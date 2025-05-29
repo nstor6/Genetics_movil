@@ -8,27 +8,39 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.genetics.api.RetrofitClient
 import com.example.genetics.api.Tratamiento
-import com.example.genetics.databinding.ActivityTreatmentsBinding
 import kotlinx.coroutines.launch
 
 class TreatmentsActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityTreatmentsBinding
+    private lateinit var toolbar: androidx.appcompat.widget.Toolbar
+    private lateinit var swipeRefreshLayout: androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    private lateinit var recyclerViewTreatments: androidx.recyclerview.widget.RecyclerView
+    private lateinit var textEmptyState: android.widget.LinearLayout
+    private lateinit var fabAddTreatment: com.google.android.material.floatingactionbutton.FloatingActionButton
+
     private val apiService = RetrofitClient.getApiService()
     private lateinit var treatmentsAdapter: TreatmentsAdapter
     private val tratamientosList = mutableListOf<Tratamiento>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityTreatmentsBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setContentView(R.layout.activity_treatments)
 
+        initializeViews()
         setupUI()
         loadTreatments()
     }
 
+    private fun initializeViews() {
+        toolbar = findViewById(R.id.toolbar)
+        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
+        recyclerViewTreatments = findViewById(R.id.recyclerViewTreatments)
+        textEmptyState = findViewById(R.id.textEmptyState)
+        fabAddTreatment = findViewById(R.id.fabAddTreatment)
+    }
+
     private fun setupUI() {
-        setSupportActionBar(binding.toolbar)
+        setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = "💊 Tratamientos"
 
@@ -37,24 +49,24 @@ class TreatmentsActivity : AppCompatActivity() {
             Toast.makeText(this, "Tratamiento: ${tratamiento.medicamento}", Toast.LENGTH_SHORT).show()
         }
 
-        binding.recyclerViewTreatments.apply {
+        recyclerViewTreatments.apply {
             layoutManager = LinearLayoutManager(this@TreatmentsActivity)
             adapter = treatmentsAdapter
         }
 
         // Configurar FAB
-        binding.fabAddTreatment.setOnClickListener {
+        fabAddTreatment.setOnClickListener {
             Toast.makeText(this, "Agregar tratamiento - Próximamente", Toast.LENGTH_SHORT).show()
         }
 
         // Configurar refresh
-        binding.swipeRefreshLayout.setOnRefreshListener {
+        swipeRefreshLayout.setOnRefreshListener {
             loadTreatments()
         }
     }
 
     private fun loadTreatments() {
-        binding.swipeRefreshLayout.isRefreshing = true
+        swipeRefreshLayout.isRefreshing = true
 
         lifecycleScope.launch {
             try {
@@ -69,11 +81,11 @@ class TreatmentsActivity : AppCompatActivity() {
 
                     // Actualizar UI vacía
                     if (treatments.isEmpty()) {
-                        binding.textEmptyState.visibility = View.VISIBLE
-                        binding.recyclerViewTreatments.visibility = View.GONE
+                        textEmptyState.visibility = View.VISIBLE
+                        recyclerViewTreatments.visibility = View.GONE
                     } else {
-                        binding.textEmptyState.visibility = View.GONE
-                        binding.recyclerViewTreatments.visibility = View.VISIBLE
+                        textEmptyState.visibility = View.GONE
+                        recyclerViewTreatments.visibility = View.VISIBLE
                     }
 
                 } else {
@@ -83,7 +95,7 @@ class TreatmentsActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 Toast.makeText(this@TreatmentsActivity, "Error de conexión: ${e.message}", Toast.LENGTH_LONG).show()
             } finally {
-                binding.swipeRefreshLayout.isRefreshing = false
+                swipeRefreshLayout.isRefreshing = false
             }
         }
     }
