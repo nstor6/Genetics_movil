@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.example.genetics.api.Adapters.AnimalsAdapter
 import com.example.genetics.api.Animals
 import com.example.genetics.api.RetrofitClient
 import com.example.genetics.databinding.ActivityAnimalsBinding
@@ -20,6 +21,7 @@ class AnimalsActivity : AppCompatActivity() {
 
     companion object {
         private const val REQUEST_ADD_ANIMAL = 1001
+        private const val REQUEST_EDIT_ANIMAL = 1002
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,8 +39,22 @@ class AnimalsActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = "🐄 Animales"
 
-        // Configurar RecyclerView con el adapter corregido
-        animalsAdapter = AnimalsAdapter(animalsList)
+        // Configurar RecyclerView con los nuevos callbacks
+        animalsAdapter = AnimalsAdapter(
+            animalsList,
+            onItemClick = { animal ->
+                // Navegar a detalles del animal
+                val intent = Intent(this, AnimalDetailActivity::class.java)
+                intent.putExtra("ANIMAL_ID", animal.id)
+                startActivity(intent)
+            },
+            onEditClick = { animal ->
+                // Editar animal
+                val intent = Intent(this, EditAnimalActivity::class.java)
+                intent.putExtra("ANIMAL_ID", animal.id)
+                startActivityForResult(intent, REQUEST_EDIT_ANIMAL)
+            }
+        )
 
         binding.recyclerViewAnimals.apply {
             layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this@AnimalsActivity)
@@ -58,6 +74,7 @@ class AnimalsActivity : AppCompatActivity() {
         }
     }
 
+    // MÉTODO QUE FALTABA: loadAnimals()
     private fun loadAnimals() {
         binding.swipeRefreshLayout.isRefreshing = true
 
@@ -93,18 +110,22 @@ class AnimalsActivity : AppCompatActivity() {
         }
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when (requestCode) {
+            REQUEST_ADD_ANIMAL, REQUEST_EDIT_ANIMAL -> {
+                if (resultCode == RESULT_OK) {
+                    // Recargar la lista cuando se agrega o edita un animal
+                    loadAnimals()
+                }
+            }
+        }
+    }
+
     override fun onResume() {
         super.onResume()
         // Recargar datos cuando volvemos a esta actividad
         loadAnimals()
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_ADD_ANIMAL && resultCode == RESULT_OK) {
-            // Recargar la lista cuando se agrega un nuevo animal
-            loadAnimals()
-        }
     }
 
     override fun onSupportNavigateUp(): Boolean {

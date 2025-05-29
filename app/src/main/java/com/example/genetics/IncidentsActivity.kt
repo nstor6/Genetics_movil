@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.genetics.api.Incidencia
-import com.example.genetics.api.IncidentsAdapter
+import com.example.genetics.api.Adapters.IncidentsAdapter
 import com.example.genetics.api.RetrofitClient
 import com.example.genetics.databinding.ActivityIncidentsBinding
 import kotlinx.coroutines.launch

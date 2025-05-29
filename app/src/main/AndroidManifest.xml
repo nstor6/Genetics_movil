@@ -25,11 +25,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".TreatmentsActivity"
+            android:name=".EditAnimalActivity"
             android:exported="false" />
-        <activity
-            android:name=".TreatmentsActivvity"
-            android:exported="false" /> <!-- Actividad principal (MainActivity) -->
+        <!-- Actividad principal (MainActivity) -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -47,7 +45,8 @@
         <activity
             android:name=".DashboardActivity"
             android:exported="false"
-            android:screenOrientation="portrait" /> <!-- Lista de animales -->
+            android:screenOrientation="portrait" /> <!-- === ANIMALES === -->
+        <!-- Lista de animales -->
         <activity
             android:name=".AnimalsActivity"
             android:exported="false"
@@ -62,7 +61,8 @@
             android:name=".AddAnimalActivity"
             android:exported="false"
             android:parentActivityName=".AnimalsActivity"
-            android:screenOrientation="portrait" /> <!-- Lista de incidencias -->
+            android:screenOrientation="portrait" /> <!-- === INCIDENCIAS === -->
+        <!-- Lista de incidencias -->
         <activity
             android:name=".IncidentsActivity"
             android:exported="false"
@@ -72,6 +72,28 @@
             android:name=".AddIncidentActivity"
             android:exported="false"
             android:parentActivityName=".IncidentsActivity"
+            android:screenOrientation="portrait" /> <!-- === TRATAMIENTOS === -->
+        <!-- Lista de tratamientos -->
+        <activity
+            android:name=".TreatmentsActivity"
+            android:exported="false"
+            android:parentActivityName=".DashboardActivity"
+            android:screenOrientation="portrait" /> <!-- Agregar nuevo tratamiento -->
+        <activity
+            android:name=".AddTreatmentActivity"
+            android:exported="false"
+            android:parentActivityName=".TreatmentsActivity"
+            android:screenOrientation="portrait" /> <!-- === CALENDARIO === -->
+        <!-- Vista del calendario -->
+        <activity
+            android:name=".CalendarActivity"
+            android:exported="false"
+            android:parentActivityName=".DashboardActivity"
+            android:screenOrientation="portrait" /> <!-- Agregar nuevo evento -->
+        <activity
+            android:name=".AddEventActivity"
+            android:exported="false"
+            android:parentActivityName=".CalendarActivity"
             android:screenOrientation="portrait" />
     </application>
 

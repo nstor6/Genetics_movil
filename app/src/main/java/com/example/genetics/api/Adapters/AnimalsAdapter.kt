@@ -1,4 +1,4 @@
-package com.example.genetics
+package com.example.genetics.api.Adapters
 
 import android.content.Intent
 import android.view.LayoutInflater
@@ -7,11 +7,18 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.genetics.AddIncidentActivity
+import com.example.genetics.AddTreatmentActivity
+import com.example.genetics.AnimalDetailActivity
+import com.example.genetics.R
 import com.example.genetics.api.Animals
 import java.util.Locale
 
+// Actualizar la clase AnimalsAdapter para incluir callback de edición:
 class AnimalsAdapter(
-    private val animalsList: List<Animals>
+    private val animalsList: List<Animals>,
+    private val onItemClick: ((Animals) -> Unit)? = null,
+    private val onEditClick: ((Animals) -> Unit)? = null
 ) : RecyclerView.Adapter<AnimalsAdapter.AnimalViewHolder>() {
 
     inner class AnimalViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -24,19 +31,58 @@ class AnimalsAdapter(
         val textEstadoReproductivo: TextView = itemView.findViewById(R.id.textEstadoReproductivo)
 
         init {
+            // Click normal - ir a detalles
             itemView.setOnClickListener {
                 val position = bindingAdapterPosition
                 if (position != RecyclerView.NO_POSITION && position < animalsList.size) {
                     val animal = animalsList[position]
+                    onItemClick?.invoke(animal)
+                }
+            }
 
-                    // Navegar a la actividad de detalles
-                    val intent = Intent(itemView.context, AnimalDetailActivity::class.java)
-                    intent.putExtra("ANIMAL_ID", animal.id)
-                    itemView.context.startActivity(intent)
+            // Long click - mostrar opciones
+            itemView.setOnLongClickListener {
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION && position < animalsList.size) {
+                    val animal = animalsList[position]
+                    mostrarOpcionesAnimal(animal)
+                    true
+                } else {
+                    false
                 }
             }
         }
 
+        private fun mostrarOpcionesAnimal(animal: Animals) {
+            val context = itemView.context
+            val opciones = arrayOf("👁️ Ver detalles", "✏️ Editar animal", "🚨 Nueva incidencia", "💊 Nuevo tratamiento")
+
+            androidx.appcompat.app.AlertDialog.Builder(context)
+                .setTitle("Opciones para ${animal.chapeta}")
+                .setItems(opciones) { _, which ->
+                    when (which) {
+                        0 -> onItemClick?.invoke(animal) // Ver detalles
+                        1 -> onEditClick?.invoke(animal) // Editar
+                        2 -> {
+                            // Nueva incidencia
+                            val intent = Intent(context, AddIncidentActivity::class.java)
+                            intent.putExtra("PRESELECTED_ANIMAL_ID", animal.id)
+                            intent.putExtra("PRESELECTED_ANIMAL_NAME", "${animal.chapeta} - ${animal.nombre ?: "Sin nombre"}")
+                            context.startActivity(intent)
+                        }
+                        3 -> {
+                            // Nuevo tratamiento
+                            val intent = Intent(context, AddTreatmentActivity::class.java)
+                            intent.putExtra("PRESELECTED_ANIMAL_ID", animal.id)
+                            intent.putExtra("PRESELECTED_ANIMAL_NAME", "${animal.chapeta} - ${animal.nombre ?: "Sin nombre"}")
+                            context.startActivity(intent)
+                        }
+                    }
+                }
+                .show()
+        }
+
+        // El resto del método bind() permanece igual...
         fun bind(animal: Animals) {
             // Usar operador safe call (?.) y elvis operator (?:)
             textChapeta.text = "📋 ${animal.chapeta ?: "N/A"}"

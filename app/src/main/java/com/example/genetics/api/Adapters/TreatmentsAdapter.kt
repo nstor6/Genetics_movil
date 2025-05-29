@@ -1,4 +1,4 @@
-package com.example.genetics
+package com.example.genetics.api.Adapters
 
 import android.graphics.Color
 import android.view.LayoutInflater
@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.genetics.R
 import com.example.genetics.api.Tratamiento
 import java.text.SimpleDateFormat
 import java.util.*
@@ -43,14 +44,14 @@ class TreatmentsAdapter(
             // Dosis
             textDosis.text = "Dosis: ${tratamiento.dosis}"
 
-            // Animal (por ahora solo ID, luego puedes mejorarlo)
-            textAnimal.text = "Animal ID: ${tratamiento.animal}"
+            // Animal - Mostrar ID por ahora (luego se puede mejorar con nombres)
+            textAnimal.text = "Animal: ID ${tratamiento.animal}"
 
             // Fecha formateada
             textFecha.text = "📅 ${formatearFecha(tratamiento.fecha)}"
 
             // Duración
-            textDuracion.text = "Duración: ${tratamiento.duracion}"
+            textDuracion.text = "⏱️ ${tratamiento.duracion}"
 
             // Observaciones (mostrar solo si existen)
             if (!tratamiento.observaciones.isNullOrEmpty()) {
@@ -60,8 +61,13 @@ class TreatmentsAdapter(
                 textObservaciones.visibility = View.GONE
             }
 
-            // Color de fondo suave para tratamientos
-            cardView.setCardBackgroundColor(Color.parseColor("#D5F4E6"))
+            // Color de fondo según antigüedad del tratamiento
+            val backgroundColor = when {
+                esTratamientoReciente(tratamiento.fecha) -> Color.parseColor("#D5F4E6") // Verde claro - Reciente
+                esTratamientoAntiquo(tratamiento.fecha) -> Color.parseColor("#F5F5F5") // Gris - Antiguo
+                else -> Color.parseColor("#E8F6FD") // Azul claro - Intermedio
+            }
+            cardView.setCardBackgroundColor(backgroundColor)
         }
 
         private fun formatearFecha(fecha: String): String {
@@ -72,6 +78,32 @@ class TreatmentsAdapter(
                 outputFormat.format(date ?: Date())
             } catch (e: Exception) {
                 fecha // Si falla el formateo, devolver la fecha original
+            }
+        }
+
+        private fun esTratamientoReciente(fecha: String): Boolean {
+            return try {
+                val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val treatmentDate = inputFormat.parse(fecha)
+                val weekAgo = Calendar.getInstance().apply {
+                    add(Calendar.DAY_OF_MONTH, -7)
+                }.time
+                treatmentDate?.after(weekAgo) == true
+            } catch (e: Exception) {
+                false
+            }
+        }
+
+        private fun esTratamientoAntiquo(fecha: String): Boolean {
+            return try {
+                val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val treatmentDate = inputFormat.parse(fecha)
+                val monthAgo = Calendar.getInstance().apply {
+                    add(Calendar.MONTH, -1)
+                }.time
+                treatmentDate?.before(monthAgo) == true
+            } catch (e: Exception) {
+                false
             }
         }
     }
@@ -93,6 +125,28 @@ class TreatmentsAdapter(
     // Método para actualizar la lista (útil para filtros)
     fun updateList(newList: List<Tratamiento>) {
         filteredList = newList
+        notifyDataSetChanged()
+    }
+
+    // Método para filtrar por animal
+    fun filterByAnimal(animalId: Int?) {
+        filteredList = if (animalId == null) {
+            tratamientosList
+        } else {
+            tratamientosList.filter { it.animal == animalId }
+        }
+        notifyDataSetChanged()
+    }
+
+    // Método para filtrar por medicamento
+    fun filterByMedicine(medicine: String) {
+        filteredList = if (medicine.isEmpty()) {
+            tratamientosList
+        } else {
+            tratamientosList.filter {
+                it.medicamento.contains(medicine, ignoreCase = true)
+            }
+        }
         notifyDataSetChanged()
     }
 }

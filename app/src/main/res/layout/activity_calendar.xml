@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- AppBar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/colorPrimary"
+            app:titleTextColor="@color/white"
+            app:navigationIconTint="@color/white" />
+
+        <!-- Filtros rápidos -->
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:padding="8dp">
+
+            <com.google.android.material.chip.ChipGroup
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:singleSelection="false">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipAllEvents"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Todos"
+                    android:checked="true"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    app:chipBackgroundColor="@color/colorPrimary" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipVisitas"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🩺 Visitas"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    app:chipBackgroundColor="@color/colorSecondary" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipTratamientos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="💊 Tratamientos"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    app:chipBackgroundColor="@color/colorWarning" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipPartos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🍼 Partos"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    app:chipBackgroundColor="@color/colorError" />
+
+            </com.google.android.material.chip.ChipGroup>
+
+        </HorizontalScrollView>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Contenido principal -->
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <!-- Vista del calendario -->
+            <CalendarView
+                android:id="@+id/calendarView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:background="@drawable/spinner_background" />
+
+            <!-- Divider -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/colorLightGray"
+                android:layout_marginHorizontal="16dp" />
+
+            <!-- Header de eventos del día -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/textSelectedDate"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="📅 Eventos de Hoy"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorPrimary" />
+
+                <TextView
+                    android:id="@+id/textEventCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="3 eventos"
+                    android:textSize="14sp"
+                    android:textColor="@color/colorGray"
+                    android:background="@drawable/badge_gray"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <!-- Lista de eventos del día seleccionado -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerViewEvents"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="8dp"
+                    android:clipToPadding="false" />
+
+                <!-- Estado vacío -->
+                <LinearLayout
+                    android:id="@+id/textEmptyState"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📅"
+                        android:textSize="64sp"
+                        android:layout_marginBottom="16dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="No hay eventos para esta fecha"
+                        android:textSize="18sp"
+                        android:textColor="@color/colorGray"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Toca el botón + para agregar uno"
+                        android:textSize="14sp"
+                        android:textColor="@color/colorGray"
+                        android:gravity="center" />
+
+                </LinearLayout>
+
+            </FrameLayout>
+
+        </LinearLayout>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <!-- FAB para agregar evento -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAddEvent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:src="@android:drawable/ic_input_add"
+        app:backgroundTint="@color/colorPrimary"
+        app:tint="@color/white"
+        app:layout_anchor="@id/swipeRefreshLayout"
+        app:layout_anchorGravity="bottom|end" />
+
+    <!-- Indicadores de eventos en el mes (opcional) -->
+    <LinearLayout
+        android:id="@+id/layoutEventIndicators"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:padding="8dp"
+        android:background="@color/colorAccent"
+        android:visibility="gone"
+        app:layout_anchor="@id/calendarView"
+        app:layout_anchorGravity="bottom">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🩺"
+            android:textSize="12sp"
+            android:layout_marginEnd="4dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="💊"
+            android:textSize="12sp"
+            android:layout_marginEnd="4dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🍼"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

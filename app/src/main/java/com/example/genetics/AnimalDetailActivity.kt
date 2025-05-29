@@ -20,6 +20,10 @@ class AnimalDetailActivity : AppCompatActivity() {
     private val apiService = RetrofitClient.getApiService()
     private lateinit var animal: Animals
 
+    companion object {
+        private const val REQUEST_EDIT_ANIMAL = 5001
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAnimalDetailBinding.inflate(layoutInflater)
@@ -67,6 +71,26 @@ class AnimalDetailActivity : AppCompatActivity() {
             intent.putExtra("PRESELECTED_ANIMAL_ID", animal.id)
             intent.putExtra("PRESELECTED_ANIMAL_NAME", "${animal.chapeta} - ${animal.nombre ?: "Sin nombre"}")
             startActivity(intent)
+        }
+
+        // NUEVO: Agregar menú de opciones en el toolbar
+        binding.toolbar.inflateMenu(R.menu.animal_detail_menu)
+        binding.toolbar.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.action_edit_animal -> {
+                    // Editar animal
+                    val intent = Intent(this, EditAnimalActivity::class.java)
+                    intent.putExtra("ANIMAL_ID", animal.id)
+                    startActivityForResult(intent, REQUEST_EDIT_ANIMAL)
+                    true
+                }
+                R.id.action_delete_animal -> {
+                    // Eliminar animal
+                    confirmarEliminarAnimal()
+                    true
+                }
+                else -> false
+            }
         }
     }
 
@@ -328,6 +352,46 @@ class AnimalDetailActivity : AppCompatActivity() {
         cardView.addView(linearLayout)
         return cardView
     }
+
+    // ========== NUEVAS FUNCIONES DE EDICIÓN Y ELIMINACIÓN ==========
+
+    private fun confirmarEliminarAnimal() {
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("⚠️ Eliminar Animal")
+            .setMessage("¿Estás seguro de que quieres eliminar el animal '${animal.chapeta}'?\n\nEsta acción no se puede deshacer y eliminará también todas sus incidencias y tratamientos.")
+            .setPositiveButton("Eliminar") { _, _ ->
+                eliminarAnimal()
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
+    }
+
+    private fun eliminarAnimal() {
+        lifecycleScope.launch {
+            try {
+                val response = apiService.eliminarAnimal(animal.id!!)
+                if (response.isSuccessful) {
+                    Toast.makeText(this@AnimalDetailActivity, "Animal eliminado correctamente", Toast.LENGTH_SHORT).show()
+                    setResult(RESULT_OK)
+                    finish()
+                } else {
+                    Toast.makeText(this@AnimalDetailActivity, "Error al eliminar animal", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(this@AnimalDetailActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_EDIT_ANIMAL && resultCode == RESULT_OK) {
+            // Recargar datos del animal después de editar
+            cargarDatosAnimal(animal.id!!)
+        }
+    }
+
+    // ========== FUNCIONES AUXILIARES ==========
 
     private fun formatearSexo(sexo: String?): String {
         return when(sexo?.lowercase()) {

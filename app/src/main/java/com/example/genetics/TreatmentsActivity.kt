@@ -1,11 +1,13 @@
 package com.example.genetics
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.genetics.api.Adapters.TreatmentsAdapter
 import com.example.genetics.api.RetrofitClient
 import com.example.genetics.api.Tratamiento
 import kotlinx.coroutines.launch
@@ -21,6 +23,10 @@ class TreatmentsActivity : AppCompatActivity() {
     private val apiService = RetrofitClient.getApiService()
     private lateinit var treatmentsAdapter: TreatmentsAdapter
     private val tratamientosList = mutableListOf<Tratamiento>()
+
+    companion object {
+        private const val REQUEST_ADD_TREATMENT = 3001
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,7 +52,7 @@ class TreatmentsActivity : AppCompatActivity() {
 
         // Configurar RecyclerView
         treatmentsAdapter = TreatmentsAdapter(tratamientosList) { tratamiento ->
-            Toast.makeText(this, "Tratamiento: ${tratamiento.medicamento}", Toast.LENGTH_SHORT).show()
+            mostrarDetallesTratamiento(tratamiento)
         }
 
         recyclerViewTreatments.apply {
@@ -54,14 +60,49 @@ class TreatmentsActivity : AppCompatActivity() {
             adapter = treatmentsAdapter
         }
 
-        // Configurar FAB
+        // Configurar FAB - AHORA SÍ FUNCIONA
         fabAddTreatment.setOnClickListener {
-            Toast.makeText(this, "Agregar tratamiento - Próximamente", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, AddTreatmentActivity::class.java)
+            startActivityForResult(intent, REQUEST_ADD_TREATMENT)
         }
 
         // Configurar refresh
         swipeRefreshLayout.setOnRefreshListener {
             loadTreatments()
+        }
+    }
+
+    private fun mostrarDetallesTratamiento(tratamiento: Tratamiento) {
+        // Crear un diálogo con los detalles del tratamiento
+        val mensaje = buildString {
+            append("💊 Medicamento: ${tratamiento.medicamento}\n")
+            append("📏 Dosis: ${tratamiento.dosis}\n")
+            append("⏱️ Duración: ${tratamiento.duracion}\n")
+            append("📅 Fecha: ${formatearFecha(tratamiento.fecha)}\n")
+            append("🐄 Animal ID: ${tratamiento.animal}\n")
+            if (!tratamiento.observaciones.isNullOrEmpty()) {
+                append("📝 Observaciones: ${tratamiento.observaciones}")
+            }
+        }
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Detalles del Tratamiento")
+            .setMessage(mensaje)
+            .setPositiveButton("OK", null)
+            .setNeutralButton("Editar") { _, _ ->
+                Toast.makeText(this, "Editar tratamiento - Próximamente", Toast.LENGTH_SHORT).show()
+            }
+            .show()
+    }
+
+    private fun formatearFecha(fecha: String): String {
+        return try {
+            val inputFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+            val outputFormat = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault())
+            val date = inputFormat.parse(fecha)
+            outputFormat.format(date ?: java.util.Date())
+        } catch (e: Exception) {
+            fecha
         }
     }
 
@@ -98,6 +139,20 @@ class TreatmentsActivity : AppCompatActivity() {
                 swipeRefreshLayout.isRefreshing = false
             }
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_ADD_TREATMENT && resultCode == RESULT_OK) {
+            // Recargar la lista cuando se agrega un nuevo tratamiento
+            loadTreatments()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Recargar datos cuando volvemos a esta actividad
+        loadTreatments()
     }
 
     override fun onSupportNavigateUp(): Boolean {

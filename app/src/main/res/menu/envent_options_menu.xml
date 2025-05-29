@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/option_edit"
+        android:title="✏️ Editar evento"
+        android:icon="@android:drawable/ic_menu_edit" />
+
+    <item
+        android:id="@+id/option_duplicate"
+        android:title="📋 Duplicar evento"
+        android:icon="@android:drawable/ic_menu_agenda" />
+
+    <item
+        android:id="@+id/option_delete"
+        android:title="🗑️ Eliminar evento"
+        android:icon="@android:drawable/ic_menu_delete" />
+
+</menu>

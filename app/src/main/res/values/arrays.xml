@@ -41,4 +41,66 @@
         <item>En tratamiento</item>
         <item>Resuelto</item>
     </string-array>
+
+    <!-- ===== NUEVAS OPCIONES PARA EVENTOS ===== -->
+
+    <!-- Opciones de tipo de evento -->
+    <string-array name="tipo_evento_options">
+        <item>Seleccionar tipo</item>
+        <item>🩺 Visita veterinaria</item>
+        <item>💊 Aplicar tratamiento</item>
+        <item>🍼 Alerta de parto</item>
+        <item>🥛 Control de producción</item>
+        <item>🏥 Vacunación</item>
+        <item>⚖️ Pesaje</item>
+        <item>🚚 Traslado</item>
+        <item>🔍 Inspección general</item>
+        <item>📊 Revisión reproductiva</item>
+        <item>🌾 Control nutricional</item>
+        <item>✂️ Descorne/Castración</item>
+        <item>📋 Otro evento</item>
+    </string-array>
+
+    <!-- Opciones de frecuencia para eventos recurrentes -->
+    <string-array name="frecuencia_recurrencia_options">
+        <item>No recurrente</item>
+        <item>Diario</item>
+        <item>Semanal</item>
+        <item>Quincenal</item>
+        <item>Mensual</item>
+        <item>Trimestral</item>
+        <item>Semestral</item>
+        <item>Anual</item>
+    </string-array>
+
+    <!-- Opciones de prioridad para eventos -->
+    <string-array name="prioridad_evento_options">
+        <item>🟢 Baja</item>
+        <item>🟡 Media</item>
+        <item>🟠 Alta</item>
+        <item>🔴 Urgente</item>
+    </string-array>
+
+    <!-- Opciones de duración estimada -->
+    <string-array name="duracion_evento_options">
+        <item>15 minutos</item>
+        <item>30 minutos</item>
+        <item>1 hora</item>
+        <item>2 horas</item>
+        <item>Medio día</item>
+        <item>Día completo</item>
+        <item>Varios días</item>
+    </string-array>
+
+    <!-- Opciones de responsable/veterinario -->
+    <string-array name="responsable_options">
+        <item>Sin asignar</item>
+        <item>Dr. García (Veterinario principal)</item>
+        <item>Dra. López (Especialista en reproducción)</item>
+        <item>Juan Pérez (Capataz)</item>
+        <item>María González (Técnico)</item>
+        <item>Equipo general</item>
+        <item>Veterinario externo</item>
+    </string-array>
+
 </resources>

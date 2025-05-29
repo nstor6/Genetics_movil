@@ -24,7 +24,8 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun setupUI() {
-        // Configurar navegación bottom nav
+        // Reemplazar la sección de navegación bottom nav en DashboardActivity:
+
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_animals -> {
@@ -39,12 +40,12 @@ class DashboardActivity : AppCompatActivity() {
                 }
                 R.id.nav_treatments -> {
                     // Ir a tratamientos
-                    Toast.makeText(this, "Tratamientos - Próximamente", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, TreatmentsActivity::class.java))
                     true
                 }
                 R.id.nav_calendar -> {
-                    // Ir a calendario
-                    Toast.makeText(this, "Calendario - Próximamente", Toast.LENGTH_SHORT).show()
+                    // Ir a calendario - ¡AHORA FUNCIONA!
+                    startActivity(Intent(this, CalendarActivity::class.java))
                     true
                 }
                 R.id.nav_settings -> {
@@ -66,12 +67,13 @@ class DashboardActivity : AppCompatActivity() {
         }
 
         binding.buttonNewTreatment.setOnClickListener {
-            Toast.makeText(this, "Nuevo tratamiento - Próximamente", Toast.LENGTH_SHORT).show()
+            // ¡AHORA FUNCIONA! - Ir a nueva actividad de tratamientos
+            startActivity(Intent(this, AddTreatmentActivity::class.java))
         }
 
         // Configurar FAB para nuevo animal
         binding.fabNewAnimal.setOnClickListener {
-            startActivity(Intent(this, AnimalsActivity::class.java))
+            startActivity(Intent(this, AddAnimalActivity::class.java))
         }
     }
 
@@ -97,7 +99,19 @@ class DashboardActivity : AppCompatActivity() {
 
                 if (treatmentsResponse.isSuccessful) {
                     val treatments = treatmentsResponse.body() ?: emptyList()
-                    binding.textTreatmentsCount.text = treatments.size.toString()
+                    // Mostrar tratamientos activos (de la última semana por ejemplo)
+                    val recentTreatments = treatments.filter {
+                        try {
+                            val treatmentDate = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).parse(it.fecha)
+                            val weekAgo = java.util.Calendar.getInstance().apply {
+                                add(java.util.Calendar.DAY_OF_MONTH, -7)
+                            }.time
+                            treatmentDate?.after(weekAgo) == true
+                        } catch (e: Exception) {
+                            false
+                        }
+                    }
+                    binding.textTreatmentsCount.text = recentTreatments.size.toString()
                 }
 
                 if (eventsResponse.isSuccessful) {
@@ -112,9 +126,22 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun logout() {
-        RetrofitClient.clearToken()
-        startActivity(Intent(this, LoginActivity::class.java))
-        finish()
-        Toast.makeText(this, "Sesión cerrada", Toast.LENGTH_SHORT).show()
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Cerrar Sesión")
+            .setMessage("¿Estás seguro de que quieres cerrar sesión?")
+            .setPositiveButton("Sí") { _, _ ->
+                RetrofitClient.clearToken()
+                startActivity(Intent(this, LoginActivity::class.java))
+                finish()
+                Toast.makeText(this, "Sesión cerrada", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Recargar estadísticas cuando volvemos al dashboard
+        loadStats()
     }
 }

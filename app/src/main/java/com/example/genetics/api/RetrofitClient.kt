@@ -16,7 +16,7 @@ object RetrofitClient {
     // Ejemplo: si tu IP es 192.168.1.105, usa:
     // private const val BASE_URL = "http://192.168.1.105:8000/api/"
 
-    private const val BASE_URL = " https://6558-85-152-18-206.ngrok-free.app/api/"
+    private const val BASE_URL = "  https://2cb5-83-97-144-149.ngrok-free.app/api/"
 
     // 💡 ALTERNATIVAMENTE, puedes usar ngrok:
     // private const val BASE_URL = "https://tu-nueva-url.ngrok-free.app/api/"

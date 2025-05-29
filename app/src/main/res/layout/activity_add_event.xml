@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- AppBar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/colorPrimary"
+            app:titleTextColor="@color/white"
+            app:navigationIconTint="@color/white" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Contenido principal -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Progress Bar -->
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+            <!-- Información básica del evento -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📅 Información del Evento"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorPrimary"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Título del evento -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        app:boxStrokeColor="@color/colorPrimary"
+                        app:hintTextColor="@color/colorPrimary">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editTextTitulo"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Título del evento *"
+                            android:inputType="textCapSentences"
+                            android:maxLength="200" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Tipo de evento -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tipo de Evento *"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorPrimary"
+                        android:layout_marginBottom="8dp" />
+
+                    <Spinner
+                        android:id="@+id/spinnerTipoEvento"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginBottom="16dp"
+                        android:background="@drawable/spinner_background"
+                        android:entries="@array/tipo_evento_options" />
+
+                    <!-- Animal relacionado -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Animal Relacionado"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorPrimary"
+                        android:layout_marginBottom="8dp" />
+
+                    <Spinner
+                        android:id="@+id/spinnerAnimal"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginBottom="16dp"
+                        android:background="@drawable/spinner_background" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- Fecha y hora -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="⏰ Fecha y Hora"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorPrimary"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Fecha inicio -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="12dp">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="8dp"
+                            app:boxStrokeColor="@color/colorPrimary"
+                            app:hintTextColor="@color/colorPrimary">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/editTextFechaInicio"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="Fecha inicio *"
+                                android:inputType="date"
+                                android:focusable="false"
+                                android:clickable="true" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="8dp"
+                            app:boxStrokeColor="@color/colorPrimary"
+                            app:hintTextColor="@color/colorPrimary">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/editTextHoraInicio"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="Hora inicio"
+                                android:inputType="time"
+                                android:focusable="false"
+                                android:clickable="true" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                    </LinearLayout>
+
+                    <!-- Fecha fin (opcional) -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="12dp">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="8dp"
+                            app:boxStrokeColor="@color/colorPrimary"
+                            app:hintTextColor="@color/colorPrimary">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/editTextFechaFin"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="Fecha fin (opcional)"
+                                android:inputType="date"
+                                android:focusable="false"
+                                android:clickable="true" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="8dp"
+                            app:boxStrokeColor="@color/colorPrimary"
+                            app:hintTextColor="@color/colorPrimary">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/editTextHoraFin"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="Hora fin"
+                                android:inputType="time"
+                                android:focusable="false"
+                                android:clickable="true" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                    </LinearLayout>
+
+                    <!-- Recurrente -->
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switchRecurrente"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="🔄 Evento recurrente"
+                        android:textSize="16sp"
+                        app:thumbTint="@color/colorPrimary"
+                        app:trackTint="@color/colorAccent" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- Descripción -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📝 Descripción y Notas"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorPrimary"
+                        android:layout_marginBottom="16dp" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:boxStrokeColor="@color/colorPrimary"
+                        app:hintTextColor="@color/colorPrimary"
+                        app:counterEnabled="true"
+                        app:counterMaxLength="500">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editTextDescripcion"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Descripción del evento, instrucciones especiales..."
+                            android:inputType="textMultiLine"
+                            android:lines="3"
+                            android:maxLines="5"
+                            android:maxLength="500"
+                            android:gravity="top" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- Botones -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonCancel"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:text="Cancelar"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    app:strokeColor="@color/colorGray" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonSave"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:text="Crear Evento"
+                    app:backgroundTint="@color/colorPrimary" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

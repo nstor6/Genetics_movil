@@ -1,4 +1,4 @@
-package com.example.genetics.api
+package com.example.genetics.api.Adapters
 
 import android.graphics.Color
 import android.view.LayoutInflater
