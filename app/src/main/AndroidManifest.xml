@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
     <!-- Permisos necesarios -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-
-    <!-- Características de cámara -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> <!-- Características de cámara -->
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
@@ -27,33 +24,55 @@
         android:theme="@style/Theme.Genetics"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
-
+        <activity
+            android:name=".TreatmentsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".TreatmentsActivvity"
+            android:exported="false" /> <!-- Actividad principal (MainActivity) -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
+        </activity> <!-- Actividad de Login -->
         <activity
             android:name=".LoginActivity"
             android:exported="false"
-            android:screenOrientation="portrait" />
-
+            android:screenOrientation="portrait" /> <!-- Dashboard principal -->
         <activity
             android:name=".DashboardActivity"
             android:exported="false"
-            android:screenOrientation="portrait" />
-
+            android:screenOrientation="portrait" /> <!-- Lista de animales -->
         <activity
             android:name=".AnimalsActivity"
             android:exported="false"
-            android:screenOrientation="portrait"
-            android:parentActivityName=".DashboardActivity" />
-
+            android:parentActivityName=".DashboardActivity"
+            android:screenOrientation="portrait" /> <!-- Detalles del animal -->
+        <activity
+            android:name=".AnimalDetailActivity"
+            android:exported="false"
+            android:parentActivityName=".AnimalsActivity"
+            android:screenOrientation="portrait" /> <!-- Agregar nuevo animal -->
+        <activity
+            android:name=".AddAnimalActivity"
+            android:exported="false"
+            android:parentActivityName=".AnimalsActivity"
+            android:screenOrientation="portrait" /> <!-- Lista de incidencias -->
+        <activity
+            android:name=".IncidentsActivity"
+            android:exported="false"
+            android:parentActivityName=".DashboardActivity"
+            android:screenOrientation="portrait" /> <!-- Agregar nueva incidencia -->
+        <activity
+            android:name=".AddIncidentActivity"
+            android:exported="false"
+            android:parentActivityName=".IncidentsActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

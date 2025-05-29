@@ -1,11 +1,11 @@
 package com.example.genetics
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.genetics.api.Animals
 import com.example.genetics.api.RetrofitClient
 import com.example.genetics.databinding.ActivityAnimalsBinding
@@ -17,6 +17,10 @@ class AnimalsActivity : AppCompatActivity() {
     private val apiService = RetrofitClient.getApiService()
     private lateinit var animalsAdapter: AnimalsAdapter
     private val animalsList = mutableListOf<Animals>()
+
+    companion object {
+        private const val REQUEST_ADD_ANIMAL = 1001
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,21 +37,19 @@ class AnimalsActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = "🐄 Animales"
 
-        // Configurar RecyclerView
-        animalsAdapter = AnimalsAdapter(animalsList) { animal ->
-            // Click en animal - Ver detalles
-            Toast.makeText(this, "Ver detalles de ${animal.chapeta}", Toast.LENGTH_SHORT).show()
-        }
+        // Configurar RecyclerView con el adapter corregido
+        animalsAdapter = AnimalsAdapter(animalsList)
 
         binding.recyclerViewAnimals.apply {
-            layoutManager = LinearLayoutManager(this@AnimalsActivity)
+            layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this@AnimalsActivity)
             adapter = animalsAdapter
         }
 
         // Configurar FAB
         binding.fabAddAnimal.setOnClickListener {
-            // Agregar nuevo animal
-            Toast.makeText(this, "Agregar nuevo animal - Próximamente", Toast.LENGTH_SHORT).show()
+            // Navegar a agregar nuevo animal
+            val intent = Intent(this, AddAnimalActivity::class.java)
+            startActivityForResult(intent, REQUEST_ADD_ANIMAL)
         }
 
         // Configurar refresh
@@ -88,6 +90,20 @@ class AnimalsActivity : AppCompatActivity() {
             } finally {
                 binding.swipeRefreshLayout.isRefreshing = false
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Recargar datos cuando volvemos a esta actividad
+        loadAnimals()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_ADD_ANIMAL && resultCode == RESULT_OK) {
+            // Recargar la lista cuando se agrega un nuevo animal
+            loadAnimals()
         }
     }
 

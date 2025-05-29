@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardIncident"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?android:attr/selectableItemBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Header con tipo y estado -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:id="@+id/textTipo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="🚨 Enfermedad"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black" />
+
+            <TextView
+                android:id="@+id/textEstado"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pendiente"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp"
+                android:background="@drawable/badge_orange" />
+
+        </LinearLayout>
+
+        <!-- Descripción -->
+        <TextView
+            android:id="@+id/textDescripcion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Descripción de la incidencia..."
+            android:textSize="14sp"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp"
+            android:maxLines="3"
+            android:ellipsize="end" />
+
+        <!-- Info adicional -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textAnimal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Animal: CH001"
+                android:textSize="12sp"
+                android:textColor="@color/colorGray"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:id="@+id/textFecha"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="📅 01/01/2024"
+                android:textSize="12sp"
+                android:textColor="@color/colorGray" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

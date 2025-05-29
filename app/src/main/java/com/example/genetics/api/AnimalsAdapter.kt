@@ -1,5 +1,6 @@
 package com.example.genetics
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,8 +11,7 @@ import com.example.genetics.api.Animals
 import java.util.Locale
 
 class AnimalsAdapter(
-    private val animalsList: List<Animals>,
-    private val onItemClick: (Animals) -> Unit
+    private val animalsList: List<Animals>
 ) : RecyclerView.Adapter<AnimalsAdapter.AnimalViewHolder>() {
 
     inner class AnimalViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -27,31 +27,36 @@ class AnimalsAdapter(
             itemView.setOnClickListener {
                 val position = bindingAdapterPosition
                 if (position != RecyclerView.NO_POSITION && position < animalsList.size) {
-                    onItemClick(animalsList[position])
+                    val animal = animalsList[position]
+
+                    // Navegar a la actividad de detalles
+                    val intent = Intent(itemView.context, AnimalDetailActivity::class.java)
+                    intent.putExtra("ANIMAL_ID", animal.id)
+                    itemView.context.startActivity(intent)
                 }
             }
         }
 
-        fun bind(animals: Animals) {
+        fun bind(animal: Animals) {
             // Usar operador safe call (?.) y elvis operator (?:)
-            textChapeta.text = "📋 ${animals.chapeta ?: "N/A"}"
+            textChapeta.text = "📋 ${animal.chapeta ?: "N/A"}"
 
-            textNombre.text = if (animals.nombre.isNullOrEmpty()) {
+            textNombre.text = if (animal.nombre.isNullOrEmpty()) {
                 "Sin nombre"
             } else {
-                animals.nombre
+                animal.nombre
             }
 
-            textRaza.text = "🐄 ${animals.raza ?: "N/A"}"
+            textRaza.text = "🐄 ${animal.raza ?: "N/A"}"
 
-            textSexo.text = when (animals.sexo?.lowercase(Locale.getDefault())) {
+            textSexo.text = when (animal.sexo?.lowercase(Locale.getDefault())) {
                 "macho" -> "♂️ Macho"
                 "hembra" -> "♀️ Hembra"
                 else -> "❓ No especificado"
             }
 
             // Capitalizar primera letra de forma segura
-            val estadoProductivo = animals.estado_productivo?.let { estado ->
+            val estadoProductivo = animal.estado_productivo?.let { estado ->
                 if (estado.isNotEmpty()) {
                     estado.replaceFirstChar { char ->
                         if (char.isLowerCase()) char.titlecase(Locale.getDefault()) else char.toString()
@@ -63,7 +68,7 @@ class AnimalsAdapter(
 
             textEstadoProductivo.text = "📊 $estadoProductivo"
 
-            val estadoReproductivo = animals.estado_reproductivo?.let { estado ->
+            val estadoReproductivo = animal.estado_reproductivo?.let { estado ->
                 if (estado.isNotEmpty()) {
                     estado.replaceFirstChar { char ->
                         if (char.isLowerCase()) char.titlecase(Locale.getDefault()) else char.toString()
@@ -76,7 +81,7 @@ class AnimalsAdapter(
             textEstadoReproductivo.text = "💕 $estadoReproductivo"
 
             // Configurar imagen de forma segura
-            if (!animals.foto_perfil_url.isNullOrEmpty()) {
+            if (!animal.foto_perfil_url.isNullOrEmpty()) {
                 // TODO: Usar Glide o Picasso para cargar la imagen
                 // Glide.with(itemView.context).load(animal.foto_perfil_url).into(imageAnimal)
                 imageAnimal.setImageResource(R.drawable.cow_image)

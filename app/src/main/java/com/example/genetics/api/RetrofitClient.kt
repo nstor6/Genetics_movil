@@ -2,6 +2,7 @@ package com.example.genetics.api
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -11,35 +12,49 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    // 🔥 NUEVA URL - Reemplaza "abc123def" por tu URL real de ngrok
-    private const val BASE_URL = "https://7470-81-42-254-142.ngrok-free.app/api/"
+    // 🔧 REEMPLAZA "192.168.1.XXX" CON TU IP LOCAL REAL
+    // Ejemplo: si tu IP es 192.168.1.105, usa:
+    // private const val BASE_URL = "http://192.168.1.105:8000/api/"
 
-    // URLs comentadas (las anteriores)
-    // private const val BASE_URL = "http://10.0.2.2:8000/api/"  // Para emulador
-    // private const val BASE_URL = "http://192.168.1.XXX:8000/api/"  // Para dispositivo real
+    private const val BASE_URL = " https://6558-85-152-18-206.ngrok-free.app/api/"
+
+    // 💡 ALTERNATIVAMENTE, puedes usar ngrok:
+    // private const val BASE_URL = "https://tu-nueva-url.ngrok-free.app/api/"
 
     private var retrofit: Retrofit? = null
     private lateinit var sharedPreferences: SharedPreferences
 
     fun initialize(context: Context) {
         sharedPreferences = context.getSharedPreferences("genetics_prefs", Context.MODE_PRIVATE)
+        Log.d("RETROFIT_CLIENT", "🔗 Conectando a: $BASE_URL")
     }
 
     private fun getOkHttpClient(): OkHttpClient {
-        val logging = HttpLoggingInterceptor().apply {
+        val logging = HttpLoggingInterceptor { message ->
+            Log.d("HTTP_LOG", message)
+        }.apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
 
         val authInterceptor = Interceptor { chain ->
             val token = getToken()
-            val request = if (token != null) {
-                chain.request().newBuilder()
-                    .addHeader("Authorization", "Bearer $token")
-                    .build()
-            } else {
-                chain.request()
+            Log.d("AUTH_INTERCEPTOR", "🔑 Token: ${if (token != null) "✅ Presente" else "❌ Ausente"}")
+
+            val requestBuilder = chain.request().newBuilder()
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+
+            if (token != null) {
+                requestBuilder.addHeader("Authorization", "Bearer $token")
             }
-            chain.proceed(request)
+
+            val request = requestBuilder.build()
+            Log.d("HTTP_REQUEST", "🌐 ${request.method} ${request.url}")
+
+            val response = chain.proceed(request)
+            Log.d("HTTP_RESPONSE", "📡 Código: ${response.code}")
+
+            response
         }
 
         return OkHttpClient.Builder()
@@ -53,6 +68,7 @@ object RetrofitClient {
 
     fun getApiService(): ApiService {
         if (retrofit == null) {
+            Log.d("RETROFIT_CLIENT", "🚀 Creando nueva instancia de Retrofit")
             retrofit = Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .client(getOkHttpClient())
@@ -62,8 +78,8 @@ object RetrofitClient {
         return retrofit!!.create(ApiService::class.java)
     }
 
-    // Manejo del token JWT
     fun saveToken(token: String) {
+        Log.d("RETROFIT_CLIENT", "💾 Guardando token: ${token.take(10)}...")
         sharedPreferences.edit()
             .putString("jwt_token", token)
             .apply()
@@ -74,12 +90,15 @@ object RetrofitClient {
     }
 
     fun clearToken() {
+        Log.d("RETROFIT_CLIENT", "🗑️ Limpiando token...")
         sharedPreferences.edit()
             .remove("jwt_token")
             .apply()
     }
 
     fun isLoggedIn(): Boolean {
-        return getToken() != null
+        val hasToken = getToken() != null
+        Log.d("RETROFIT_CLIENT", "🔐 ¿Usuario logueado? $hasToken")
+        return hasToken
     }
 }

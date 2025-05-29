@@ -24,7 +24,7 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun setupUI() {
-        // Configurar navegación
+        // Configurar navegación bottom nav
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_animals -> {
@@ -34,7 +34,7 @@ class DashboardActivity : AppCompatActivity() {
                 }
                 R.id.nav_incidents -> {
                     // Ir a incidencias
-                    Toast.makeText(this, "Incidencias - Próximamente", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, IncidentsActivity::class.java))
                     true
                 }
                 R.id.nav_treatments -> {
@@ -56,7 +56,20 @@ class DashboardActivity : AppCompatActivity() {
             }
         }
 
-        // Configurar botón de nuevo animal
+        // Configurar botones de acción del dashboard
+        binding.buttonViewAnimals.setOnClickListener {
+            startActivity(Intent(this, AnimalsActivity::class.java))
+        }
+
+        binding.buttonNewIncident.setOnClickListener {
+            startActivity(Intent(this, AddIncidentActivity::class.java))
+        }
+
+        binding.buttonNewTreatment.setOnClickListener {
+            Toast.makeText(this, "Nuevo tratamiento - Próximamente", Toast.LENGTH_SHORT).show()
+        }
+
+        // Configurar FAB para nuevo animal
         binding.fabNewAnimal.setOnClickListener {
             startActivity(Intent(this, AnimalsActivity::class.java))
         }

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Opciones de sexo -->
+    <string-array name="sexo_options">
+        <item>Seleccionar sexo</item>
+        <item>Hembra</item>
+        <item>Macho</item>
+    </string-array>
+
+    <!-- Opciones de estado reproductivo -->
+    <string-array name="estado_reproductivo_options">
+        <item>No definido</item>
+        <item>Gestante</item>
+        <item>Lactante</item>
+        <item>Vacío</item>
+        <item>Castrado</item>
+    </string-array>
+
+    <!-- Opciones de estado productivo -->
+    <string-array name="estado_productivo_options">
+        <item>No definido</item>
+        <item>Activo</item>
+        <item>Retirado</item>
+        <item>Engorde</item>
+    </string-array>
+
+    <!-- Opciones de tipo de incidencia -->
+    <string-array name="tipo_incidencia_options">
+        <item>Seleccionar tipo</item>
+        <item>Enfermedad</item>
+        <item>Herida</item>
+        <item>Comportamiento anómalo</item>
+        <item>Problema reproductivo</item>
+        <item>Problema nutricional</item>
+        <item>Otro</item>
+    </string-array>
+
+    <!-- Opciones de estado de incidencia -->
+    <string-array name="estado_incidencia_options">
+        <item>Pendiente</item>
+        <item>En tratamiento</item>
+        <item>Resuelto</item>
+    </string-array>
+</resources>
