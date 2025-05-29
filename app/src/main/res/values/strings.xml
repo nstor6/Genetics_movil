@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">Genetics</string>
+
+    <!-- Strings para login -->
+    <string name="login">Iniciar Sesión</string>
+    <string name="email">Email</string>
+    <string name="password">Contraseña</string>
+    <string name="enter">Entrar</string>
+
+    <!-- Strings para navigation -->
+    <string name="dashboard">Dashboard</string>
+    <string name="animals">Animales</string>
+    <string name="settings">Configuración</string>
+
+    <!-- Strings para AnimalsAdapter -->
+    <string name="chapeta_format">📋 %1$s</string>
+    <string name="sin_nombre">Sin nombre</string>
+    <string name="raza_format">🐄 %1$s</string>
+    <string name="macho">♂️ Macho</string>
+    <string name="hembra">♀️ Hembra</string>
+    <string name="estado_productivo_format">📊 %1$s</string>
+    <string name="estado_reproductivo_format">💕 %1$s</string>
+    <string name="imagen_animal">Imagen del animal</string>
+
+    <!-- Strings para animals activity -->
+    <string name="animales_title">🐄 Animales</string>
+    <string name="agregar_animal">Agregar nuevo animal - Próximamente</string>
+    <string name="ver_detalles">Ver detalles de %1$s</string>
+    <string name="error_cargando_animales">Error cargando animales</string>
+    <string name="error_conexion">Error de conexión: %1$s</string>
+    <string name="no_hay_animales">No hay animales registrados</string>
+
+</resources>
