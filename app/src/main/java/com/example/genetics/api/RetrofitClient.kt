@@ -11,8 +11,11 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    // URL de tu backend Django
-    private const val BASE_URL = "http://10.0.2.2:8000/api/"  // Para emulador
+    // 🔥 NUEVA URL - Reemplaza "abc123def" por tu URL real de ngrok
+    private const val BASE_URL = "https://7470-81-42-254-142.ngrok-free.app/api/"
+
+    // URLs comentadas (las anteriores)
+    // private const val BASE_URL = "http://10.0.2.2:8000/api/"  // Para emulador
     // private const val BASE_URL = "http://192.168.1.XXX:8000/api/"  // Para dispositivo real
 
     private var retrofit: Retrofit? = null

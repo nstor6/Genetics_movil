@@ -1,7 +1,9 @@
+// 1. VERIFICAR LoginActivity.kt - Agregar logs para debug
 package com.example.genetics
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -46,6 +48,8 @@ class LoginActivity : AppCompatActivity() {
         val email = binding.editTextEmail.text.toString().trim()
         val password = binding.editTextPassword.text.toString().trim()
 
+        Log.d("LOGIN_DEBUG", "Intentando login con email: $email")
+
         if (email.isEmpty() || password.isEmpty()) {
             Toast.makeText(this, "Por favor completa todos los campos", Toast.LENGTH_SHORT).show()
             return
@@ -57,11 +61,17 @@ class LoginActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
+                Log.d("LOGIN_DEBUG", "Enviando request al servidor...")
                 val request = LoginRequest(email, password)
                 val response = apiService.login(request)
 
+                Log.d("LOGIN_DEBUG", "Response code: ${response.code()}")
+                Log.d("LOGIN_DEBUG", "Response successful: ${response.isSuccessful}")
+
                 if (response.isSuccessful && response.body() != null) {
                     val loginResponse = response.body()!!
+
+                    Log.d("LOGIN_DEBUG", "Login exitoso! Token recibido")
 
                     // Guardar token
                     RetrofitClient.saveToken(loginResponse.access)
@@ -73,9 +83,13 @@ class LoginActivity : AppCompatActivity() {
                     Toast.makeText(this@LoginActivity, "¡Bienvenido a Genetics!", Toast.LENGTH_SHORT).show()
                 } else {
                     val errorBody = response.errorBody()?.string()
-                    Toast.makeText(this@LoginActivity, "Credenciales incorrectas", Toast.LENGTH_LONG).show()
+                    Log.e("LOGIN_DEBUG", "Error response: $errorBody")
+                    Log.e("LOGIN_DEBUG", "Response code: ${response.code()}")
+                    Toast.makeText(this@LoginActivity, "Credenciales incorrectas: ${response.code()}", Toast.LENGTH_LONG).show()
                 }
             } catch (e: Exception) {
+                Log.e("LOGIN_DEBUG", "Exception durante login: ${e.message}")
+                e.printStackTrace()
                 Toast.makeText(this@LoginActivity, "Error de conexión: ${e.message}", Toast.LENGTH_LONG).show()
             } finally {
                 // Restaurar botón
