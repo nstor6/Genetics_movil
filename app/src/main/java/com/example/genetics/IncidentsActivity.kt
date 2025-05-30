@@ -7,7 +7,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.genetics.Add.AddIncidentActivity
+import com.example.genetics.Create.AddIncidentActivity
+import com.example.genetics.Edit.EditIncidentActivity
 import com.example.genetics.api.Incidencia
 import com.example.genetics.api.Adapters.IncidentsAdapter
 import com.example.genetics.api.RetrofitClient
@@ -20,10 +21,11 @@ class IncidentsActivity : AppCompatActivity() {
     private val apiService = RetrofitClient.getApiService()
     private lateinit var incidentsAdapter: IncidentsAdapter
     private val incidenciasList = mutableListOf<Incidencia>()
-    private val incidenciasOriginales = mutableListOf<Incidencia>() // Lista completa sin filtrar
+    private val incidenciasOriginales = mutableListOf<Incidencia>()
 
     companion object {
         private const val REQUEST_ADD_INCIDENT = 2001
+        private const val REQUEST_EDIT_INCIDENT = 2002
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,7 +44,6 @@ class IncidentsActivity : AppCompatActivity() {
 
         // Configurar RecyclerView
         incidentsAdapter = IncidentsAdapter(incidenciasList) { incidencia ->
-            // Ver detalles de la incidencia
             mostrarDetallesIncidencia(incidencia)
         }
 
@@ -62,12 +63,11 @@ class IncidentsActivity : AppCompatActivity() {
             loadIncidents()
         }
 
-        // Configurar filtros - CORREGIDO
+        // Configurar filtros
         setupFilters()
     }
 
     private fun setupFilters() {
-        // Configurar el chip "Todas" como seleccionado por defecto
         binding.chipFilterAll.isChecked = true
 
         binding.chipFilterAll.setOnClickListener {
@@ -107,23 +107,27 @@ class IncidentsActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
+                android.util.Log.d("INCIDENTS_ACTIVITY", "🔄 Iniciando carga de incidencias...")
                 val response = apiService.getIncidencias()
+                android.util.Log.d("INCIDENTS_ACTIVITY", "📡 Response code: ${response.code()}")
 
                 if (response.isSuccessful && response.body() != null) {
                     val incidents = response.body()!!
+                    android.util.Log.d("INCIDENTS_ACTIVITY", "✅ Incidencias recibidas: ${incidents.size}")
 
-                    // Guardar la lista completa sin filtrar
                     incidenciasOriginales.clear()
                     incidenciasOriginales.addAll(incidents.sortedByDescending { it.fecha_deteccion })
 
-                    // Mostrar todas las incidencias inicialmente usando el mismo método que los filtros
                     filterIncidents("all")
 
                 } else {
-                    Toast.makeText(this@IncidentsActivity, "Error cargando incidencias", Toast.LENGTH_SHORT).show()
+                    val errorBody = response.errorBody()?.string()
+                    android.util.Log.e("INCIDENTS_ACTIVITY", "❌ Error: $errorBody")
+                    Toast.makeText(this@IncidentsActivity, "Error cargando incidencias: ${response.code()}", Toast.LENGTH_SHORT).show()
                 }
 
             } catch (e: Exception) {
+                android.util.Log.e("INCIDENTS_ACTIVITY", "❌ Exception: ${e.message}", e)
                 Toast.makeText(this@IncidentsActivity, "Error de conexión: ${e.message}", Toast.LENGTH_LONG).show()
             } finally {
                 binding.swipeRefreshLayout.isRefreshing = false
@@ -134,7 +138,6 @@ class IncidentsActivity : AppCompatActivity() {
     private fun filterIncidents(filter: String) {
         when (filter) {
             "all" -> {
-                // Mostrar todas las incidencias
                 incidentsAdapter.updateList(incidenciasOriginales)
             }
             "pendiente" -> {
@@ -151,7 +154,6 @@ class IncidentsActivity : AppCompatActivity() {
             }
         }
 
-        // Actualizar estado vacío después del filtrado
         updateEmptyState()
     }
 
@@ -184,10 +186,42 @@ class IncidentsActivity : AppCompatActivity() {
             .setTitle("Detalles de la Incidencia")
             .setMessage(mensaje)
             .setPositiveButton("OK", null)
-            .setNeutralButton("Editar") { _, _ ->
-                Toast.makeText(this, "Editar incidencia - Próximamente", Toast.LENGTH_SHORT).show()
+            .setNeutralButton("✏️ Editar") { _, _ ->
+                val intent = Intent(this, EditIncidentActivity::class.java)
+                intent.putExtra("INCIDENCIA_ID", incidencia.id)
+                startActivityForResult(intent, REQUEST_EDIT_INCIDENT)
+            }
+            .setNegativeButton("🗑️ Eliminar") { _, _ ->
+                confirmarEliminarIncidencia(incidencia)
             }
             .show()
+    }
+
+    private fun confirmarEliminarIncidencia(incidencia: Incidencia) {
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("⚠️ Eliminar Incidencia")
+            .setMessage("¿Estás seguro de que quieres eliminar la incidencia '${incidencia.tipo}' del animal ID ${incidencia.animal}?\n\nEsta acción no se puede deshacer.")
+            .setPositiveButton("Eliminar") { _, _ ->
+                eliminarIncidencia(incidencia)
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
+    }
+
+    private fun eliminarIncidencia(incidencia: Incidencia) {
+        lifecycleScope.launch {
+            try {
+                val response = apiService.eliminarIncidencia(incidencia.id!!)
+                if (response.isSuccessful) {
+                    Toast.makeText(this@IncidentsActivity, "Incidencia eliminada correctamente", Toast.LENGTH_SHORT).show()
+                    loadIncidents()
+                } else {
+                    Toast.makeText(this@IncidentsActivity, "Error al eliminar incidencia", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(this@IncidentsActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun formatearEstado(estado: String): String {
@@ -212,13 +246,15 @@ class IncidentsActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_ADD_INCIDENT && resultCode == RESULT_OK) {
+        if ((requestCode == REQUEST_ADD_INCIDENT || requestCode == REQUEST_EDIT_INCIDENT) && resultCode == RESULT_OK) {
+            android.util.Log.d("INCIDENTS_ACTIVITY", "🔄 Recargando después de crear/editar")
             loadIncidents()
         }
     }
 
     override fun onResume() {
         super.onResume()
+        android.util.Log.d("INCIDENTS_ACTIVITY", "🔄 onResume - Recargando incidencias")
         loadIncidents()
     }
 

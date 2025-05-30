@@ -13,11 +13,11 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class TreatmentsAdapter(
-    private var tratamientosList: List<Tratamiento>,
+    private var tratamientosList: MutableList<Tratamiento>, // 🔧 CAMBIAR A MutableList
     private val onItemClick: (Tratamiento) -> Unit
 ) : RecyclerView.Adapter<TreatmentsAdapter.TreatmentViewHolder>() {
 
-    private var filteredList = tratamientosList.toList()
+    private var filteredList = tratamientosList.toMutableList() // 🔧 CAMBIAR A MutableList
 
     inner class TreatmentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val cardView: CardView = itemView.findViewById(R.id.cardTreatment)
@@ -122,31 +122,68 @@ class TreatmentsAdapter(
 
     override fun getItemCount(): Int = filteredList.size
 
-    // Método para actualizar la lista (útil para filtros)
+    // 🔧 MÉTODO CRÍTICO: updateList() - Este es el que faltaba
     fun updateList(newList: List<Tratamiento>) {
-        filteredList = newList
+        android.util.Log.d("TREATMENTS_ADAPTER", "🔄 Actualizando lista: ${newList.size} tratamientos")
+
+        tratamientosList.clear()
+        tratamientosList.addAll(newList)
+
+        filteredList.clear()
+        filteredList.addAll(newList)
+
         notifyDataSetChanged()
+
+        android.util.Log.d("TREATMENTS_ADAPTER", "✅ Lista actualizada. Items en adapter: ${itemCount}")
     }
 
     // Método para filtrar por animal
     fun filterByAnimal(animalId: Int?) {
-        filteredList = if (animalId == null) {
-            tratamientosList
+        filteredList.clear()
+        if (animalId == null) {
+            filteredList.addAll(tratamientosList)
         } else {
-            tratamientosList.filter { it.animal == animalId }
+            filteredList.addAll(tratamientosList.filter { it.animal == animalId })
         }
         notifyDataSetChanged()
+        android.util.Log.d("TREATMENTS_ADAPTER", "🔍 Filtrado por animal $animalId: ${filteredList.size} resultados")
     }
 
     // Método para filtrar por medicamento
     fun filterByMedicine(medicine: String) {
-        filteredList = if (medicine.isEmpty()) {
-            tratamientosList
+        filteredList.clear()
+        if (medicine.isEmpty()) {
+            filteredList.addAll(tratamientosList)
         } else {
-            tratamientosList.filter {
+            filteredList.addAll(tratamientosList.filter {
                 it.medicamento.contains(medicine, ignoreCase = true)
-            }
+            })
         }
         notifyDataSetChanged()
+        android.util.Log.d("TREATMENTS_ADAPTER", "🔍 Filtrado por medicamento '$medicine': ${filteredList.size} resultados")
+    }
+
+    // Método para obtener tratamientos recientes
+    fun getTratamientosRecientes(): List<Tratamiento> {
+        return tratamientosList.filter { tratamiento ->
+            try {
+                val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val treatmentDate = inputFormat.parse(tratamiento.fecha)
+                val weekAgo = Calendar.getInstance().apply {
+                    add(Calendar.DAY_OF_MONTH, -7)
+                }.time
+                treatmentDate?.after(weekAgo) == true
+            } catch (e: Exception) {
+                false
+            }
+        }
+    }
+
+    // Método para limpiar filtros
+    fun clearFilters() {
+        filteredList.clear()
+        filteredList.addAll(tratamientosList)
+        notifyDataSetChanged()
+        android.util.Log.d("TREATMENTS_ADAPTER", "🧹 Filtros limpiados: ${filteredList.size} tratamientos")
     }
 }

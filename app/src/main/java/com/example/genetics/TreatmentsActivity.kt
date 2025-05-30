@@ -7,7 +7,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.genetics.Add.AddTreatmentActivity
+import com.example.genetics.Create.AddTreatmentActivity
 import com.example.genetics.api.Adapters.TreatmentsAdapter
 import com.example.genetics.api.RetrofitClient
 import com.example.genetics.api.Tratamiento
@@ -51,7 +51,7 @@ class TreatmentsActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = "💊 Tratamientos"
 
-        // Configurar RecyclerView
+        // 🔧 CONFIGURAR RECYCLERVIEW CORRECTAMENTE
         treatmentsAdapter = TreatmentsAdapter(tratamientosList) { tratamiento ->
             mostrarDetallesTratamiento(tratamiento)
         }
@@ -59,9 +59,11 @@ class TreatmentsActivity : AppCompatActivity() {
         recyclerViewTreatments.apply {
             layoutManager = LinearLayoutManager(this@TreatmentsActivity)
             adapter = treatmentsAdapter
+            // 🔧 AÑADIR LOGGING PARA DEBUG
+            android.util.Log.d("TREATMENTS_ACTIVITY", "📋 RecyclerView configurado con adapter")
         }
 
-        // Configurar FAB - AHORA SÍ FUNCIONA
+        // Configurar FAB
         fabAddTreatment.setOnClickListener {
             val intent = Intent(this, AddTreatmentActivity::class.java)
             startActivityForResult(intent, REQUEST_ADD_TREATMENT)
@@ -74,7 +76,6 @@ class TreatmentsActivity : AppCompatActivity() {
     }
 
     private fun mostrarDetallesTratamiento(tratamiento: Tratamiento) {
-        // Crear un diálogo con los detalles del tratamiento
         val mensaje = buildString {
             append("💊 Medicamento: ${tratamiento.medicamento}\n")
             append("📏 Dosis: ${tratamiento.dosis}\n")
@@ -108,51 +109,72 @@ class TreatmentsActivity : AppCompatActivity() {
     }
 
     private fun loadTreatments() {
+        android.util.Log.d("TREATMENTS_ACTIVITY", "🔄 Iniciando carga de tratamientos...")
         swipeRefreshLayout.isRefreshing = true
 
         lifecycleScope.launch {
             try {
                 val response = apiService.getTratamientos()
+                android.util.Log.d("TREATMENTS_ACTIVITY", "📡 Response code: ${response.code()}")
+                android.util.Log.d("TREATMENTS_ACTIVITY", "📡 Response successful: ${response.isSuccessful}")
 
                 if (response.isSuccessful && response.body() != null) {
                     val treatments = response.body()!!
+                    android.util.Log.d("TREATMENTS_ACTIVITY", "✅ Tratamientos recibidos: ${treatments.size}")
 
+                    // 🔧 LIMPIAR Y ACTUALIZAR LA LISTA CORRECTAMENTE
                     tratamientosList.clear()
                     tratamientosList.addAll(treatments.sortedByDescending { it.fecha })
-                    treatmentsAdapter.notifyDataSetChanged()
+
+                    // 🔧 USAR updateList EN LUGAR DE notifyDataSetChanged
+                    treatmentsAdapter.updateList(tratamientosList)
+
+                    android.util.Log.d("TREATMENTS_ACTIVITY", "📋 Lista actualizada. Items en adapter: ${treatmentsAdapter.itemCount}")
 
                     // Actualizar UI vacía
-                    if (treatments.isEmpty()) {
-                        textEmptyState.visibility = View.VISIBLE
-                        recyclerViewTreatments.visibility = View.GONE
-                    } else {
-                        textEmptyState.visibility = View.GONE
-                        recyclerViewTreatments.visibility = View.VISIBLE
-                    }
+                    updateEmptyState(treatments.isEmpty())
 
                 } else {
-                    Toast.makeText(this@TreatmentsActivity, "Error cargando tratamientos", Toast.LENGTH_SHORT).show()
+                    val errorBody = response.errorBody()?.string()
+                    android.util.Log.e("TREATMENTS_ACTIVITY", "❌ Error: $errorBody")
+                    Toast.makeText(this@TreatmentsActivity, "Error cargando tratamientos: ${response.code()}", Toast.LENGTH_SHORT).show()
+                    updateEmptyState(true)
                 }
 
             } catch (e: Exception) {
+                android.util.Log.e("TREATMENTS_ACTIVITY", "❌ Exception: ${e.message}", e)
                 Toast.makeText(this@TreatmentsActivity, "Error de conexión: ${e.message}", Toast.LENGTH_LONG).show()
+                updateEmptyState(true)
             } finally {
                 swipeRefreshLayout.isRefreshing = false
             }
         }
     }
 
+    // 🔧 NUEVA FUNCIÓN PARA ACTUALIZAR ESTADO VACÍO
+    private fun updateEmptyState(isEmpty: Boolean) {
+        if (isEmpty) {
+            textEmptyState.visibility = View.VISIBLE
+            recyclerViewTreatments.visibility = View.GONE
+            android.util.Log.d("TREATMENTS_ACTIVITY", "👻 Mostrando estado vacío")
+        } else {
+            textEmptyState.visibility = View.GONE
+            recyclerViewTreatments.visibility = View.VISIBLE
+            android.util.Log.d("TREATMENTS_ACTIVITY", "📋 Mostrando lista de tratamientos")
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_ADD_TREATMENT && resultCode == RESULT_OK) {
-            // Recargar la lista cuando se agrega un nuevo tratamiento
+            android.util.Log.d("TREATMENTS_ACTIVITY", "🔄 Recargando después de agregar tratamiento")
             loadTreatments()
         }
     }
 
     override fun onResume() {
         super.onResume()
-        // Recargar datos cuando volvemos a esta actividad
+        android.util.Log.d("TREATMENTS_ACTIVITY", "🔄 onResume - Recargando datos")
         loadTreatments()
     }
 

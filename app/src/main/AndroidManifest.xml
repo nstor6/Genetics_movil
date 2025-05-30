@@ -26,6 +26,15 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".Edit.EditEventActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Edit.EditTreatmentActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Edit.EditIncidentActivity"
+            android:exported="false" />
+        <activity
             android:name=".BaseActivity"
             android:exported="false" />
         <activity
@@ -61,7 +70,7 @@
             android:parentActivityName=".AnimalsActivity"
             android:screenOrientation="portrait" /> <!-- Agregar nuevo animal -->
         <activity
-            android:name=".Add.AddAnimalActivity"
+            android:name=".Create.AddAnimalActivity"
             android:exported="false"
             android:parentActivityName=".AnimalsActivity"
             android:screenOrientation="portrait" /> <!-- === INCIDENCIAS === -->
@@ -72,7 +81,7 @@
             android:parentActivityName=".DashboardActivity"
             android:screenOrientation="portrait" /> <!-- Agregar nueva incidencia -->
         <activity
-            android:name=".Add.AddIncidentActivity"
+            android:name=".Create.AddIncidentActivity"
             android:exported="false"
             android:parentActivityName=".IncidentsActivity"
             android:screenOrientation="portrait" /> <!-- === TRATAMIENTOS === -->
@@ -83,7 +92,7 @@
             android:parentActivityName=".DashboardActivity"
             android:screenOrientation="portrait" /> <!-- Agregar nuevo tratamiento -->
         <activity
-            android:name=".Add.AddTreatmentActivity"
+            android:name=".Create.AddTreatmentActivity"
             android:exported="false"
             android:parentActivityName=".TreatmentsActivity"
             android:screenOrientation="portrait" /> <!-- === CALENDARIO === -->
@@ -94,7 +103,7 @@
             android:parentActivityName=".DashboardActivity"
             android:screenOrientation="portrait" /> <!-- Agregar nuevo evento -->
         <activity
-            android:name=".Add.AddEventActivity"
+            android:name=".Create.AddEventActivity"
             android:exported="false"
             android:parentActivityName=".CalendarActivity"
             android:screenOrientation="portrait" />

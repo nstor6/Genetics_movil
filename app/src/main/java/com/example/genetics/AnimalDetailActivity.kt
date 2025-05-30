@@ -7,7 +7,7 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.example.genetics.Add.AddIncidentActivity
+import com.example.genetics.Create.AddIncidentActivity
 import com.example.genetics.api.Animals
 import com.example.genetics.api.Incidencia
 import com.example.genetics.api.RetrofitClient

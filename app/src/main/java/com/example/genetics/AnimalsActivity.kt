@@ -6,7 +6,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.example.genetics.Add.AddAnimalActivity
+import com.example.genetics.Create.AddAnimalActivity
 import com.example.genetics.api.Adapters.AnimalsAdapter
 import com.example.genetics.api.Animals
 import com.example.genetics.api.RetrofitClient

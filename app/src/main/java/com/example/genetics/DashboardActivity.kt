@@ -5,10 +5,10 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.example.genetics.Add.AddAnimalActivity
-import com.example.genetics.Add.AddEventActivity
-import com.example.genetics.Add.AddIncidentActivity
-import com.example.genetics.Add.AddTreatmentActivity
+import com.example.genetics.Create.AddAnimalActivity
+import com.example.genetics.Create.AddEventActivity
+import com.example.genetics.Create.AddIncidentActivity
+import com.example.genetics.Create.AddTreatmentActivity
 import com.example.genetics.api.RetrofitClient
 import com.example.genetics.databinding.ActivityDashboardBinding
 import com.example.genetics.utils.safeApiCall
