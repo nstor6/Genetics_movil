@@ -4,16 +4,16 @@
 
     <item
         android:id="@+id/action_edit_animal"
-        android:title="✏️ Editar"
+        android:title="Editar Animal"
         android:icon="@android:drawable/ic_menu_edit"
-        app:showAsAction="ifRoom"
+        app:showAsAction="always"
         android:orderInCategory="1" />
 
     <item
         android:id="@+id/action_delete_animal"
-        android:title="🗑️ Eliminar"
+        android:title="Eliminar Animal"
         android:icon="@android:drawable/ic_menu_delete"
-        app:showAsAction="never"
+        app:showAsAction="always"
         android:orderInCategory="2" />
 
 </menu>

@@ -1,8 +1,10 @@
 package com.example.genetics.api
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.util.Log
+import com.example.genetics.LoginActivity
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -12,20 +14,16 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    // 🔧 REEMPLAZA "192.168.1.XXX" CON TU IP LOCAL REAL
-    // Ejemplo: si tu IP es 192.168.1.105, usa:
-    // private const val BASE_URL = "http://192.168.1.105:8000/api/"
-
-    private const val BASE_URL = "  https://2cb5-83-97-144-149.ngrok-free.app/api/"
-
-    // 💡 ALTERNATIVAMENTE, puedes usar ngrok:
-    // private const val BASE_URL = "https://tu-nueva-url.ngrok-free.app/api/"
+    // 🔧 REEMPLAZA CON TU URL ACTUAL
+    private const val BASE_URL = "https://6d9d-83-97-144-149.ngrok-free.app/api/"
 
     private var retrofit: Retrofit? = null
     private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var appContext: Context
 
     fun initialize(context: Context) {
-        sharedPreferences = context.getSharedPreferences("genetics_prefs", Context.MODE_PRIVATE)
+        appContext = context.applicationContext
+        sharedPreferences = appContext.getSharedPreferences("genetics_prefs", Context.MODE_PRIVATE)
         Log.d("RETROFIT_CLIENT", "🔗 Conectando a: $BASE_URL")
     }
 
@@ -36,23 +34,52 @@ object RetrofitClient {
             level = HttpLoggingInterceptor.Level.BODY
         }
 
+        // Interceptor de autenticación con redirección automática
         val authInterceptor = Interceptor { chain ->
-            val token = getToken()
-            Log.d("AUTH_INTERCEPTOR", "🔑 Token: ${if (token != null) "✅ Presente" else "❌ Ausente"}")
+            val request = chain.request()
+            val url = request.url.toString()
 
-            val requestBuilder = chain.request().newBuilder()
+            // CORREGIDO: No verificar token para peticiones de login
+            val isLoginRequest = url.contains("/auth/login") || url.contains("/auth/register")
+
+            if (!isLoginRequest) {
+                val token = getToken()
+                Log.d("AUTH_INTERCEPTOR", "🔑 Token: ${if (token != null) "✅ Presente" else "❌ Ausente"}")
+
+                // Si no hay token Y no es una petición de login, redirigir
+                if (token == null) {
+                    Log.w("AUTH_INTERCEPTOR", "🚨 No hay token, redirigiendo al login...")
+                    redirectToLogin()
+                    // Continúar con la petición sin token (fallará pero evita crash)
+                }
+            } else {
+                Log.d("AUTH_INTERCEPTOR", "🔓 Petición de login/registro, omitiendo verificación de token")
+            }
+
+            val requestBuilder = request.newBuilder()
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Accept", "application/json")
 
-            if (token != null) {
-                requestBuilder.addHeader("Authorization", "Bearer $token")
+            // Solo agregar Authorization si no es login/registro Y hay token
+            if (!isLoginRequest) {
+                val token = getToken()
+                if (token != null) {
+                    requestBuilder.addHeader("Authorization", "Bearer $token")
+                }
             }
 
-            val request = requestBuilder.build()
-            Log.d("HTTP_REQUEST", "🌐 ${request.method} ${request.url}")
+            val finalRequest = requestBuilder.build()
+            Log.d("HTTP_REQUEST", "🌐 ${finalRequest.method} ${finalRequest.url}")
 
-            val response = chain.proceed(request)
+            val response = chain.proceed(finalRequest)
             Log.d("HTTP_RESPONSE", "📡 Código: ${response.code}")
+
+            // Solo verificar 401 para peticiones que NO son de login
+            if (!isLoginRequest && response.code == 401) {
+                Log.w("AUTH_INTERCEPTOR", "🚨 Token inválido (401), redirigiendo al login...")
+                clearToken()
+                redirectToLogin()
+            }
 
             response
         }
@@ -64,6 +91,19 @@ object RetrofitClient {
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
             .build()
+    }
+
+    // Método para redirigir al login
+    private fun redirectToLogin() {
+        try {
+            val intent = Intent(appContext, LoginActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+            appContext.startActivity(intent)
+            Log.i("AUTH_INTERCEPTOR", "🔄 Redirigiendo al login...")
+        } catch (e: Exception) {
+            Log.e("AUTH_INTERCEPTOR", "❌ Error redirigiendo al login: ${e.message}")
+        }
     }
 
     fun getApiService(): ApiService {
@@ -94,6 +134,9 @@ object RetrofitClient {
         sharedPreferences.edit()
             .remove("jwt_token")
             .apply()
+
+        // Limpiar también la instancia de Retrofit para forzar recreación
+        retrofit = null
     }
 
     fun isLoggedIn(): Boolean {

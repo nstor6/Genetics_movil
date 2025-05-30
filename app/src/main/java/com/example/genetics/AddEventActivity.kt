@@ -271,13 +271,25 @@ class AddEventActivity : AppCompatActivity() {
         val fechaInicio = construirFechaHora(true)
         val fechaFin = construirFechaHora(false)
 
+        // Obtener los arrays de opciones y valores
+        val tipoOptions = resources.getStringArray(R.array.tipo_evento_options)
+        val tipoValues = resources.getStringArray(R.array.tipo_evento_values)
+
+        // Obtener el índice seleccionado y mapear al valor correcto del backend
+        val selectedIndex = binding.spinnerTipoEvento.selectedItemPosition
+        val tipoParaBackend = if (selectedIndex > 0 && selectedIndex < tipoValues.size) {
+            tipoValues[selectedIndex]
+        } else {
+            "otro" // Valor por defecto
+        }
+
         val nuevoEvento = Evento(
             titulo = binding.editTextTitulo.text.toString().trim(),
             descripcion = binding.editTextDescripcion.text.toString().trim().ifEmpty { null },
             fecha_inicio = fechaInicio,
             fecha_fin = fechaFin,
             animal = selectedAnimalId,
-            tipo = binding.spinnerTipoEvento.selectedItem.toString(),
+            tipo = tipoParaBackend, // Ahora envía el valor correcto sin emojis
             recurrente = binding.switchRecurrente.isChecked
         )
 

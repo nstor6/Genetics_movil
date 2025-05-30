@@ -2,6 +2,8 @@ package com.example.genetics
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -46,6 +48,10 @@ class AnimalDetailActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = "Detalles del Animal"
 
+        // AÑADIDO: Forzar color negro para los iconos del toolbar
+        binding.toolbar.navigationIcon?.setTint(android.graphics.Color.BLACK)
+        binding.toolbar.overflowIcon?.setTint(android.graphics.Color.BLACK)
+
         // Configurar tabs
         binding.tabLayout.addTab(binding.tabLayout.newTab().setText("Info"))
         binding.tabLayout.addTab(binding.tabLayout.newTab().setText("Incidencias"))
@@ -72,25 +78,44 @@ class AnimalDetailActivity : AppCompatActivity() {
             intent.putExtra("PRESELECTED_ANIMAL_NAME", "${animal.chapeta} - ${animal.nombre ?: "Sin nombre"}")
             startActivity(intent)
         }
+    }
 
-        // NUEVO: Agregar menú de opciones en el toolbar
-        binding.toolbar.inflateMenu(R.menu.animal_detail_menu)
-        binding.toolbar.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.action_edit_animal -> {
-                    // Editar animal
-                    val intent = Intent(this, EditAnimalActivity::class.java)
-                    intent.putExtra("ANIMAL_ID", animal.id)
-                    startActivityForResult(intent, REQUEST_EDIT_ANIMAL)
-                    true
-                }
-                R.id.action_delete_animal -> {
-                    // Eliminar animal
-                    confirmarEliminarAnimal()
-                    true
-                }
-                else -> false
+    // CORREGIDO: Crear el menú en el toolbar
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.animal_detail_menu, menu)
+
+        // AÑADIDO: Forzar color negro para los iconos del menú
+        menu?.let {
+            for (i in 0 until it.size()) {
+                val item = it.getItem(i)
+                item.icon?.setTint(android.graphics.Color.BLACK)
             }
+        }
+
+        return true
+    }
+
+    // CORREGIDO: Manejar clicks del menú
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_edit_animal -> {
+                // Editar animal
+                val intent = Intent(this, EditAnimalActivity::class.java)
+                intent.putExtra("ANIMAL_ID", animal.id)
+                startActivityForResult(intent, REQUEST_EDIT_ANIMAL)
+                true
+            }
+            R.id.action_delete_animal -> {
+                // Eliminar animal
+                confirmarEliminarAnimal()
+                true
+            }
+            android.R.id.home -> {
+                // Botón de navegación hacia atrás
+                onBackPressedDispatcher.onBackPressed()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
@@ -353,8 +378,6 @@ class AnimalDetailActivity : AppCompatActivity() {
         return cardView
     }
 
-    // ========== NUEVAS FUNCIONES DE EDICIÓN Y ELIMINACIÓN ==========
-
     private fun confirmarEliminarAnimal() {
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle("⚠️ Eliminar Animal")
@@ -391,8 +414,6 @@ class AnimalDetailActivity : AppCompatActivity() {
         }
     }
 
-    // ========== FUNCIONES AUXILIARES ==========
-
     private fun formatearSexo(sexo: String?): String {
         return when(sexo?.lowercase()) {
             "macho" -> "♂️ Macho"
@@ -414,10 +435,5 @@ class AnimalDetailActivity : AppCompatActivity() {
         } catch (e: Exception) {
             fecha ?: "No especificada"
         }
-    }
-
-    override fun onSupportNavigateUp(): Boolean {
-        onBackPressedDispatcher.onBackPressed()
-        return true
     }
 }

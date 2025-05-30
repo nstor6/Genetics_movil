@@ -1,4 +1,3 @@
-// 1. VERIFICAR LoginActivity.kt - Agregar logs para debug
 package com.example.genetics
 
 import android.content.Intent
@@ -26,14 +25,13 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun setupUI() {
-        // Pre-llenar con datos de demo
-        binding.editTextEmail.setText("admin@genetics.com")
-        binding.editTextPassword.setText("admin123")
+        // Los campos empiezan vacíos (sin pre-llenar credenciales)
 
         binding.buttonLogin.setOnClickListener {
             login()
         }
 
+        // Botón demo que llena las credenciales automáticamente
         binding.buttonDemo.setOnClickListener {
             fillDemoData()
         }
@@ -42,6 +40,7 @@ class LoginActivity : AppCompatActivity() {
     private fun fillDemoData() {
         binding.editTextEmail.setText("admin@genetics.com")
         binding.editTextPassword.setText("admin123")
+        Toast.makeText(this, "Credenciales demo cargadas", Toast.LENGTH_SHORT).show()
     }
 
     private fun login() {
@@ -85,7 +84,7 @@ class LoginActivity : AppCompatActivity() {
                     val errorBody = response.errorBody()?.string()
                     Log.e("LOGIN_DEBUG", "Error response: $errorBody")
                     Log.e("LOGIN_DEBUG", "Response code: ${response.code()}")
-                    Toast.makeText(this@LoginActivity, "Credenciales incorrectas: ${response.code()}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@LoginActivity, "Credenciales incorrectas", Toast.LENGTH_LONG).show()
                 }
             } catch (e: Exception) {
                 Log.e("LOGIN_DEBUG", "Exception durante login: ${e.message}")

@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Opciones de sexo -->
+
     <string-array name="sexo_options">
         <item>Seleccionar sexo</item>
         <item>Hembra</item>
         <item>Macho</item>
     </string-array>
 
-    <!-- Opciones de estado reproductivo -->
     <string-array name="estado_reproductivo_options">
         <item>No definido</item>
         <item>Gestante</item>
@@ -16,7 +15,6 @@
         <item>Castrado</item>
     </string-array>
 
-    <!-- Opciones de estado productivo -->
     <string-array name="estado_productivo_options">
         <item>No definido</item>
         <item>Activo</item>
@@ -24,7 +22,6 @@
         <item>Engorde</item>
     </string-array>
 
-    <!-- Opciones de tipo de incidencia -->
     <string-array name="tipo_incidencia_options">
         <item>Seleccionar tipo</item>
         <item>Enfermedad</item>
@@ -35,20 +32,16 @@
         <item>Otro</item>
     </string-array>
 
-    <!-- Opciones de estado de incidencia -->
     <string-array name="estado_incidencia_options">
         <item>Pendiente</item>
         <item>En tratamiento</item>
         <item>Resuelto</item>
     </string-array>
 
-    <!-- ===== NUEVAS OPCIONES PARA EVENTOS ===== -->
-
-    <!-- Opciones de tipo de evento -->
     <string-array name="tipo_evento_options">
         <item>Seleccionar tipo</item>
         <item>🩺 Visita veterinaria</item>
-        <item>💊 Aplicar tratamiento</item>
+        <item>💊 Tratamiento</item>
         <item>🍼 Alerta de parto</item>
         <item>🥛 Control de producción</item>
         <item>🏥 Vacunación</item>
@@ -61,7 +54,14 @@
         <item>📋 Otro evento</item>
     </string-array>
 
-    <!-- Opciones de frecuencia para eventos recurrentes -->
+    <string-array name="tipo_evento_values">
+        <item></item>
+        <item>visita</item>
+        <item>tratamiento</item>
+        <item>alerta_parto</item>
+        <item>otro</item>
+    </string-array>
+
     <string-array name="frecuencia_recurrencia_options">
         <item>No recurrente</item>
         <item>Diario</item>
@@ -73,7 +73,6 @@
         <item>Anual</item>
     </string-array>
 
-    <!-- Opciones de prioridad para eventos -->
     <string-array name="prioridad_evento_options">
         <item>🟢 Baja</item>
         <item>🟡 Media</item>
@@ -81,7 +80,6 @@
         <item>🔴 Urgente</item>
     </string-array>
 
-    <!-- Opciones de duración estimada -->
     <string-array name="duracion_evento_options">
         <item>15 minutos</item>
         <item>30 minutos</item>
@@ -92,7 +90,6 @@
         <item>Varios días</item>
     </string-array>
 
-    <!-- Opciones de responsable/veterinario -->
     <string-array name="responsable_options">
         <item>Sin asignar</item>
         <item>Dr. García (Veterinario principal)</item>

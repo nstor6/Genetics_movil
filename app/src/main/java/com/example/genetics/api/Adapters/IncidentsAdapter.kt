@@ -13,11 +13,9 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class IncidentsAdapter(
-    private var incidenciasList: List<Incidencia>,
+    private var incidenciasList: MutableList<Incidencia>, // ← Cambiar a MutableList
     private val onItemClick: (Incidencia) -> Unit
 ) : RecyclerView.Adapter<IncidentsAdapter.IncidentViewHolder>() {
-
-    private var filteredList = incidenciasList.toList()
 
     inner class IncidentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val cardView: CardView = itemView.findViewById(R.id.cardIncident)
@@ -30,8 +28,8 @@ class IncidentsAdapter(
         init {
             itemView.setOnClickListener {
                 val position = bindingAdapterPosition
-                if (position != RecyclerView.NO_POSITION && position < filteredList.size) {
-                    onItemClick(filteredList[position])
+                if (position != RecyclerView.NO_POSITION && position < incidenciasList.size) {
+                    onItemClick(incidenciasList[position])
                 }
             }
         }
@@ -98,15 +96,17 @@ class IncidentsAdapter(
     }
 
     override fun onBindViewHolder(holder: IncidentViewHolder, position: Int) {
-        if (position < filteredList.size) {
-            holder.bind(filteredList[position])
+        if (position < incidenciasList.size) {
+            holder.bind(incidenciasList[position])
         }
     }
 
-    override fun getItemCount(): Int = filteredList.size
+    override fun getItemCount(): Int = incidenciasList.size
 
+    // MÉTODO CORREGIDO - Actualiza la lista y notifica los cambios
     fun updateList(newList: List<Incidencia>) {
-        filteredList = newList
+        incidenciasList.clear()
+        incidenciasList.addAll(newList)
         notifyDataSetChanged()
     }
 }

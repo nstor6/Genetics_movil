@@ -24,8 +24,7 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun setupUI() {
-        // Reemplazar la sección de navegación bottom nav en DashboardActivity:
-
+        // Configurar navegación bottom nav
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_animals -> {
@@ -44,7 +43,7 @@ class DashboardActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_calendar -> {
-                    // Ir a calendario - ¡AHORA FUNCIONA!
+                    // Ir a calendario
                     startActivity(Intent(this, CalendarActivity::class.java))
                     true
                 }
@@ -57,9 +56,9 @@ class DashboardActivity : AppCompatActivity() {
             }
         }
 
-        // Configurar botones de acción del dashboard
+        // CAMBIADO: Ahora el botón "Ver Animales" es "Nuevo Animal"
         binding.buttonViewAnimals.setOnClickListener {
-            startActivity(Intent(this, AnimalsActivity::class.java))
+            startActivity(Intent(this, AddAnimalActivity::class.java))
         }
 
         binding.buttonNewIncident.setOnClickListener {
@@ -67,14 +66,13 @@ class DashboardActivity : AppCompatActivity() {
         }
 
         binding.buttonNewTreatment.setOnClickListener {
-            // ¡AHORA FUNCIONA! - Ir a nueva actividad de tratamientos
             startActivity(Intent(this, AddTreatmentActivity::class.java))
         }
 
-        // Configurar FAB para nuevo animal
-        binding.fabNewAnimal.setOnClickListener {
-            startActivity(Intent(this, AddAnimalActivity::class.java))
-        }
+        // ELIMINADO: Ya no necesitamos el FAB para nuevo animal
+        // binding.fabNewAnimal.setOnClickListener {
+        //     startActivity(Intent(this, AddAnimalActivity::class.java))
+        // }
     }
 
     private fun loadStats() {

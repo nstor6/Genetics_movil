@@ -80,10 +80,19 @@
                         android:background="@drawable/spinner_background" />
 
                     <!-- Medicamento -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Medicamento *"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorSecondary"
+                        android:layout_marginBottom="4dp" />
+
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp"
+                        android:layout_marginBottom="8dp"
                         app:boxStrokeColor="@color/colorSecondary"
                         app:hintTextColor="@color/colorSecondary">
 
@@ -91,16 +100,25 @@
                             android:id="@+id/editTextMedicamento"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Medicamento *"
+                            android:hint="Ej: Ivermectina, Penicilina, Vitamina B12"
                             android:inputType="textCapWords"
                             android:maxLength="100" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Dosis -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Dosis *"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorSecondary"
+                        android:layout_marginBottom="4dp" />
+
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp"
+                        android:layout_marginBottom="8dp"
                         app:boxStrokeColor="@color/colorSecondary"
                         app:hintTextColor="@color/colorSecondary">
 
@@ -108,12 +126,47 @@
                             android:id="@+id/editTextDosis"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Dosis *"
+                            android:hint="Ej: 10ml, 2 comprimidos, 5cc"
                             android:inputType="text"
                             android:maxLength="50" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Duración -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Duración del Tratamiento *"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorSecondary"
+                        android:layout_marginBottom="4dp" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        app:boxStrokeColor="@color/colorSecondary"
+                        app:hintTextColor="@color/colorSecondary">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editTextDuracion"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Ej: 3 días, 1 semana, Dosis única"
+                            android:inputType="text"
+                            android:maxLength="50" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Fecha del tratamiento -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Fecha del Tratamiento *"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorSecondary"
+                        android:layout_marginBottom="4dp" />
+
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -122,26 +175,10 @@
                         app:hintTextColor="@color/colorSecondary">
 
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/editTextDuracion"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="Duración del tratamiento *"
-                            android:inputType="text"
-                            android:maxLength="50" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <!-- Fecha del tratamiento -->
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:boxStrokeColor="@color/colorSecondary"
-                        app:hintTextColor="@color/colorSecondary">
-
-                        <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/editTextFecha"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Fecha del tratamiento *"
+                            android:hint="Toca para seleccionar fecha"
                             android:inputType="date"
                             android:focusable="false"
                             android:clickable="true" />
@@ -194,14 +231,7 @@
                             android:gravity="top" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="💡 Incluye información como: efectos esperados, precauciones especiales, horarios de administración, etc."
-                        android:textSize="12sp"
-                        android:textColor="@color/colorGray"
-                        android:layout_marginTop="8dp"
-                        android:lineSpacingExtra="2dp" />
+
 
                 </LinearLayout>
 

@@ -20,25 +20,18 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
+                android:orientation="vertical"
+                android:gravity="center"
                 android:layout_marginBottom="24dp">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="🐄 Genetics"
-                    android:textSize="28sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/colorPrimary" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Dashboard"
-                    android:textSize="16sp"
-                    android:textColor="@color/colorGray" />
+                    android:text="🐄 Genetics"
+                    android:textSize="32sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorPrimary"
+                    android:gravity="center" />
 
             </LinearLayout>
 
@@ -251,11 +244,12 @@
                 android:orientation="vertical"
                 android:layout_marginBottom="16dp">
 
+                <!-- CAMBIADO: Ahora es "Nuevo Animal" en lugar de "Ver Animales" -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/buttonViewAnimals"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
-                    android:text="🐄 Ver Animales"
+                    android:text="🐄 Nuevo Animal"
                     android:textSize="16sp"
                     app:backgroundTint="@color/colorPrimary"
                     app:cornerRadius="12dp"
@@ -297,16 +291,6 @@
         app:itemIconTint="@color/colorPrimary"
         app:itemTextColor="@color/colorPrimary" />
 
-    <!-- FAB -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabNewAnimal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:src="@android:drawable/ic_input_add"
-        app:backgroundTint="@color/colorPrimary"
-        app:tint="@color/white"
-        app:layout_anchor="@id/bottomNavigation"
-        app:layout_anchorGravity="top|end" />
+    <!-- FAB ELIMINADO - Ya no es necesario -->
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

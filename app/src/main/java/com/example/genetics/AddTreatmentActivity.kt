@@ -63,16 +63,6 @@ class AddTreatmentActivity : AppCompatActivity() {
         binding.buttonCancel.setOnClickListener {
             finish()
         }
-
-        // Configurar hints con ejemplos
-        setupHints()
-    }
-
-    private fun setupHints() {
-        // Agregar ejemplos en los hints
-        binding.editTextMedicamento.hint = "Ej: Ivermectina, Penicilina, Vitamina B12"
-        binding.editTextDosis.hint = "Ej: 10ml, 2 comprimidos, 5cc"
-        binding.editTextDuracion.hint = "Ej: 3 días, 1 semana, Dosis única"
     }
 
     private fun cargarAnimales() {

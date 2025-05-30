@@ -19,6 +19,7 @@ class IncidentsActivity : AppCompatActivity() {
     private val apiService = RetrofitClient.getApiService()
     private lateinit var incidentsAdapter: IncidentsAdapter
     private val incidenciasList = mutableListOf<Incidencia>()
+    private val incidenciasOriginales = mutableListOf<Incidencia>() // Lista completa sin filtrar
 
     companion object {
         private const val REQUEST_ADD_INCIDENT = 2001
@@ -41,7 +42,7 @@ class IncidentsActivity : AppCompatActivity() {
         // Configurar RecyclerView
         incidentsAdapter = IncidentsAdapter(incidenciasList) { incidencia ->
             // Ver detalles de la incidencia
-            Toast.makeText(this, "Detalle de: ${incidencia.tipo}", Toast.LENGTH_SHORT).show()
+            mostrarDetallesIncidencia(incidencia)
         }
 
         binding.recyclerViewIncidents.apply {
@@ -60,11 +61,44 @@ class IncidentsActivity : AppCompatActivity() {
             loadIncidents()
         }
 
-        // Configurar filtros
-        binding.chipFilterAll.setOnClickListener { filterIncidents("all") }
-        binding.chipFilterPending.setOnClickListener { filterIncidents("pendiente") }
-        binding.chipFilterTreatment.setOnClickListener { filterIncidents("en tratamiento") }
-        binding.chipFilterResolved.setOnClickListener { filterIncidents("resuelto") }
+        // Configurar filtros - CORREGIDO
+        setupFilters()
+    }
+
+    private fun setupFilters() {
+        // Configurar el chip "Todas" como seleccionado por defecto
+        binding.chipFilterAll.isChecked = true
+
+        binding.chipFilterAll.setOnClickListener {
+            resetChips()
+            binding.chipFilterAll.isChecked = true
+            filterIncidents("all")
+        }
+
+        binding.chipFilterPending.setOnClickListener {
+            resetChips()
+            binding.chipFilterPending.isChecked = true
+            filterIncidents("pendiente")
+        }
+
+        binding.chipFilterTreatment.setOnClickListener {
+            resetChips()
+            binding.chipFilterTreatment.isChecked = true
+            filterIncidents("en tratamiento")
+        }
+
+        binding.chipFilterResolved.setOnClickListener {
+            resetChips()
+            binding.chipFilterResolved.isChecked = true
+            filterIncidents("resuelto")
+        }
+    }
+
+    private fun resetChips() {
+        binding.chipFilterAll.isChecked = false
+        binding.chipFilterPending.isChecked = false
+        binding.chipFilterTreatment.isChecked = false
+        binding.chipFilterResolved.isChecked = false
     }
 
     private fun loadIncidents() {
@@ -77,18 +111,12 @@ class IncidentsActivity : AppCompatActivity() {
                 if (response.isSuccessful && response.body() != null) {
                     val incidents = response.body()!!
 
-                    incidenciasList.clear()
-                    incidenciasList.addAll(incidents.sortedByDescending { it.fecha_deteccion })
-                    incidentsAdapter.notifyDataSetChanged()
+                    // Guardar la lista completa sin filtrar
+                    incidenciasOriginales.clear()
+                    incidenciasOriginales.addAll(incidents.sortedByDescending { it.fecha_deteccion })
 
-                    // Actualizar UI vacía
-                    if (incidents.isEmpty()) {
-                        binding.textEmptyState.visibility = View.VISIBLE
-                        binding.recyclerViewIncidents.visibility = View.GONE
-                    } else {
-                        binding.textEmptyState.visibility = View.GONE
-                        binding.recyclerViewIncidents.visibility = View.VISIBLE
-                    }
+                    // Mostrar todas las incidencias inicialmente usando el mismo método que los filtros
+                    filterIncidents("all")
 
                 } else {
                     Toast.makeText(this@IncidentsActivity, "Error cargando incidencias", Toast.LENGTH_SHORT).show()
@@ -103,33 +131,81 @@ class IncidentsActivity : AppCompatActivity() {
     }
 
     private fun filterIncidents(filter: String) {
-        // Resetear todos los chips
-        binding.chipFilterAll.isChecked = false
-        binding.chipFilterPending.isChecked = false
-        binding.chipFilterTreatment.isChecked = false
-        binding.chipFilterResolved.isChecked = false
-
-        // Marcar el chip seleccionado
         when (filter) {
             "all" -> {
-                binding.chipFilterAll.isChecked = true
-                incidentsAdapter.updateList(incidenciasList)
+                // Mostrar todas las incidencias
+                incidentsAdapter.updateList(incidenciasOriginales)
             }
             "pendiente" -> {
-                binding.chipFilterPending.isChecked = true
-                val filtered = incidenciasList.filter { it.estado == "pendiente" }
+                val filtered = incidenciasOriginales.filter { it.estado == "pendiente" }
                 incidentsAdapter.updateList(filtered)
             }
             "en tratamiento" -> {
-                binding.chipFilterTreatment.isChecked = true
-                val filtered = incidenciasList.filter { it.estado == "en tratamiento" }
+                val filtered = incidenciasOriginales.filter { it.estado == "en tratamiento" }
                 incidentsAdapter.updateList(filtered)
             }
             "resuelto" -> {
-                binding.chipFilterResolved.isChecked = true
-                val filtered = incidenciasList.filter { it.estado == "resuelto" }
+                val filtered = incidenciasOriginales.filter { it.estado == "resuelto" }
                 incidentsAdapter.updateList(filtered)
             }
+        }
+
+        // Actualizar estado vacío después del filtrado
+        updateEmptyState()
+    }
+
+    private fun updateEmptyState() {
+        val hasItems = incidentsAdapter.itemCount > 0
+
+        if (hasItems) {
+            binding.textEmptyState.visibility = View.GONE
+            binding.recyclerViewIncidents.visibility = View.VISIBLE
+        } else {
+            binding.textEmptyState.visibility = View.VISIBLE
+            binding.recyclerViewIncidents.visibility = View.GONE
+        }
+    }
+
+    private fun mostrarDetallesIncidencia(incidencia: Incidencia) {
+        val mensaje = buildString {
+            append("🚨 Tipo: ${incidencia.tipo}\n\n")
+            append("📝 Descripción:\n${incidencia.descripcion}\n\n")
+            append("🐄 Animal: ID ${incidencia.animal}\n")
+            append("📅 Fecha detección: ${formatearFecha(incidencia.fecha_deteccion)}\n")
+            append("📊 Estado: ${formatearEstado(incidencia.estado)}\n")
+
+            if (incidencia.fecha_resolucion != null) {
+                append("✅ Fecha resolución: ${formatearFecha(incidencia.fecha_resolucion!!)}")
+            }
+        }
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Detalles de la Incidencia")
+            .setMessage(mensaje)
+            .setPositiveButton("OK", null)
+            .setNeutralButton("Editar") { _, _ ->
+                Toast.makeText(this, "Editar incidencia - Próximamente", Toast.LENGTH_SHORT).show()
+            }
+            .show()
+    }
+
+    private fun formatearEstado(estado: String): String {
+        return when (estado) {
+            "pendiente" -> "⏳ Pendiente"
+            "en tratamiento" -> "🔄 En Tratamiento"
+            "resuelto" -> "✅ Resuelto"
+            else -> estado.replaceFirstChar { it.uppercase() }
+        }
+    }
+
+    private fun formatearFecha(fecha: String): String {
+        return try {
+            val inputFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+            val outputFormat = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault())
+            val date = inputFormat.parse(fecha)
+            outputFormat.format(date ?: java.util.Date())
+        } catch (e: Exception) {
+            fecha
         }
     }
 
