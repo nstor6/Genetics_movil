@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.genetics.Add.AddTreatmentActivity
 import com.example.genetics.api.Adapters.TreatmentsAdapter
 import com.example.genetics.api.RetrofitClient
 import com.example.genetics.api.Tratamiento

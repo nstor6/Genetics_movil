@@ -14,12 +14,25 @@ import kotlinx.coroutines.launch
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
-    private val apiService = RetrofitClient.getApiService()
+    private lateinit var apiService: com.example.genetics.api.ApiService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // 🔧 CRÍTICO: Asegurar que RetrofitClient esté inicializado
+        try {
+            RetrofitClient.initialize(this)
+            apiService = RetrofitClient.getApiService()
+            Log.d("LOGIN_ACTIVITY", "✅ RetrofitClient inicializado correctamente")
+        } catch (e: Exception) {
+            Log.e("LOGIN_ACTIVITY", "❌ Error inicializando RetrofitClient: ${e.message}")
+            e.printStackTrace()
+            Toast.makeText(this, "Error de configuración. Reinicia la app.", Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
 
         setupUI()
     }

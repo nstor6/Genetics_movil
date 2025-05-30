@@ -15,19 +15,37 @@ import java.util.concurrent.TimeUnit
 object RetrofitClient {
 
     // 🔧 REEMPLAZA CON TU URL ACTUAL
-    private const val BASE_URL = "https://6d9d-83-97-144-149.ngrok-free.app/api/"
+    private const val BASE_URL = " https://9e5a-83-97-144-149.ngrok-free.app/api/"
 
     private var retrofit: Retrofit? = null
-    private lateinit var sharedPreferences: SharedPreferences
-    private lateinit var appContext: Context
+    private var sharedPreferences: SharedPreferences? = null // CAMBIADO: Ahora es nullable
+    private var appContext: Context? = null // CAMBIADO: Ahora es nullable
 
     fun initialize(context: Context) {
         appContext = context.applicationContext
-        sharedPreferences = appContext.getSharedPreferences("genetics_prefs", Context.MODE_PRIVATE)
+        sharedPreferences = appContext!!.getSharedPreferences("genetics_prefs", Context.MODE_PRIVATE)
         Log.d("RETROFIT_CLIENT", "🔗 Conectando a: $BASE_URL")
+        Log.d("RETROFIT_CLIENT", "✅ RetrofitClient inicializado correctamente")
+    }
+
+    // NUEVO: Método para verificar si está inicializado
+    private fun isInitialized(): Boolean {
+        return sharedPreferences != null && appContext != null
+    }
+
+    // NUEVO: Método para asegurar inicialización
+    private fun ensureInitialized() {
+        if (!isInitialized()) {
+            throw IllegalStateException(
+                "RetrofitClient no ha sido inicializado. " +
+                        "Llama a RetrofitClient.initialize(context) antes de usar el cliente."
+            )
+        }
     }
 
     private fun getOkHttpClient(): OkHttpClient {
+        ensureInitialized() // Verificar inicialización
+
         val logging = HttpLoggingInterceptor { message ->
             Log.d("HTTP_LOG", message)
         }.apply {
@@ -39,7 +57,7 @@ object RetrofitClient {
             val request = chain.request()
             val url = request.url.toString()
 
-            // CORREGIDO: No verificar token para peticiones de login
+            // No verificar token para peticiones de login/registro
             val isLoginRequest = url.contains("/auth/login") || url.contains("/auth/register")
 
             if (!isLoginRequest) {
@@ -50,7 +68,7 @@ object RetrofitClient {
                 if (token == null) {
                     Log.w("AUTH_INTERCEPTOR", "🚨 No hay token, redirigiendo al login...")
                     redirectToLogin()
-                    // Continúar con la petición sin token (fallará pero evita crash)
+                    // Continuar con la petición sin token (fallará pero evita crash)
                 }
             } else {
                 Log.d("AUTH_INTERCEPTOR", "🔓 Petición de login/registro, omitiendo verificación de token")
@@ -87,26 +105,38 @@ object RetrofitClient {
         return OkHttpClient.Builder()
             .addInterceptor(logging)
             .addInterceptor(authInterceptor)
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
+            // 🔧 TIMEOUTS OPTIMIZADOS para reducir cancelaciones
+            .connectTimeout(15, TimeUnit.SECONDS)    // Tiempo para establecer conexión
+            .readTimeout(20, TimeUnit.SECONDS)       // Tiempo para leer respuesta
+            .writeTimeout(15, TimeUnit.SECONDS)      // Tiempo para enviar datos
+            .callTimeout(25, TimeUnit.SECONDS)       // Tiempo total máximo por llamada
+            // 🔧 CONFIGURACIONES ADICIONALES
+            .retryOnConnectionFailure(true)          // Reintentar automáticamente
+            .followRedirects(true)                   // Seguir redirecciones HTTP
+            .followSslRedirects(true)               // Seguir redirecciones HTTPS
             .build()
     }
 
     // Método para redirigir al login
     private fun redirectToLogin() {
         try {
-            val intent = Intent(appContext, LoginActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            appContext?.let { context ->
+                val intent = Intent(context, LoginActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                }
+                context.startActivity(intent)
+                Log.i("AUTH_INTERCEPTOR", "🔄 Redirigiendo al login...")
+            } ?: run {
+                Log.e("AUTH_INTERCEPTOR", "❌ AppContext es null, no se puede redirigir")
             }
-            appContext.startActivity(intent)
-            Log.i("AUTH_INTERCEPTOR", "🔄 Redirigiendo al login...")
         } catch (e: Exception) {
             Log.e("AUTH_INTERCEPTOR", "❌ Error redirigiendo al login: ${e.message}")
         }
     }
 
     fun getApiService(): ApiService {
+        ensureInitialized() // AÑADIDO: Verificar inicialización
+
         if (retrofit == null) {
             Log.d("RETROFIT_CLIENT", "🚀 Creando nueva instancia de Retrofit")
             retrofit = Retrofit.Builder()
@@ -119,19 +149,29 @@ object RetrofitClient {
     }
 
     fun saveToken(token: String) {
+        ensureInitialized() // AÑADIDO: Verificar inicialización
         Log.d("RETROFIT_CLIENT", "💾 Guardando token: ${token.take(10)}...")
-        sharedPreferences.edit()
+        sharedPreferences!!.edit()
             .putString("jwt_token", token)
             .apply()
     }
 
     fun getToken(): String? {
-        return sharedPreferences.getString("jwt_token", null)
+        if (!isInitialized()) {
+            Log.w("RETROFIT_CLIENT", "⚠️ RetrofitClient no inicializado, retornando null para token")
+            return null
+        }
+        return sharedPreferences!!.getString("jwt_token", null)
     }
 
     fun clearToken() {
+        if (!isInitialized()) {
+            Log.w("RETROFIT_CLIENT", "⚠️ RetrofitClient no inicializado, no se puede limpiar token")
+            return
+        }
+
         Log.d("RETROFIT_CLIENT", "🗑️ Limpiando token...")
-        sharedPreferences.edit()
+        sharedPreferences!!.edit()
             .remove("jwt_token")
             .apply()
 
@@ -140,6 +180,11 @@ object RetrofitClient {
     }
 
     fun isLoggedIn(): Boolean {
+        if (!isInitialized()) {
+            Log.w("RETROFIT_CLIENT", "⚠️ RetrofitClient no inicializado, retornando false para isLoggedIn")
+            return false
+        }
+
         val hasToken = getToken() != null
         Log.d("RETROFIT_CLIENT", "🔐 ¿Usuario logueado? $hasToken")
         return hasToken

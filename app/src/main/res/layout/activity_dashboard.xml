@@ -45,7 +45,7 @@
                 android:textColor="@color/colorPrimary"
                 android:layout_marginBottom="16dp" />
 
-            <!-- Grid de estadísticas -->
+            <!-- Grid de estadísticas CLICKEABLES -->
             <GridLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -53,14 +53,18 @@
                 android:rowCount="2"
                 android:layout_marginBottom="24dp">
 
-                <!-- Card Animales -->
+                <!-- Card Animales CLICKEABLE -->
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/cardAnimals"
                     android:layout_width="0dp"
                     android:layout_height="120dp"
                     android:layout_columnWeight="1"
                     android:layout_margin="8dp"
                     app:cardCornerRadius="12dp"
-                    app:cardElevation="4dp">
+                    app:cardElevation="4dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -96,14 +100,18 @@
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
-                <!-- Card Incidencias -->
+                <!-- Card Incidencias CLICKEABLE -->
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/cardIncidents"
                     android:layout_width="0dp"
                     android:layout_height="120dp"
                     android:layout_columnWeight="1"
                     android:layout_margin="8dp"
                     app:cardCornerRadius="12dp"
-                    app:cardElevation="4dp">
+                    app:cardElevation="4dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -139,14 +147,18 @@
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
-                <!-- Card Tratamientos -->
+                <!-- Card Tratamientos CLICKEABLE -->
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/cardTreatments"
                     android:layout_width="0dp"
                     android:layout_height="120dp"
                     android:layout_columnWeight="1"
                     android:layout_margin="8dp"
                     app:cardCornerRadius="12dp"
-                    app:cardElevation="4dp">
+                    app:cardElevation="4dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -182,14 +194,18 @@
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
-                <!-- Card Eventos -->
+                <!-- Card Eventos CLICKEABLE -->
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/cardEvents"
                     android:layout_width="0dp"
                     android:layout_height="120dp"
                     android:layout_columnWeight="1"
                     android:layout_margin="8dp"
                     app:cardCornerRadius="12dp"
-                    app:cardElevation="4dp">
+                    app:cardElevation="4dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -244,7 +260,6 @@
                 android:orientation="vertical"
                 android:layout_marginBottom="16dp">
 
-                <!-- CAMBIADO: Ahora es "Nuevo Animal" en lugar de "Ver Animales" -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/buttonViewAnimals"
                     android:layout_width="match_parent"
@@ -272,6 +287,17 @@
                     android:text="💊 Nuevo Tratamiento"
                     android:textSize="16sp"
                     app:backgroundTint="@color/colorSecondary"
+                    app:cornerRadius="12dp"
+                    android:layout_marginBottom="8dp" />
+
+                <!-- NUEVO BOTÓN: Nuevo Evento -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonNewEvent"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:text="📅 Nuevo Evento"
+                    android:textSize="16sp"
+                    app:backgroundTint="@color/colorError"
                     app:cornerRadius="12dp" />
 
             </LinearLayout>
@@ -290,7 +316,5 @@
         app:backgroundTint="@color/white"
         app:itemIconTint="@color/colorPrimary"
         app:itemTextColor="@color/colorPrimary" />
-
-    <!-- FAB ELIMINADO - Ya no es necesario -->
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

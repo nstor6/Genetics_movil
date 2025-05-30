@@ -7,9 +7,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.genetics.AddIncidentActivity
-import com.example.genetics.AddTreatmentActivity
-import com.example.genetics.AnimalDetailActivity
+import com.example.genetics.Add.AddIncidentActivity
+import com.example.genetics.Add.AddTreatmentActivity
 import com.example.genetics.R
 import com.example.genetics.api.Animals
 import java.util.Locale

@@ -14,6 +14,7 @@
         android:required="false" />
 
     <application
+        android:name=".GeneticsApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -25,9 +26,11 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".EditAnimalActivity"
+            android:name=".BaseActivity"
             android:exported="false" />
-        <!-- Actividad principal (MainActivity) -->
+        <activity
+            android:name=".EditAnimalActivity"
+            android:exported="false" /> <!-- Actividad principal (MainActivity) -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -58,7 +61,7 @@
             android:parentActivityName=".AnimalsActivity"
             android:screenOrientation="portrait" /> <!-- Agregar nuevo animal -->
         <activity
-            android:name=".AddAnimalActivity"
+            android:name=".Add.AddAnimalActivity"
             android:exported="false"
             android:parentActivityName=".AnimalsActivity"
             android:screenOrientation="portrait" /> <!-- === INCIDENCIAS === -->
@@ -69,7 +72,7 @@
             android:parentActivityName=".DashboardActivity"
             android:screenOrientation="portrait" /> <!-- Agregar nueva incidencia -->
         <activity
-            android:name=".AddIncidentActivity"
+            android:name=".Add.AddIncidentActivity"
             android:exported="false"
             android:parentActivityName=".IncidentsActivity"
             android:screenOrientation="portrait" /> <!-- === TRATAMIENTOS === -->
@@ -80,7 +83,7 @@
             android:parentActivityName=".DashboardActivity"
             android:screenOrientation="portrait" /> <!-- Agregar nuevo tratamiento -->
         <activity
-            android:name=".AddTreatmentActivity"
+            android:name=".Add.AddTreatmentActivity"
             android:exported="false"
             android:parentActivityName=".TreatmentsActivity"
             android:screenOrientation="portrait" /> <!-- === CALENDARIO === -->
@@ -91,7 +94,7 @@
             android:parentActivityName=".DashboardActivity"
             android:screenOrientation="portrait" /> <!-- Agregar nuevo evento -->
         <activity
-            android:name=".AddEventActivity"
+            android:name=".Add.AddEventActivity"
             android:exported="false"
             android:parentActivityName=".CalendarActivity"
             android:screenOrientation="portrait" />

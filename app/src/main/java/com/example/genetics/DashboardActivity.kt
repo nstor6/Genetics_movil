@@ -5,8 +5,15 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.example.genetics.Add.AddAnimalActivity
+import com.example.genetics.Add.AddEventActivity
+import com.example.genetics.Add.AddIncidentActivity
+import com.example.genetics.Add.AddTreatmentActivity
 import com.example.genetics.api.RetrofitClient
 import com.example.genetics.databinding.ActivityDashboardBinding
+import com.example.genetics.utils.safeApiCall
+import com.example.genetics.utils.onSuccess
+import com.example.genetics.utils.onError
 import kotlinx.coroutines.launch
 
 class DashboardActivity : AppCompatActivity() {
@@ -24,39 +31,27 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun setupUI() {
-        // Configurar navegación bottom nav
-        binding.bottomNavigation.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_animals -> {
-                    // Ir a lista de animales
-                    startActivity(Intent(this, AnimalsActivity::class.java))
-                    true
-                }
-                R.id.nav_incidents -> {
-                    // Ir a incidencias
-                    startActivity(Intent(this, IncidentsActivity::class.java))
-                    true
-                }
-                R.id.nav_treatments -> {
-                    // Ir a tratamientos
-                    startActivity(Intent(this, TreatmentsActivity::class.java))
-                    true
-                }
-                R.id.nav_calendar -> {
-                    // Ir a calendario
-                    startActivity(Intent(this, CalendarActivity::class.java))
-                    true
-                }
-                R.id.nav_settings -> {
-                    // Configuración y logout
-                    logout()
-                    true
-                }
-                else -> false
-            }
+        // 🔧 TARJETAS CLICKEABLES - Navegar a las respectivas activities
+        binding.cardAnimals.setOnClickListener {
+            startActivity(Intent(this, AnimalsActivity::class.java))
         }
 
-        // CAMBIADO: Ahora el botón "Ver Animales" es "Nuevo Animal"
+        binding.cardIncidents.setOnClickListener {
+            startActivity(Intent(this, IncidentsActivity::class.java))
+        }
+
+        binding.cardTreatments.setOnClickListener {
+            startActivity(Intent(this, TreatmentsActivity::class.java))
+        }
+
+        binding.cardEvents.setOnClickListener {
+            startActivity(Intent(this, CalendarActivity::class.java))
+        }
+
+        // ✅ CONFIGURAR NAVEGACIÓN BOTTOM SIN SELECCIÓN POR DEFECTO
+        setupBottomNavigation()
+
+        // 🔧 BOTONES DE ACCIONES RÁPIDAS
         binding.buttonViewAnimals.setOnClickListener {
             startActivity(Intent(this, AddAnimalActivity::class.java))
         }
@@ -69,35 +64,112 @@ class DashboardActivity : AppCompatActivity() {
             startActivity(Intent(this, AddTreatmentActivity::class.java))
         }
 
-        // ELIMINADO: Ya no necesitamos el FAB para nuevo animal
-        // binding.fabNewAnimal.setOnClickListener {
-        //     startActivity(Intent(this, AddAnimalActivity::class.java))
-        // }
+        binding.buttonNewEvent.setOnClickListener {
+            startActivity(Intent(this, AddEventActivity::class.java))
+        }
+    }
+
+    // ✅ FUNCIÓN PARA CONFIGURAR BOTTOM NAVIGATION SIN SELECCIÓN
+    private fun setupBottomNavigation() {
+        // 🔧 NO establecer ningún item como seleccionado por defecto
+        // binding.bottomNavigation.selectedItemId = ... (COMENTADO)
+
+        binding.bottomNavigation.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_animals -> {
+                    startActivity(Intent(this, AnimalsActivity::class.java))
+                    true
+                }
+                R.id.nav_incidents -> {
+                    startActivity(Intent(this, IncidentsActivity::class.java))
+                    true
+                }
+                R.id.nav_treatments -> {
+                    startActivity(Intent(this, TreatmentsActivity::class.java))
+                    true
+                }
+                R.id.nav_calendar -> {
+                    startActivity(Intent(this, CalendarActivity::class.java))
+                    true
+                }
+                R.id.nav_settings -> {
+                    // Ya estamos en el Dashboard/Settings, mostrar opciones
+                    showSettingsMenu()
+                    false // No seleccionar el item
+                }
+                else -> false
+            }
+        }
+    }
+
+    // ✅ MENÚ DE CONFIGURACIÓN CUANDO SE TOCA SETTINGS
+    private fun showSettingsMenu() {
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("⚙️ Configuración")
+            .setItems(arrayOf("🔄 Actualizar datos", "🚪 Cerrar sesión")) { _, which ->
+                when (which) {
+                    0 -> {
+                        // Actualizar datos
+                        Toast.makeText(this, "Actualizando datos...", Toast.LENGTH_SHORT).show()
+                        loadStats() // Recargar estadísticas
+                    }
+                    1 -> {
+                        // Cerrar sesión
+                        logout()
+                    }
+                }
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
     }
 
     private fun loadStats() {
         lifecycleScope.launch {
-            try {
-                // Cargar estadísticas
-                val animalsResponse = apiService.getAnimales()
-                val incidentsResponse = apiService.getIncidencias()
-                val treatmentsResponse = apiService.getTratamientos()
-                val eventsResponse = apiService.getEventos()
+            loadAnimalsStats()
+            loadIncidentsStats()
+            loadTreatmentsStats()
+            loadEventsStats()
+        }
+    }
 
-                if (animalsResponse.isSuccessful) {
-                    val animals = animalsResponse.body() ?: emptyList()
+    private suspend fun loadAnimalsStats() {
+        safeApiCall("LOAD_ANIMALS_STATS") {
+            apiService.getAnimales()
+        }
+            .onSuccess { response ->
+                if (response.isSuccessful) {
+                    val animals = response.body() ?: emptyList()
                     binding.textAnimalsCount.text = animals.size.toString()
                 }
+            }
+            .onError { message ->
+                android.util.Log.w("DASHBOARD", "Error cargando animales: $message")
+            }
+    }
 
-                if (incidentsResponse.isSuccessful) {
-                    val incidents = incidentsResponse.body() ?: emptyList()
+    private suspend fun loadIncidentsStats() {
+        safeApiCall("LOAD_INCIDENTS_STATS") {
+            apiService.getIncidencias()
+        }
+            .onSuccess { response ->
+                if (response.isSuccessful) {
+                    val incidents = response.body() ?: emptyList()
                     val pending = incidents.count { it.estado == "pendiente" }
                     binding.textIncidentsCount.text = pending.toString()
                 }
+            }
+            .onError { message ->
+                android.util.Log.w("DASHBOARD", "Error cargando incidencias: $message")
+            }
+    }
 
-                if (treatmentsResponse.isSuccessful) {
-                    val treatments = treatmentsResponse.body() ?: emptyList()
-                    // Mostrar tratamientos activos (de la última semana por ejemplo)
+    private suspend fun loadTreatmentsStats() {
+        safeApiCall("LOAD_TREATMENTS_STATS") {
+            apiService.getTratamientos()
+        }
+            .onSuccess { response ->
+                if (response.isSuccessful) {
+                    val treatments = response.body() ?: emptyList()
                     val recentTreatments = treatments.filter {
                         try {
                             val treatmentDate = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).parse(it.fecha)
@@ -111,16 +183,38 @@ class DashboardActivity : AppCompatActivity() {
                     }
                     binding.textTreatmentsCount.text = recentTreatments.size.toString()
                 }
-
-                if (eventsResponse.isSuccessful) {
-                    val events = eventsResponse.body() ?: emptyList()
-                    binding.textEventsCount.text = events.size.toString()
-                }
-
-            } catch (e: Exception) {
-                Toast.makeText(this@DashboardActivity, "Error cargando datos: ${e.message}", Toast.LENGTH_SHORT).show()
             }
+            .onError { message ->
+                android.util.Log.w("DASHBOARD", "Error cargando tratamientos: $message")
+            }
+    }
+
+    private suspend fun loadEventsStats() {
+        safeApiCall("LOAD_EVENTS_STATS") {
+            apiService.getEventos()
         }
+            .onSuccess { response ->
+                if (response.isSuccessful) {
+                    val events = response.body() ?: emptyList()
+                    val upcomingEvents = events.filter { evento ->
+                        try {
+                            val eventoFecha = evento.fecha_inicio.substring(0, 10)
+                            val eventDate = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).parse(eventoFecha)
+                            val today = java.util.Calendar.getInstance().time
+                            val nextWeek = java.util.Calendar.getInstance().apply {
+                                add(java.util.Calendar.DAY_OF_MONTH, 7)
+                            }.time
+                            eventDate?.let { it.after(today) && it.before(nextWeek) } == true
+                        } catch (e: Exception) {
+                            false
+                        }
+                    }
+                    binding.textEventsCount.text = upcomingEvents.size.toString()
+                }
+            }
+            .onError { message ->
+                android.util.Log.w("DASHBOARD", "Error cargando eventos: $message")
+            }
     }
 
     private fun logout() {
@@ -130,7 +224,7 @@ class DashboardActivity : AppCompatActivity() {
             .setPositiveButton("Sí") { _, _ ->
                 RetrofitClient.clearToken()
                 startActivity(Intent(this, LoginActivity::class.java))
-                finish()
+                finishAffinity() // Cerrar todas las activities
                 Toast.makeText(this, "Sesión cerrada", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("Cancelar", null)
@@ -139,7 +233,14 @@ class DashboardActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // Recargar estadísticas cuando volvemos al dashboard
+        // 🔧 ASEGURAR que no hay nada seleccionado al volver
+        binding.bottomNavigation.menu.setGroupCheckable(0, true, false)
+        for (i in 0 until binding.bottomNavigation.menu.size()) {
+            binding.bottomNavigation.menu.getItem(i).isChecked = false
+        }
+        binding.bottomNavigation.menu.setGroupCheckable(0, true, true)
+
+        // Recargar estadísticas
         loadStats()
     }
 }
