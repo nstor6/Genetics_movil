@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit
 object RetrofitClient {
 
     // 🔧 REEMPLAZA CON TU URL ACTUAL
-    private const val BASE_URL = " https://9e5a-83-97-144-149.ngrok-free.app/api/"
+    private const val BASE_URL = "https://8e4c-83-97-144-149.ngrok-free.app/api/"
 
     private var retrofit: Retrofit? = null
     private var sharedPreferences: SharedPreferences? = null // CAMBIADO: Ahora es nullable

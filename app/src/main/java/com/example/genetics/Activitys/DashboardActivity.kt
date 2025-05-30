@@ -1,14 +1,20 @@
 package com.example.genetics
 
+import UsersActivity
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.example.genetics.Activitys.AnimalsActivity
+import com.example.genetics.Activitys.CalendarActivity
+import com.example.genetics.Activitys.IncidentsActivity
+import com.example.genetics.Activitys.TreatmentsActivity
 import com.example.genetics.Create.AddAnimalActivity
 import com.example.genetics.Create.AddEventActivity
 import com.example.genetics.Create.AddIncidentActivity
 import com.example.genetics.Create.AddTreatmentActivity
+import com.example.genetics.Create.AddUserActivity
 import com.example.genetics.api.RetrofitClient
 import com.example.genetics.databinding.ActivityDashboardBinding
 import com.example.genetics.utils.safeApiCall
@@ -48,7 +54,12 @@ class DashboardActivity : AppCompatActivity() {
             startActivity(Intent(this, CalendarActivity::class.java))
         }
 
-        // ✅ CONFIGURAR NAVEGACIÓN BOTTOM SIN SELECCIÓN POR DEFECTO
+        // ✅ NUEVA TARJETA: Usuarios
+        binding.cardUsers.setOnClickListener {
+            startActivity(Intent(this, UsersActivity::class.java))
+        }
+
+        // ✅ CONFIGURAR NAVEGACIÓN BOTTOM CON USUARIOS
         setupBottomNavigation()
 
         // 🔧 BOTONES DE ACCIONES RÁPIDAS
@@ -67,9 +78,14 @@ class DashboardActivity : AppCompatActivity() {
         binding.buttonNewEvent.setOnClickListener {
             startActivity(Intent(this, AddEventActivity::class.java))
         }
+
+        // ✅ NUEVO BOTÓN: Nuevo Usuario
+        binding.buttonNewUser.setOnClickListener {
+            startActivity(Intent(this, AddUserActivity::class.java))
+        }
     }
 
-    // ✅ FUNCIÓN PARA CONFIGURAR BOTTOM NAVIGATION SIN SELECCIÓN
+    // ✅ FUNCIÓN PARA CONFIGURAR BOTTOM NAVIGATION CON USUARIOS
     private fun setupBottomNavigation() {
         // 🔧 NO establecer ningún item como seleccionado por defecto
         // binding.bottomNavigation.selectedItemId = ... (COMENTADO)
@@ -92,6 +108,10 @@ class DashboardActivity : AppCompatActivity() {
                     startActivity(Intent(this, CalendarActivity::class.java))
                     true
                 }
+                R.id.nav_users -> {
+                    startActivity(Intent(this, UsersActivity::class.java))
+                    true
+                }
                 R.id.nav_settings -> {
                     // Ya estamos en el Dashboard/Settings, mostrar opciones
                     showSettingsMenu()
@@ -106,7 +126,7 @@ class DashboardActivity : AppCompatActivity() {
     private fun showSettingsMenu() {
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle("⚙️ Configuración")
-            .setItems(arrayOf("🔄 Actualizar datos", "🚪 Cerrar sesión")) { _, which ->
+            .setItems(arrayOf("🔄 Actualizar datos", "👤 Mi perfil", "🚪 Cerrar sesión")) { _, which ->
                 when (which) {
                     0 -> {
                         // Actualizar datos
@@ -114,6 +134,11 @@ class DashboardActivity : AppCompatActivity() {
                         loadStats() // Recargar estadísticas
                     }
                     1 -> {
+                        // Ver perfil del usuario actual
+                        // TODO: Implementar ProfileActivity
+                        Toast.makeText(this, "Mi perfil - Próximamente", Toast.LENGTH_SHORT).show()
+                    }
+                    2 -> {
                         // Cerrar sesión
                         logout()
                     }
@@ -129,6 +154,7 @@ class DashboardActivity : AppCompatActivity() {
             loadIncidentsStats()
             loadTreatmentsStats()
             loadEventsStats()
+            loadUsersStats() // ✅ NUEVA FUNCIÓN
         }
     }
 
@@ -214,6 +240,24 @@ class DashboardActivity : AppCompatActivity() {
             }
             .onError { message ->
                 android.util.Log.w("DASHBOARD", "Error cargando eventos: $message")
+            }
+    }
+
+    private suspend fun loadUsersStats() {
+        safeApiCall("LOAD_USERS_STATS") {
+            apiService.getUsers()
+        }
+            .onSuccess { response ->
+                if (response.isSuccessful) {
+                    val users = response.body() ?: emptyList()
+                    val activeUsers = users.count { it.activo == true }
+                    binding.textUsersCount.text = activeUsers.toString()
+                }
+            }
+            .onError { message ->
+                android.util.Log.w("DASHBOARD", "Error cargando usuarios: $message")
+                // Mostrar 0 si hay error
+                binding.textUsersCount.text = "0"
             }
     }
 

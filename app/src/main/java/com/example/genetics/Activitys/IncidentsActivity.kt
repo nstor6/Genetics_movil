@@ -1,4 +1,4 @@
-package com.example.genetics
+package com.example.genetics.Activitys
 
 import android.content.Intent
 import android.os.Bundle

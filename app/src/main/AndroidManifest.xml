@@ -26,6 +26,15 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".Edit.EditUserActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Create.AddUserActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Activitys.UsersActivity"
+            android:exported="false" />
+        <activity
             android:name=".Edit.EditEventActivity"
             android:exported="false" />
         <activity
@@ -38,7 +47,7 @@
             android:name=".BaseActivity"
             android:exported="false" />
         <activity
-            android:name=".EditAnimalActivity"
+            android:name=".Activitys.EditAnimalActivity"
             android:exported="false" /> <!-- Actividad principal (MainActivity) -->
         <activity
             android:name=".MainActivity"
@@ -55,57 +64,57 @@
             android:exported="false"
             android:screenOrientation="portrait" /> <!-- Dashboard principal -->
         <activity
-            android:name=".DashboardActivity"
+            android:name=".Activitys.DashboardActivity"
             android:exported="false"
             android:screenOrientation="portrait" /> <!-- === ANIMALES === -->
         <!-- Lista de animales -->
         <activity
-            android:name=".AnimalsActivity"
+            android:name=".Activitys.AnimalsActivity"
             android:exported="false"
-            android:parentActivityName=".DashboardActivity"
+            android:parentActivityName=".Activitys.DashboardActivity"
             android:screenOrientation="portrait" /> <!-- Detalles del animal -->
         <activity
-            android:name=".AnimalDetailActivity"
+            android:name=".Activitys.AnimalDetailActivity"
             android:exported="false"
-            android:parentActivityName=".AnimalsActivity"
+            android:parentActivityName=".Activitys.AnimalsActivity"
             android:screenOrientation="portrait" /> <!-- Agregar nuevo animal -->
         <activity
             android:name=".Create.AddAnimalActivity"
             android:exported="false"
-            android:parentActivityName=".AnimalsActivity"
+            android:parentActivityName=".Activitys.AnimalsActivity"
             android:screenOrientation="portrait" /> <!-- === INCIDENCIAS === -->
         <!-- Lista de incidencias -->
         <activity
-            android:name=".IncidentsActivity"
+            android:name=".Activitys.IncidentsActivity"
             android:exported="false"
-            android:parentActivityName=".DashboardActivity"
+            android:parentActivityName=".Activitys.DashboardActivity"
             android:screenOrientation="portrait" /> <!-- Agregar nueva incidencia -->
         <activity
             android:name=".Create.AddIncidentActivity"
             android:exported="false"
-            android:parentActivityName=".IncidentsActivity"
+            android:parentActivityName=".Activitys.IncidentsActivity"
             android:screenOrientation="portrait" /> <!-- === TRATAMIENTOS === -->
         <!-- Lista de tratamientos -->
         <activity
-            android:name=".TreatmentsActivity"
+            android:name=".Activitys.TreatmentsActivity"
             android:exported="false"
-            android:parentActivityName=".DashboardActivity"
+            android:parentActivityName=".Activitys.DashboardActivity"
             android:screenOrientation="portrait" /> <!-- Agregar nuevo tratamiento -->
         <activity
             android:name=".Create.AddTreatmentActivity"
             android:exported="false"
-            android:parentActivityName=".TreatmentsActivity"
+            android:parentActivityName=".Activitys.TreatmentsActivity"
             android:screenOrientation="portrait" /> <!-- === CALENDARIO === -->
         <!-- Vista del calendario -->
         <activity
-            android:name=".CalendarActivity"
+            android:name=".Activitys.CalendarActivity"
             android:exported="false"
-            android:parentActivityName=".DashboardActivity"
+            android:parentActivityName=".Activitys.DashboardActivity"
             android:screenOrientation="portrait" /> <!-- Agregar nuevo evento -->
         <activity
             android:name=".Create.AddEventActivity"
             android:exported="false"
-            android:parentActivityName=".CalendarActivity"
+            android:parentActivityName=".Activitys.CalendarActivity"
             android:screenOrientation="portrait" />
     </application>
 

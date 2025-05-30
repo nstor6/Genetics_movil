@@ -100,4 +100,24 @@
         <item>Veterinario externo</item>
     </string-array>
 
+    <string-array name="user_role_options">
+        <item>Seleccionar rol</item>
+        <item>👤 Usuario</item>
+        <item>🏠 Dueño</item>
+        <item>👑 Administrador</item>
+    </string-array>
+
+    <string-array name="user_status_options">
+        <item>✅ Activo</item>
+        <item>❌ Inactivo</item>
+    </string-array>
+
+    <string-array name="user_filter_options">
+        <item>Todos los usuarios</item>
+        <item>👑 Solo administradores</item>
+        <item>🏠 Solo dueños</item>
+        <item>👤 Solo usuarios</item>
+        <item>✅ Solo activos</item>
+        <item>❌ Solo inactivos</item>
+    </string-array>
 </resources>

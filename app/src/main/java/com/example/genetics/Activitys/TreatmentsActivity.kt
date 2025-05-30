@@ -1,4 +1,4 @@
-package com.example.genetics
+package com.example.genetics.Activitys
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,6 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.genetics.Create.AddTreatmentActivity
+import com.example.genetics.Edit.EditTreatmentActivity
+import com.example.genetics.R
 import com.example.genetics.api.Adapters.TreatmentsAdapter
 import com.example.genetics.api.RetrofitClient
 import com.example.genetics.api.Tratamiento
@@ -27,6 +29,7 @@ class TreatmentsActivity : AppCompatActivity() {
 
     companion object {
         private const val REQUEST_ADD_TREATMENT = 3001
+        private const val REQUEST_EDIT_TREATMENT = 3002
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,16 +54,17 @@ class TreatmentsActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = "💊 Tratamientos"
 
-        // 🔧 CONFIGURAR RECYCLERVIEW CORRECTAMENTE
-        treatmentsAdapter = TreatmentsAdapter(tratamientosList) { tratamiento ->
-            mostrarDetallesTratamiento(tratamiento)
-        }
+        // ✅ CONFIGURAR RECYCLERVIEW CON CALLBACKS DE CRUD
+        treatmentsAdapter = TreatmentsAdapter(
+            tratamientosList,
+            onItemClick = { tratamiento -> mostrarDetallesTratamiento(tratamiento) },
+            onEditClick = { tratamiento -> editarTratamiento(tratamiento) },
+            onDeleteClick = { tratamiento -> confirmarEliminarTratamiento(tratamiento) }
+        )
 
         recyclerViewTreatments.apply {
             layoutManager = LinearLayoutManager(this@TreatmentsActivity)
             adapter = treatmentsAdapter
-            // 🔧 AÑADIR LOGGING PARA DEBUG
-            android.util.Log.d("TREATMENTS_ACTIVITY", "📋 RecyclerView configurado con adapter")
         }
 
         // Configurar FAB
@@ -83,7 +87,7 @@ class TreatmentsActivity : AppCompatActivity() {
             append("📅 Fecha: ${formatearFecha(tratamiento.fecha)}\n")
             append("🐄 Animal ID: ${tratamiento.animal}\n")
             if (!tratamiento.observaciones.isNullOrEmpty()) {
-                append("📝 Observaciones: ${tratamiento.observaciones}")
+                append("\n📝 Observaciones:\n${tratamiento.observaciones}")
             }
         }
 
@@ -91,10 +95,59 @@ class TreatmentsActivity : AppCompatActivity() {
             .setTitle("Detalles del Tratamiento")
             .setMessage(mensaje)
             .setPositiveButton("OK", null)
-            .setNeutralButton("Editar") { _, _ ->
-                Toast.makeText(this, "Editar tratamiento - Próximamente", Toast.LENGTH_SHORT).show()
+            .setNeutralButton("✏️ Editar") { _, _ ->
+                editarTratamiento(tratamiento)
+            }
+            .setNegativeButton("🗑️ Eliminar") { _, _ ->
+                confirmarEliminarTratamiento(tratamiento)
             }
             .show()
+    }
+
+    private fun editarTratamiento(tratamiento: Tratamiento) {
+        val intent = Intent(this, EditTreatmentActivity::class.java)
+        intent.putExtra("TRATAMIENTO_ID", tratamiento.id)
+        startActivityForResult(intent, REQUEST_EDIT_TREATMENT)
+    }
+
+    private fun confirmarEliminarTratamiento(tratamiento: Tratamiento) {
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("⚠️ Eliminar Tratamiento")
+            .setMessage("¿Estás seguro de que quieres eliminar el tratamiento con '${tratamiento.medicamento}' del animal ID ${tratamiento.animal}?\n\nEsta acción no se puede deshacer.")
+            .setPositiveButton("Eliminar") { _, _ ->
+                eliminarTratamiento(tratamiento)
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
+    }
+
+    private fun eliminarTratamiento(tratamiento: Tratamiento) {
+        lifecycleScope.launch {
+            try {
+                android.util.Log.d("TREATMENTS_ACTIVITY", "🗑️ Eliminando tratamiento ID: ${tratamiento.id}")
+
+                val response = apiService.eliminarTratamiento(tratamiento.id!!)
+
+                if (response.isSuccessful) {
+                    Toast.makeText(this@TreatmentsActivity, "Tratamiento eliminado correctamente", Toast.LENGTH_SHORT).show()
+
+                    // Eliminar del adapter inmediatamente para mejor UX
+                    treatmentsAdapter.removeTreatment(tratamiento)
+
+                    // Actualizar estado vacío si es necesario
+                    updateEmptyState(tratamientosList.isEmpty())
+
+                    android.util.Log.d("TREATMENTS_ACTIVITY", "✅ Tratamiento eliminado exitosamente")
+                } else {
+                    val errorBody = response.errorBody()?.string()
+                    android.util.Log.e("TREATMENTS_ACTIVITY", "❌ Error eliminando: $errorBody")
+                    Toast.makeText(this@TreatmentsActivity, "Error al eliminar tratamiento", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("TREATMENTS_ACTIVITY", "❌ Exception eliminando: ${e.message}", e)
+                Toast.makeText(this@TreatmentsActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun formatearFecha(fecha: String): String {
@@ -116,18 +169,17 @@ class TreatmentsActivity : AppCompatActivity() {
             try {
                 val response = apiService.getTratamientos()
                 android.util.Log.d("TREATMENTS_ACTIVITY", "📡 Response code: ${response.code()}")
-                android.util.Log.d("TREATMENTS_ACTIVITY", "📡 Response successful: ${response.isSuccessful}")
 
                 if (response.isSuccessful && response.body() != null) {
                     val treatments = response.body()!!
                     android.util.Log.d("TREATMENTS_ACTIVITY", "✅ Tratamientos recibidos: ${treatments.size}")
 
-                    // 🔧 LIMPIAR Y ACTUALIZAR LA LISTA CORRECTAMENTE
+                    // Limpiar y actualizar la lista
                     tratamientosList.clear()
                     tratamientosList.addAll(treatments.sortedByDescending { it.fecha })
 
-                    // 🔧 USAR updateList EN LUGAR DE notifyDataSetChanged
-                    treatmentsAdapter.updateList(tratamientosList)
+                    // Notificar al adapter
+                    treatmentsAdapter.notifyDataSetChanged()
 
                     android.util.Log.d("TREATMENTS_ACTIVITY", "📋 Lista actualizada. Items en adapter: ${treatmentsAdapter.itemCount}")
 
@@ -151,7 +203,6 @@ class TreatmentsActivity : AppCompatActivity() {
         }
     }
 
-    // 🔧 NUEVA FUNCIÓN PARA ACTUALIZAR ESTADO VACÍO
     private fun updateEmptyState(isEmpty: Boolean) {
         if (isEmpty) {
             textEmptyState.visibility = View.VISIBLE
@@ -166,9 +217,13 @@ class TreatmentsActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_ADD_TREATMENT && resultCode == RESULT_OK) {
-            android.util.Log.d("TREATMENTS_ACTIVITY", "🔄 Recargando después de agregar tratamiento")
-            loadTreatments()
+        when (requestCode) {
+            REQUEST_ADD_TREATMENT, REQUEST_EDIT_TREATMENT -> {
+                if (resultCode == RESULT_OK) {
+                    android.util.Log.d("TREATMENTS_ACTIVITY", "🔄 Recargando después de crear/editar tratamiento")
+                    loadTreatments()
+                }
+            }
         }
     }
 

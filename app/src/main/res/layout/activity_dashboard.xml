@@ -45,12 +45,12 @@
                 android:textColor="@color/colorPrimary"
                 android:layout_marginBottom="16dp" />
 
-            <!-- Grid de estadísticas CLICKEABLES -->
+            <!-- Grid de estadísticas CLICKEABLES (2x3) -->
             <GridLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:columnCount="2"
-                android:rowCount="2"
+                android:rowCount="3"
                 android:layout_marginBottom="24dp">
 
                 <!-- Card Animales CLICKEABLE -->
@@ -241,6 +241,53 @@
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
+                <!-- ✅ NUEVA Card Usuarios CLICKEABLE -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardUsers"
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_columnWeight="1"
+                    android:layout_margin="8dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="4dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:padding="16dp"
+                        android:background="#f0e8ff">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="👥"
+                            android:textSize="32sp"
+                            android:layout_marginBottom="8dp" />
+
+                        <TextView
+                            android:id="@+id/textUsersCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textSize="24sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/colorSecondary" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Usuarios"
+                            android:textSize="12sp"
+                            android:textColor="@color/colorGray" />
+
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
             </GridLayout>
 
             <!-- Acciones rápidas -->
@@ -290,7 +337,6 @@
                     app:cornerRadius="12dp"
                     android:layout_marginBottom="8dp" />
 
-                <!-- NUEVO BOTÓN: Nuevo Evento -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/buttonNewEvent"
                     android:layout_width="match_parent"
@@ -298,6 +344,17 @@
                     android:text="📅 Nuevo Evento"
                     android:textSize="16sp"
                     app:backgroundTint="@color/colorError"
+                    app:cornerRadius="12dp"
+                    android:layout_marginBottom="8dp" />
+
+                <!-- ✅ NUEVO BOTÓN: Nuevo Usuario -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonNewUser"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:text="👤 Nuevo Usuario"
+                    android:textSize="16sp"
+                    app:backgroundTint="@color/colorSecondary"
                     app:cornerRadius="12dp" />
 
             </LinearLayout>

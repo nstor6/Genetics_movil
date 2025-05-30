@@ -21,6 +21,12 @@
         android:icon="@android:drawable/ic_menu_today"
         android:title="Calendario" />
 
+    <!-- ✅ NUEVO ITEM: Usuarios -->
+    <item
+        android:id="@+id/nav_users"
+        android:icon="@android:drawable/ic_menu_manage"
+        android:title="Usuarios" />
+
     <item
         android:id="@+id/nav_settings"
         android:icon="@android:drawable/ic_menu_preferences"

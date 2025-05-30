@@ -29,5 +29,6 @@
     <string name="error_cargando_animales">Error cargando animales</string>
     <string name="error_conexion">Error de conexión: %1$s</string>
     <string name="no_hay_animales">No hay animales registrados</string>
+    <string name="OlvidarContra">Por seguridad, las contraseñas no se pueden editar desde aquí. El usuario debe cambiar su contraseña desde su perfil o usar la función de \\</string>
 
 </resources>

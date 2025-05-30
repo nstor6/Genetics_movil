@@ -1,4 +1,4 @@
-package com.example.genetics
+package com.example.genetics.Activitys
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,7 +8,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.genetics.Create.AddEventActivity
+import com.example.genetics.Create.AddEventActivity  // ← VERIFICAR QUE ESTE IMPORT EXISTE
+import com.example.genetics.Edit.EditEventActivity   // ← VERIFICAR QUE ESTE IMPORT EXISTE
+import com.example.genetics.R
 import com.example.genetics.api.Adapters.EventsAdapter
 import com.example.genetics.api.Evento
 import com.example.genetics.api.RetrofitClient
@@ -22,7 +24,7 @@ class CalendarActivity : AppCompatActivity() {
     private lateinit var calendarView: CalendarView
     private lateinit var swipeRefreshLayout: androidx.swiperefreshlayout.widget.SwipeRefreshLayout
     private lateinit var recyclerViewEvents: androidx.recyclerview.widget.RecyclerView
-    private lateinit var textEmptyState: android.widget.LinearLayout  // ← CORREGIDO: LinearLayout en lugar de ConstraintLayout
+    private lateinit var textEmptyState: android.widget.LinearLayout
     private lateinit var textSelectedDate: android.widget.TextView
     private lateinit var textEventCount: android.widget.TextView
     private lateinit var fabAddEvent: com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -40,6 +42,7 @@ class CalendarActivity : AppCompatActivity() {
 
     companion object {
         private const val REQUEST_ADD_EVENT = 4001
+        private const val REQUEST_EDIT_EVENT = 4002
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,7 +63,7 @@ class CalendarActivity : AppCompatActivity() {
         calendarView = findViewById(R.id.calendarView)
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
         recyclerViewEvents = findViewById(R.id.recyclerViewEvents)
-        textEmptyState = findViewById(R.id.textEmptyState)  // ← Ya no hay cast problemático
+        textEmptyState = findViewById(R.id.textEmptyState)
         textSelectedDate = findViewById(R.id.textSelectedDate)
         textEventCount = findViewById(R.id.textEventCount)
         fabAddEvent = findViewById(R.id.fabAddEvent)
@@ -159,10 +162,13 @@ class CalendarActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
+                android.util.Log.d("CALENDAR_ACTIVITY", "🔄 Iniciando carga de eventos...")
                 val response = apiService.getEventos()
+                android.util.Log.d("CALENDAR_ACTIVITY", "📡 Response code: ${response.code()}")
 
                 if (response.isSuccessful && response.body() != null) {
                     val events = response.body()!!
+                    android.util.Log.d("CALENDAR_ACTIVITY", "✅ Eventos recibidos: ${events.size}")
 
                     eventosList.clear()
                     eventosList.addAll(events.sortedBy { it.fecha_inicio })
@@ -171,10 +177,13 @@ class CalendarActivity : AppCompatActivity() {
                     filterEventsByDate()
 
                 } else {
-                    Toast.makeText(this@CalendarActivity, "Error cargando eventos", Toast.LENGTH_SHORT).show()
+                    val errorBody = response.errorBody()?.string()
+                    android.util.Log.e("CALENDAR_ACTIVITY", "❌ Error: $errorBody")
+                    Toast.makeText(this@CalendarActivity, "Error cargando eventos: ${response.code()}", Toast.LENGTH_SHORT).show()
                 }
 
             } catch (e: Exception) {
+                android.util.Log.e("CALENDAR_ACTIVITY", "❌ Exception: ${e.message}", e)
                 Toast.makeText(this@CalendarActivity, "Error de conexión: ${e.message}", Toast.LENGTH_LONG).show()
             } finally {
                 swipeRefreshLayout.isRefreshing = false
@@ -242,20 +251,37 @@ class CalendarActivity : AppCompatActivity() {
             .setMessage(mensaje)
             .setPositiveButton("OK", null)
             .setNeutralButton("Editar") { _, _ ->
-                Toast.makeText(this, "Editar evento - Próximamente", Toast.LENGTH_SHORT).show()
+                // 🔧 VERIFICAR QUE ESTA CLASE EXISTE
+                try {
+                    val intent = Intent(this, EditEventActivity::class.java)
+                    intent.putExtra("EVENT_ID", evento.id)
+                    startActivityForResult(intent, REQUEST_EDIT_EVENT)
+                } catch (e: Exception) {
+                    android.util.Log.e("CALENDAR_ACTIVITY", "❌ Error abriendo EditEventActivity: ${e.message}")
+                    Toast.makeText(this, "Error: La actividad de edición no está disponible", Toast.LENGTH_LONG).show()
+                }
             }
             .show()
     }
 
     private fun mostrarOpcionesEvento(evento: Evento) {
-        // Crear menú contextual simple sin PopupMenu por ahora
         val opciones = arrayOf("✏️ Editar evento", "📋 Duplicar evento", "🗑️ Eliminar evento")
 
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle("Opciones del evento")
             .setItems(opciones) { _, which ->
                 when (which) {
-                    0 -> Toast.makeText(this, "Editar evento - Próximamente", Toast.LENGTH_SHORT).show()
+                    0 -> {
+                        // 🔧 EDITAR EVENTO CON TRY-CATCH
+                        try {
+                            val intent = Intent(this, EditEventActivity::class.java)
+                            intent.putExtra("EVENT_ID", evento.id)
+                            startActivityForResult(intent, REQUEST_EDIT_EVENT)
+                        } catch (e: Exception) {
+                            android.util.Log.e("CALENDAR_ACTIVITY", "❌ Error abriendo EditEventActivity: ${e.message}")
+                            Toast.makeText(this, "Error: La actividad de edición no está disponible", Toast.LENGTH_LONG).show()
+                        }
+                    }
                     1 -> duplicarEvento(evento)
                     2 -> confirmarEliminarEvento(evento)
                 }
@@ -317,7 +343,7 @@ class CalendarActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_ADD_EVENT && resultCode == RESULT_OK) {
+        if ((requestCode == REQUEST_ADD_EVENT || requestCode == REQUEST_EDIT_EVENT) && resultCode == RESULT_OK) {
             loadEvents()
         }
     }

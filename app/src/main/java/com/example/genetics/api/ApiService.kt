@@ -119,4 +119,67 @@ interface ApiService {
 
     @DELETE("eventos/{id}/")
     suspend fun eliminarEvento(@Path("id") id: Int): Response<Unit>
+
+    //Usuarios
+    @GET("auth/me/")
+    suspend fun getCurrentUser(): Response<Usuario>
+
+    // Cambiar contraseña
+    @POST("auth/change-password/")
+    suspend fun changePassword(@Body request: ChangePasswordRequest): Response<Unit>
+
+    // === GESTIÓN DE USUARIOS (Solo para administradores) ===
+
+    // Listar todos los usuarios
+    @GET("usuarios/")
+    suspend fun getUsers(): Response<List<Usuario>>
+
+    // Obtener usuario específico
+    @GET("usuarios/{id}/")
+    suspend fun getUser(@Path("id") id: Int): Response<Usuario>
+
+    // Crear nuevo usuario (registro)
+    @POST("auth/registro/")
+    suspend fun createUser(@Body request: CreateUserRequest): Response<Usuario>
+
+    // Actualizar usuario
+    @PUT("usuarios/{id}/")
+    suspend fun updateUser(@Path("id") id: Int, @Body request: UpdateUserRequest): Response<Usuario>
+
+    // Eliminar usuario
+    @DELETE("usuarios/{id}/")
+    suspend fun deleteUser(@Path("id") id: Int): Response<Unit>
+
+    // Activar/Desactivar usuario
+    @PATCH("usuarios/{id}/toggle-active/")
+    suspend fun toggleUserActive(@Path("id") id: Int): Response<Usuario>
+
+    // === GESTIÓN DE PERFILES ===
+
+    // Obtener perfil del usuario actual
+    @GET("auth/profile/")
+    suspend fun getCurrentUserProfile(): Response<UserProfile>
+
+    // Actualizar perfil del usuario actual
+    @PUT("auth/profile/")
+    suspend fun updateCurrentUserProfile(@Body request: UpdateProfileRequest): Response<UserProfile>
+
+    // Subir foto de perfil
+    @Multipart
+    @POST("auth/profile/upload-photo/")
+    suspend fun uploadProfilePhoto(@Part photo: MultipartBody.Part): Response<UserProfile>
+
+    // === ADMINISTRACIÓN AVANZADA ===
+
+    // Obtener usuarios por rol
+    @GET("users/by-role/")
+    suspend fun getUsersByRole(@Query("role") role: String): Response<List<Usuario>>
+
+    // Asignar rol a usuario
+    @POST("users/{id}/assign-role/")
+    suspend fun assignRole(@Path("id") id: Int, @Body role: Map<String, String>): Response<Usuario>
+
+    // Obtener logs de actividad del usuario
+    @GET("users/{id}/activity-logs/")
+    suspend fun getUserActivityLogs(@Path("id") id: Int): Response<List<ActivityLog>>
 }

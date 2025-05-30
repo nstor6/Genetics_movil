@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardUser"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?android:attr/selectableItemBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <!-- Avatar del usuario -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginEnd="16dp">
+
+            <ImageView
+                android:id="@+id/imageUser"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/user_image"
+                android:contentDescription="Avatar del usuario"
+                android:background="@drawable/spinner_background" />
+
+        </LinearLayout>
+
+        <!-- Información del usuario -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <!-- Nombre y estado -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="4dp">
+
+                <TextView
+                    android:id="@+id/textNombre"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Juan Pérez"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="@android:color/black" />
+
+                <TextView
+                    android:id="@+id/textEstado"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="✅ Activo"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="2dp"
+                    android:background="@drawable/badge_green" />
+
+            </LinearLayout>
+
+            <!-- Email -->
+            <TextView
+                android:id="@+id/textEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="📧 juan@genetics.com"
+                android:textSize="14sp"
+                android:textColor="@android:color/black"
+                android:layout_marginBottom="4dp" />
+
+            <!-- Rol -->
+            <TextView
+                android:id="@+id/textRol"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="👤 Usuario"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Información adicional -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textFechaCreacion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="📅 Miembro desde: 15/01/2024"
+                    android:textSize="12sp"
+                    android:textColor="@color/colorGray"
+                    android:layout_marginBottom="2dp" />
+
+                <TextView
+                    android:id="@+id/textUltimoAcceso"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="🕐 Último acceso: Hace 2 días"
+                    android:textSize="12sp"
+                    android:textColor="@color/colorGray" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Indicador de rol (opcional) -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginStart="8dp">
+
+            <View
+                android:id="@+id/viewRoleIndicator"
+                android:layout_width="4dp"
+                android:layout_height="match_parent"
+                android:background="@color/colorPrimary" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

@@ -153,17 +153,8 @@ class EditEventActivity : AppCompatActivity() {
         // Recurrente
         binding.switchRecurrente.isChecked = evento.recurrente
 
-        // Configurar tipo de evento
-        val tipoArray = resources.getStringArray(R.array.tipo_evento_options)
-        val tipoIndex = tipoArray.indexOfFirst { opcion ->
-            // Buscar por el valor sin emoji
-            val valorSinEmoji = opcion.replace(Regex("^[🩺💊🍼🥛🏥⚖️🚚🔍📊🌾✂️📋]\\s*"), "")
-            valorSinEmoji.equals(evento.tipo, ignoreCase = true) ||
-                    evento.tipo.contains(valorSinEmoji, ignoreCase = true)
-        }
-        if (tipoIndex >= 0) {
-            binding.spinnerTipoEvento.setSelection(tipoIndex)
-        }
+        // 🔧 CONFIGURAR TIPO DE EVENTO MEJORADO
+        configurarTipoEvento(evento.tipo)
 
         // Configurar animal si existe
         if (evento.animal != null) {
@@ -178,6 +169,68 @@ class EditEventActivity : AppCompatActivity() {
         configurarFechaHora(evento.fecha_inicio, true)
         if (evento.fecha_fin != null) {
             configurarFechaHora(evento.fecha_fin!!, false)
+        }
+    }
+
+    // 🔧 NUEVA FUNCIÓN PARA CONFIGURAR TIPO DE EVENTO CORRECTAMENTE
+    private fun configurarTipoEvento(tipoBackend: String) {
+        android.util.Log.d("EDIT_EVENT", "🔍 Tipo recibido del backend: '$tipoBackend'")
+
+        val tipoOptions = resources.getStringArray(R.array.tipo_evento_options)
+        val tipoValues = resources.getStringArray(R.array.tipo_evento_values)
+
+        android.util.Log.d("EDIT_EVENT", "📋 Opciones disponibles: ${tipoOptions.contentToString()}")
+        android.util.Log.d("EDIT_EVENT", "📋 Valores disponibles: ${tipoValues.contentToString()}")
+
+        // 🔧 BUSCAR COINCIDENCIA EXACTA PRIMERO
+        var tipoIndex = tipoValues.indexOfFirst { valor ->
+            valor.equals(tipoBackend, ignoreCase = true)
+        }
+
+        // 🔧 SI NO ENCUENTRA COINCIDENCIA EXACTA, BUSCAR POR CONTENIDO
+        if (tipoIndex == -1) {
+            tipoIndex = tipoValues.indexOfFirst { valor ->
+                tipoBackend.contains(valor, ignoreCase = true) || valor.contains(tipoBackend, ignoreCase = true)
+            }
+        }
+
+        // 🔧 BUSCAR TAMBIÉN EN LAS OPCIONES (CON EMOJIS)
+        if (tipoIndex == -1) {
+            tipoIndex = tipoOptions.indexOfFirst { opcion ->
+                val opcionLimpia = opcion.replace(Regex("^[🩺💊🍼🥛🏥⚖️🚚🔍📊🌾✂️📋]\\s*"), "")
+                opcionLimpia.equals(tipoBackend, ignoreCase = true) ||
+                        tipoBackend.contains(opcionLimpia, ignoreCase = true) ||
+                        opcionLimpia.contains(tipoBackend, ignoreCase = true)
+            }
+        }
+
+        // 🔧 MANEJAR TIPOS ESPECÍFICOS CONOCIDOS
+        if (tipoIndex == -1) {
+            tipoIndex = when (tipoBackend.lowercase()) {
+                "visita", "visita_veterinaria", "veterinaria" -> 1
+                "tratamiento", "medicamento" -> 2
+                "parto", "alerta_parto" -> 3
+                "produccion", "control_produccion" -> 4
+                "vacunacion" -> 5
+                "pesaje" -> 6
+                "traslado" -> 7
+                "inspeccion", "inspeccion_general" -> 8
+                "reproductivo", "revision_reproductiva" -> 9
+                "nutricional", "control_nutricional" -> 10
+                "descorne", "castracion" -> 11
+                else -> 12 // "📋 Otro evento"
+            }
+        }
+
+        android.util.Log.d("EDIT_EVENT", "🎯 Índice seleccionado: $tipoIndex")
+
+        if (tipoIndex >= 0 && tipoIndex < tipoOptions.size) {
+            binding.spinnerTipoEvento.setSelection(tipoIndex)
+            android.util.Log.d("EDIT_EVENT", "✅ Tipo configurado: ${tipoOptions[tipoIndex]}")
+        } else {
+            // Por defecto, seleccionar "Otro evento"
+            binding.spinnerTipoEvento.setSelection(12)
+            android.util.Log.w("EDIT_EVENT", "⚠️ Tipo no encontrado, usando 'Otro evento'")
         }
     }
 
@@ -319,15 +372,18 @@ class EditEventActivity : AppCompatActivity() {
         val fechaInicio = construirFechaHora(true)
         val fechaFin = construirFechaHora(false)
 
-        // Obtener el tipo correcto para el backend
+        // 🔧 OBTENER EL TIPO CORRECTO PARA EL BACKEND
         val tipoOptions = resources.getStringArray(R.array.tipo_evento_options)
         val tipoValues = resources.getStringArray(R.array.tipo_evento_values)
         val selectedIndex = binding.spinnerTipoEvento.selectedItemPosition
+
         val tipoParaBackend = if (selectedIndex > 0 && selectedIndex < tipoValues.size) {
             tipoValues[selectedIndex]
         } else {
             "otro"
         }
+
+        android.util.Log.d("EDIT_EVENT", "💾 Guardando con tipo: '$tipoParaBackend' (índice: $selectedIndex)")
 
         val eventoActualizado = Evento(
             id = eventoId,

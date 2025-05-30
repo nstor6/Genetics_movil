@@ -1,4 +1,4 @@
-package com.example.genetics
+package com.example.genetics.Activitys
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.genetics.Create.AddIncidentActivity
+import com.example.genetics.R
 import com.example.genetics.api.Animals
 import com.example.genetics.api.Incidencia
 import com.example.genetics.api.RetrofitClient

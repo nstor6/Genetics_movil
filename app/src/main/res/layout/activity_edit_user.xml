@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- AppBar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/colorWarning"
+            app:titleTextColor="@color/white"
+            app:navigationIconTint="@color/white" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Contenido principal -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Progress Bar -->
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+            <!-- Información del usuario -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ℹ️ Información del Usuario"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorPrimary"
+                        android:layout_marginBottom="12dp" />
+
+                    <TextView
+                        android:id="@+id/textFechaCreacion"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📅 Miembro desde: --/--/----"
+                        android:textSize="14sp"
+                        android:textColor="@color/colorGray"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:id="@+id/textUltimoAcceso"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🕐 Último acceso: --/--/---- --:--"
+                        android:textSize="14sp"
+                        android:textColor="@color/colorGray"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:id="@+id/textEstadoStaff"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="👑 Usuario con permisos de administración"
+                        android:textSize="14sp"
+                        android:textColor="@color/colorError"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- Información personal -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="👤 Información Personal"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorWarning"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Nombre -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        app:boxStrokeColor="@color/colorWarning"
+                        app:hintTextColor="@color/colorWarning">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editTextNombre"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Nombre *"
+                            android:inputType="textCapWords"
+                            android:maxLength="100" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Apellidos -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        app:boxStrokeColor="@color/colorWarning"
+                        app:hintTextColor="@color/colorWarning">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editTextApellidos"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Apellidos *"
+                            android:inputType="textCapWords"
+                            android:maxLength="150" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Email -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        app:boxStrokeColor="@color/colorWarning"
+                        app:hintTextColor="@color/colorWarning">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editTextEmail"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Email *"
+                            android:inputType="textEmailAddress"
+                            android:maxLength="254" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Rol -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Rol del Usuario *"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorWarning"
+                        android:layout_marginBottom="8dp" />
+
+                    <Spinner
+                        android:id="@+id/spinnerRol"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginBottom="16dp"
+                        android:background="@drawable/spinner_background"
+                        android:entries="@array/user_role_options" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- Estado y configuración -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="⚙️ Estado y Configuración"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorWarning"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Estado activo/inactivo -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Estado del Usuario"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:textColor="@android:color/black" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Los usuarios inactivos no pueden acceder al sistema"
+                                android:textSize="12sp"
+                                android:textColor="@color/colorGray" />
+
+                        </LinearLayout>
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchActivo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Activo"
+                            android:textSize="16sp"
+                            app:thumbTint="@color/colorWarning"
+                            app:trackTint="@color/colorAccent" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="💡 Desactivar un usuario impide su acceso pero conserva sus datos"
+                        android:textSize="12sp"
+                        android:textColor="@color/colorGray"
+                        android:layout_marginTop="12dp"
+                        android:lineSpacingExtra="2dp" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- Nota sobre contraseñas -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🔐 Nota sobre Contraseñas"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorPrimary"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/OlvidarContra"
+                    android:textSize="14sp"
+                    android:textColor="@color/colorGray"
+                    android:lineSpacingExtra="4dp" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- Botones -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonCancel"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:text="Cancelar"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    app:strokeColor="@color/colorGray" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonSave"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:text="💾 Guardar Cambios"
+                    app:backgroundTint="@color/colorWarning" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

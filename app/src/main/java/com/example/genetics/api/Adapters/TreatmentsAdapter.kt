@@ -13,11 +13,11 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class TreatmentsAdapter(
-    private var tratamientosList: MutableList<Tratamiento>, // 🔧 CAMBIAR A MutableList
-    private val onItemClick: (Tratamiento) -> Unit
+    private val tratamientosList: MutableList<Tratamiento>,
+    private val onItemClick: (Tratamiento) -> Unit,
+    private val onEditClick: ((Tratamiento) -> Unit)? = null,
+    private val onDeleteClick: ((Tratamiento) -> Unit)? = null
 ) : RecyclerView.Adapter<TreatmentsAdapter.TreatmentViewHolder>() {
-
-    private var filteredList = tratamientosList.toMutableList() // 🔧 CAMBIAR A MutableList
 
     inner class TreatmentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val cardView: CardView = itemView.findViewById(R.id.cardTreatment)
@@ -29,12 +29,44 @@ class TreatmentsAdapter(
         val textObservaciones: TextView = itemView.findViewById(R.id.textObservaciones)
 
         init {
+            // Click normal - ver detalles
             itemView.setOnClickListener {
                 val position = bindingAdapterPosition
-                if (position != RecyclerView.NO_POSITION && position < filteredList.size) {
-                    onItemClick(filteredList[position])
+                if (position != RecyclerView.NO_POSITION && position < tratamientosList.size) {
+                    onItemClick(tratamientosList[position])
                 }
             }
+
+            // Long click - mostrar opciones de CRUD
+            itemView.setOnLongClickListener {
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION && position < tratamientosList.size) {
+                    mostrarOpcionesTratamiento(tratamientosList[position])
+                    true
+                } else {
+                    false
+                }
+            }
+        }
+
+        private fun mostrarOpcionesTratamiento(tratamiento: Tratamiento) {
+            val context = itemView.context
+            val opciones = arrayOf(
+                "👁️ Ver detalles",
+                "✏️ Editar tratamiento",
+                "🗑️ Eliminar tratamiento"
+            )
+
+            androidx.appcompat.app.AlertDialog.Builder(context)
+                .setTitle("Opciones para ${tratamiento.medicamento}")
+                .setItems(opciones) { _, which ->
+                    when (which) {
+                        0 -> onItemClick(tratamiento) // Ver detalles
+                        1 -> onEditClick?.invoke(tratamiento) // Editar
+                        2 -> onDeleteClick?.invoke(tratamiento) // Eliminar
+                    }
+                }
+                .show()
         }
 
         fun bind(tratamiento: Tratamiento) {
@@ -77,7 +109,7 @@ class TreatmentsAdapter(
                 val date = inputFormat.parse(fecha)
                 outputFormat.format(date ?: Date())
             } catch (e: Exception) {
-                fecha // Si falla el formateo, devolver la fecha original
+                fecha
             }
         }
 
@@ -115,75 +147,31 @@ class TreatmentsAdapter(
     }
 
     override fun onBindViewHolder(holder: TreatmentViewHolder, position: Int) {
-        if (position < filteredList.size) {
-            holder.bind(filteredList[position])
+        if (position < tratamientosList.size) {
+            holder.bind(tratamientosList[position])
         }
     }
 
-    override fun getItemCount(): Int = filteredList.size
+    override fun getItemCount(): Int = tratamientosList.size
 
-    // 🔧 MÉTODO CRÍTICO: updateList() - Este es el que faltaba
     fun updateList(newList: List<Tratamiento>) {
         android.util.Log.d("TREATMENTS_ADAPTER", "🔄 Actualizando lista: ${newList.size} tratamientos")
 
         tratamientosList.clear()
         tratamientosList.addAll(newList)
 
-        filteredList.clear()
-        filteredList.addAll(newList)
-
         notifyDataSetChanged()
 
         android.util.Log.d("TREATMENTS_ADAPTER", "✅ Lista actualizada. Items en adapter: ${itemCount}")
     }
 
-    // Método para filtrar por animal
-    fun filterByAnimal(animalId: Int?) {
-        filteredList.clear()
-        if (animalId == null) {
-            filteredList.addAll(tratamientosList)
-        } else {
-            filteredList.addAll(tratamientosList.filter { it.animal == animalId })
+    // Método para eliminar un tratamiento específico de la lista
+    fun removeTreatment(tratamiento: Tratamiento) {
+        val index = tratamientosList.indexOfFirst { it.id == tratamiento.id }
+        if (index != -1) {
+            tratamientosList.removeAt(index)
+            notifyItemRemoved(index)
+            android.util.Log.d("TREATMENTS_ADAPTER", "🗑️ Tratamiento eliminado del adapter en posición $index")
         }
-        notifyDataSetChanged()
-        android.util.Log.d("TREATMENTS_ADAPTER", "🔍 Filtrado por animal $animalId: ${filteredList.size} resultados")
-    }
-
-    // Método para filtrar por medicamento
-    fun filterByMedicine(medicine: String) {
-        filteredList.clear()
-        if (medicine.isEmpty()) {
-            filteredList.addAll(tratamientosList)
-        } else {
-            filteredList.addAll(tratamientosList.filter {
-                it.medicamento.contains(medicine, ignoreCase = true)
-            })
-        }
-        notifyDataSetChanged()
-        android.util.Log.d("TREATMENTS_ADAPTER", "🔍 Filtrado por medicamento '$medicine': ${filteredList.size} resultados")
-    }
-
-    // Método para obtener tratamientos recientes
-    fun getTratamientosRecientes(): List<Tratamiento> {
-        return tratamientosList.filter { tratamiento ->
-            try {
-                val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                val treatmentDate = inputFormat.parse(tratamiento.fecha)
-                val weekAgo = Calendar.getInstance().apply {
-                    add(Calendar.DAY_OF_MONTH, -7)
-                }.time
-                treatmentDate?.after(weekAgo) == true
-            } catch (e: Exception) {
-                false
-            }
-        }
-    }
-
-    // Método para limpiar filtros
-    fun clearFilters() {
-        filteredList.clear()
-        filteredList.addAll(tratamientosList)
-        notifyDataSetChanged()
-        android.util.Log.d("TREATMENTS_ADAPTER", "🧹 Filtros limpiados: ${filteredList.size} tratamientos")
     }
 }
