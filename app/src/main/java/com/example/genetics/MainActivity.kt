@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import com.example.genetics.Activitys.DashboardActivity
 import com.example.genetics.api.RetrofitClient
 
 class MainActivity : AppCompatActivity() {

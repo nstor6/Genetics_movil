@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.cardview.widget.CardView
+import com.google.android.material.card.MaterialCardView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.genetics.R
 import com.example.genetics.api.Usuario
@@ -22,7 +22,7 @@ class UsersAdapter(
 ) : RecyclerView.Adapter<UsersAdapter.UserViewHolder>() {
 
     inner class UserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val cardView: CardView = itemView.findViewById(R.id.cardUser)
+        val cardView: MaterialCardView = itemView.findViewById(R.id.cardUser)
         val imageUser: ImageView = itemView.findViewById(R.id.imageUser)
         val textNombre: TextView = itemView.findViewById(R.id.textNombre)
         val textEmail: TextView = itemView.findViewById(R.id.textEmail)
@@ -117,9 +117,9 @@ class UsersAdapter(
 
             // Imagen de perfil (por ahora placeholder)
             val avatarResource = when (usuario.rol) {
-                "admin" -> R.drawable.cow_image // Usamos la imagen existente como placeholder
-                "dueño" -> R.drawable.cow_image
-                else -> R.drawable.cow_image
+                "admin" -> R.drawable.user_image
+                "dueño" -> R.drawable.user_image
+                else -> R.drawable.user_image
             }
             imageUser.setImageResource(avatarResource)
 
@@ -132,10 +132,10 @@ class UsersAdapter(
             }
             cardView.setCardBackgroundColor(backgroundColor)
 
-            // Borde especial para administradores
+            // Borde especial para administradores (ahora funciona con MaterialCardView)
             if (usuario.rol == "admin") {
                 cardView.strokeColor = Color.parseColor("#E74C3C")
-                cardView.strokeWidth = 3
+                cardView.strokeWidth = 6
             } else {
                 cardView.strokeWidth = 0
             }

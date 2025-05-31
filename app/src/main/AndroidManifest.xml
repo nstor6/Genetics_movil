@@ -26,13 +26,13 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".Activitys.UsersActivity"
+            android:exported="false" />
+        <activity
             android:name=".Edit.EditUserActivity"
             android:exported="false" />
         <activity
             android:name=".Create.AddUserActivity"
-            android:exported="false" />
-        <activity
-            android:name=".Activitys.UsersActivity"
             android:exported="false" />
         <activity
             android:name=".Edit.EditEventActivity"
@@ -42,9 +42,6 @@
             android:exported="false" />
         <activity
             android:name=".Edit.EditIncidentActivity"
-            android:exported="false" />
-        <activity
-            android:name=".BaseActivity"
             android:exported="false" />
         <activity
             android:name=".Activitys.EditAnimalActivity"

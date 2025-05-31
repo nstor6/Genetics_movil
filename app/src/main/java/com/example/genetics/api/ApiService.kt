@@ -1,5 +1,6 @@
 package com.example.genetics.api
 
+import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -181,5 +182,5 @@ interface ApiService {
 
     // Obtener logs de actividad del usuario
     @GET("users/{id}/activity-logs/")
-    suspend fun getUserActivityLogs(@Path("id") id: Int): Response<List<ActivityLog>>
+    suspend fun <ActivityLog> getUserActivityLogs(@Path("id") id: Int): Response<List<ActivityLog>>
 }

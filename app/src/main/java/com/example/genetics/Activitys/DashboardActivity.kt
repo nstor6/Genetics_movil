@@ -1,8 +1,9 @@
-package com.example.genetics
+package com.example.genetics.Activitys
 
 import UsersActivity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -15,6 +16,8 @@ import com.example.genetics.Create.AddEventActivity
 import com.example.genetics.Create.AddIncidentActivity
 import com.example.genetics.Create.AddTreatmentActivity
 import com.example.genetics.Create.AddUserActivity
+import com.example.genetics.LoginActivity
+import com.example.genetics.R
 import com.example.genetics.api.RetrofitClient
 import com.example.genetics.databinding.ActivityDashboardBinding
 import com.example.genetics.utils.safeApiCall
@@ -32,31 +35,52 @@ class DashboardActivity : AppCompatActivity() {
         binding = ActivityDashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        Log.d("DASHBOARD", "🚀 Dashboard iniciado")
         setupUI()
         loadStats()
     }
 
     private fun setupUI() {
+        Log.d("DASHBOARD", "🔧 Configurando UI...")
+
         // 🔧 TARJETAS CLICKEABLES - Navegar a las respectivas activities
         binding.cardAnimals.setOnClickListener {
+            Log.d("DASHBOARD", "🐄 Click en Animals")
             startActivity(Intent(this, AnimalsActivity::class.java))
         }
 
         binding.cardIncidents.setOnClickListener {
+            Log.d("DASHBOARD", "🚨 Click en Incidents")
             startActivity(Intent(this, IncidentsActivity::class.java))
         }
 
         binding.cardTreatments.setOnClickListener {
+            Log.d("DASHBOARD", "💊 Click en Treatments")
             startActivity(Intent(this, TreatmentsActivity::class.java))
         }
 
         binding.cardEvents.setOnClickListener {
+            Log.d("DASHBOARD", "📅 Click en Events")
             startActivity(Intent(this, CalendarActivity::class.java))
         }
 
-        // ✅ NUEVA TARJETA: Usuarios
-        binding.cardUsers.setOnClickListener {
-            startActivity(Intent(this, UsersActivity::class.java))
+        // ✅ NUEVA TARJETA: Usuarios - CON DEBUG
+        try {
+            binding.cardUsers.setOnClickListener {
+                Log.d("DASHBOARD", "👥 Click en Users - Intentando abrir UsersActivity")
+                try {
+                    val intent = Intent(this, UsersActivity::class.java)
+                    Log.d("DASHBOARD", "👥 Intent creado correctamente")
+                    startActivity(intent)
+                    Log.d("DASHBOARD", "👥 StartActivity llamado")
+                } catch (e: Exception) {
+                    Log.e("DASHBOARD", "❌ Error al abrir UsersActivity: ${e.message}")
+                    Toast.makeText(this, "Error al abrir Usuarios: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+            Log.d("DASHBOARD", "✅ Listener de cardUsers configurado")
+        } catch (e: Exception) {
+            Log.e("DASHBOARD", "❌ Error configurando cardUsers: ${e.message}")
         }
 
         // ✅ CONFIGURAR NAVEGACIÓN BOTTOM CON USUARIOS
@@ -64,82 +88,110 @@ class DashboardActivity : AppCompatActivity() {
 
         // 🔧 BOTONES DE ACCIONES RÁPIDAS
         binding.buttonViewAnimals.setOnClickListener {
+            Log.d("DASHBOARD", "🆕 Click en buttonViewAnimals")
             startActivity(Intent(this, AddAnimalActivity::class.java))
         }
 
         binding.buttonNewIncident.setOnClickListener {
+            Log.d("DASHBOARD", "🆕 Click en buttonNewIncident")
             startActivity(Intent(this, AddIncidentActivity::class.java))
         }
 
         binding.buttonNewTreatment.setOnClickListener {
+            Log.d("DASHBOARD", "🆕 Click en buttonNewTreatment")
             startActivity(Intent(this, AddTreatmentActivity::class.java))
         }
 
         binding.buttonNewEvent.setOnClickListener {
+            Log.d("DASHBOARD", "🆕 Click en buttonNewEvent")
             startActivity(Intent(this, AddEventActivity::class.java))
         }
 
-        // ✅ NUEVO BOTÓN: Nuevo Usuario
-        binding.buttonNewUser.setOnClickListener {
-            startActivity(Intent(this, AddUserActivity::class.java))
+        // ✅ NUEVO BOTÓN: Nuevo Usuario - CON DEBUG
+        try {
+            binding.buttonNewUser.setOnClickListener {
+                Log.d("DASHBOARD", "🆕👥 Click en buttonNewUser")
+                try {
+                    startActivity(Intent(this, AddUserActivity::class.java))
+                } catch (e: Exception) {
+                    Log.e("DASHBOARD", "❌ Error al abrir AddUserActivity: ${e.message}")
+                    Toast.makeText(this, "Error al abrir Nuevo Usuario: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+            Log.d("DASHBOARD", "✅ Listener de buttonNewUser configurado")
+        } catch (e: Exception) {
+            Log.e("DASHBOARD", "❌ Error configurando buttonNewUser: ${e.message}")
         }
     }
 
     // ✅ FUNCIÓN PARA CONFIGURAR BOTTOM NAVIGATION CON USUARIOS
     private fun setupBottomNavigation() {
-        // 🔧 NO establecer ningún item como seleccionado por defecto
-        // binding.bottomNavigation.selectedItemId = ... (COMENTADO)
+        Log.d("DASHBOARD", "🔧 Configurando Bottom Navigation...")
 
-        binding.bottomNavigation.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_animals -> {
-                    startActivity(Intent(this, AnimalsActivity::class.java))
-                    true
+        try {
+            // 🔧 NO establecer ningún item como seleccionado por defecto
+            // binding.bottomNavigation.selectedItemId = ... (COMENTADO)
+
+            binding.bottomNavigation.setOnItemSelectedListener { item ->
+                Log.d("DASHBOARD", "📱 Bottom Nav item selected: ${item.itemId}")
+                when (item.itemId) {
+                    R.id.nav_animals -> {
+                        Log.d("DASHBOARD", "📱 Nav a Animals")
+                        startActivity(Intent(this, AnimalsActivity::class.java))
+                        true
+                    }
+                    R.id.nav_incidents -> {
+                        Log.d("DASHBOARD", "📱 Nav a Incidents")
+                        startActivity(Intent(this, IncidentsActivity::class.java))
+                        true
+                    }
+                    R.id.nav_treatments -> {
+                        Log.d("DASHBOARD", "📱 Nav a Treatments")
+                        startActivity(Intent(this, TreatmentsActivity::class.java))
+                        true
+                    }
+                    R.id.nav_calendar -> {
+                        Log.d("DASHBOARD", "📱 Nav a Calendar")
+                        startActivity(Intent(this, CalendarActivity::class.java))
+                        true
+                    }
+                    R.id.nav_users -> {
+                        Log.d("DASHBOARD", "📱 Nav a Users - Intentando abrir UsersActivity")
+                        try {
+                            startActivity(Intent(this, UsersActivity::class.java))
+                            Log.d("DASHBOARD", "📱 UsersActivity abierto desde Bottom Nav")
+                        } catch (e: Exception) {
+                            Log.e("DASHBOARD", "❌ Error en Bottom Nav Users: ${e.message}")
+                            Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                        }
+                        true
+                    }
+                    else -> {
+                        Log.w("DASHBOARD", "⚠️ Item no reconocido en Bottom Nav: ${item.itemId}")
+                        false
+                    }
                 }
-                R.id.nav_incidents -> {
-                    startActivity(Intent(this, IncidentsActivity::class.java))
-                    true
-                }
-                R.id.nav_treatments -> {
-                    startActivity(Intent(this, TreatmentsActivity::class.java))
-                    true
-                }
-                R.id.nav_calendar -> {
-                    startActivity(Intent(this, CalendarActivity::class.java))
-                    true
-                }
-                R.id.nav_users -> {
-                    startActivity(Intent(this, UsersActivity::class.java))
-                    true
-                }
-                R.id.nav_settings -> {
-                    // Ya estamos en el Dashboard/Settings, mostrar opciones
-                    showSettingsMenu()
-                    false // No seleccionar el item
-                }
-                else -> false
             }
+            Log.d("DASHBOARD", "✅ Bottom Navigation configurado")
+        } catch (e: Exception) {
+            Log.e("DASHBOARD", "❌ Error configurando Bottom Navigation: ${e.message}")
         }
     }
 
-    // ✅ MENÚ DE CONFIGURACIÓN CUANDO SE TOCA SETTINGS
+    // Resto del código permanece igual...
     private fun showSettingsMenu() {
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle("⚙️ Configuración")
             .setItems(arrayOf("🔄 Actualizar datos", "👤 Mi perfil", "🚪 Cerrar sesión")) { _, which ->
                 when (which) {
                     0 -> {
-                        // Actualizar datos
                         Toast.makeText(this, "Actualizando datos...", Toast.LENGTH_SHORT).show()
-                        loadStats() // Recargar estadísticas
+                        loadStats()
                     }
                     1 -> {
-                        // Ver perfil del usuario actual
-                        // TODO: Implementar ProfileActivity
                         Toast.makeText(this, "Mi perfil - Próximamente", Toast.LENGTH_SHORT).show()
                     }
                     2 -> {
-                        // Cerrar sesión
                         logout()
                     }
                 }
@@ -154,7 +206,7 @@ class DashboardActivity : AppCompatActivity() {
             loadIncidentsStats()
             loadTreatmentsStats()
             loadEventsStats()
-            loadUsersStats() // ✅ NUEVA FUNCIÓN
+            loadUsersStats()
         }
     }
 
@@ -256,7 +308,6 @@ class DashboardActivity : AppCompatActivity() {
             }
             .onError { message ->
                 android.util.Log.w("DASHBOARD", "Error cargando usuarios: $message")
-                // Mostrar 0 si hay error
                 binding.textUsersCount.text = "0"
             }
     }
@@ -268,7 +319,7 @@ class DashboardActivity : AppCompatActivity() {
             .setPositiveButton("Sí") { _, _ ->
                 RetrofitClient.clearToken()
                 startActivity(Intent(this, LoginActivity::class.java))
-                finishAffinity() // Cerrar todas las activities
+                finishAffinity()
                 Toast.makeText(this, "Sesión cerrada", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("Cancelar", null)
@@ -277,14 +328,11 @@ class DashboardActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // 🔧 ASEGURAR que no hay nada seleccionado al volver
         binding.bottomNavigation.menu.setGroupCheckable(0, true, false)
         for (i in 0 until binding.bottomNavigation.menu.size()) {
             binding.bottomNavigation.menu.getItem(i).isChecked = false
         }
         binding.bottomNavigation.menu.setGroupCheckable(0, true, true)
-
-        // Recargar estadísticas
         loadStats()
     }
 }
