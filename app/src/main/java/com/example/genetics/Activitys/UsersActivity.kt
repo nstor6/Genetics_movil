@@ -1,3 +1,5 @@
+package com.example.genetics.Activitys  // ← LÍNEA AÑADIDA
+
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -10,6 +12,7 @@ import com.example.genetics.Edit.EditUserActivity
 import com.example.genetics.R
 import com.example.genetics.api.Adapters.UsersAdapter
 import com.example.genetics.api.RetrofitClient
+import com.example.genetics.api.UpdateUserRequest
 import com.example.genetics.api.Usuario
 import kotlinx.coroutines.launch
 
@@ -39,6 +42,7 @@ class UsersActivity : AppCompatActivity() {
         loadUsers()
     }
 
+    // ... resto del código permanece igual
     private fun initializeViews() {
         toolbar = findViewById(R.id.toolbar)
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
@@ -78,6 +82,8 @@ class UsersActivity : AppCompatActivity() {
         }
     }
 
+    // ... resto de métodos permanecen iguales
+
     private fun mostrarDetallesUsuario(usuario: Usuario) {
         val mensaje = buildString {
             append("👤 Nombre: ${usuario.nombre} ${usuario.apellidos}\n")
@@ -111,53 +117,157 @@ class UsersActivity : AppCompatActivity() {
     }
 
     private fun confirmarEliminarUsuario(usuario: Usuario) {
-        androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("⚠️ Eliminar Usuario")
-            .setMessage("¿Estás seguro de que quieres eliminar al usuario '${usuario.nombre} ${usuario.apellidos}'?\n\n⚠️ Esta acción eliminará también todos los datos asociados (animales, incidencias, tratamientos creados por este usuario).\n\nEsta acción no se puede deshacer.")
-            .setPositiveButton("Eliminar") { _, _ ->
-                eliminarUsuario(usuario)
+        // Verificaciones de seguridad antes de mostrar el diálogo
+        val mensaje = when {
+            usuario.rol == "admin" -> {
+                "⚠️ No se puede eliminar un usuario administrador por seguridad."
             }
-            .setNegativeButton("Cancelar", null)
-            .show()
+            usuario.isStaff == true -> {
+                "⚠️ No se puede eliminar un usuario con permisos de staff."
+            }
+            else -> {
+                "¿Estás seguro de que quieres eliminar al usuario '${usuario.nombre} ${usuario.apellidos}'?\n\n" +
+                        "⚠️ Esta acción:\n" +
+                        "• Eliminará permanentemente la cuenta del usuario\n" +
+                        "• Puede afectar datos asociados (animales, incidencias, etc.)\n" +
+                        "• NO se puede deshacer\n\n" +
+                        "¿Continuar con la eliminación?"
+            }
+        }
+
+        if (usuario.rol == "admin" || usuario.isStaff == true) {
+            // Solo mostrar mensaje de advertencia
+            androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("❌ Eliminación no permitida")
+                .setMessage(mensaje)
+                .setPositiveButton("Entendido", null)
+                .show()
+        } else {
+            // Mostrar diálogo de confirmación
+            androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("⚠️ Eliminar Usuario")
+                .setMessage(mensaje)
+                .setPositiveButton("Sí, eliminar") { _, _ ->
+                    eliminarUsuario(usuario)
+                }
+                .setNegativeButton("Cancelar", null)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show()
+        }
     }
 
     private fun eliminarUsuario(usuario: Usuario) {
+        // Mostrar indicador de carga
+        val loadingDialog = androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Eliminando usuario...")
+            .setMessage("Por favor espera...")
+            .setCancelable(false)
+            .create()
+        loadingDialog.show()
+
         lifecycleScope.launch {
             try {
-                android.util.Log.d("USERS_ACTIVITY", "🗑️ Eliminando usuario ID: ${usuario.id}")
+                android.util.Log.d("USERS_ACTIVITY", "🗑️ Iniciando eliminación del usuario ID: ${usuario.id}")
 
                 val response = apiService.deleteUser(usuario.id!!)
 
-                if (response.isSuccessful) {
-                    Toast.makeText(this@UsersActivity, "Usuario eliminado correctamente", Toast.LENGTH_SHORT).show()
+                loadingDialog.dismiss()
 
-                    // Eliminar del adapter inmediatamente
+                if (response.isSuccessful) {
+                    android.util.Log.d("USERS_ACTIVITY", "✅ Usuario eliminado exitosamente")
+
+                    // Mostrar mensaje de éxito
+                    Toast.makeText(
+                        this@UsersActivity,
+                        "✅ Usuario '${usuario.nombre} ${usuario.apellidos}' eliminado correctamente",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    // Eliminar del adapter inmediatamente para mejor UX
                     usersAdapter.removeUser(usuario)
 
                     // Actualizar estado vacío si es necesario
                     updateEmptyState(usuariosList.isEmpty())
 
-                    android.util.Log.d("USERS_ACTIVITY", "✅ Usuario eliminado exitosamente")
                 } else {
                     val errorBody = response.errorBody()?.string()
-                    android.util.Log.e("USERS_ACTIVITY", "❌ Error eliminando: $errorBody")
-                    Toast.makeText(this@UsersActivity, "Error al eliminar usuario", Toast.LENGTH_SHORT).show()
+                    android.util.Log.e("USERS_ACTIVITY", "❌ Error del servidor: $errorBody")
+
+                    // Manejar errores específicos
+                    val errorMessage = when (response.code()) {
+                        403 -> "❌ No tienes permisos para eliminar este usuario"
+                        404 -> "❌ Usuario no encontrado (puede haber sido eliminado por otro administrador)"
+                        409 -> "❌ No se puede eliminar: el usuario tiene datos asociados que deben eliminarse primero"
+                        500 -> "❌ Error interno del servidor. Inténtalo más tarde"
+                        else -> "❌ Error al eliminar usuario (código: ${response.code()})"
+                    }
+
+                    mostrarErrorEliminacion(errorMessage, errorBody)
                 }
+
+            } catch (e: java.net.ConnectException) {
+                loadingDialog.dismiss()
+                android.util.Log.e("USERS_ACTIVITY", "❌ Error de conexión: ${e.message}")
+                mostrarErrorEliminacion("❌ No se puede conectar al servidor. Verifica tu conexión a internet.", null)
+
+            } catch (e: java.net.SocketTimeoutException) {
+                loadingDialog.dismiss()
+                android.util.Log.e("USERS_ACTIVITY", "❌ Timeout: ${e.message}")
+                mostrarErrorEliminacion("❌ La operación tardó demasiado. Inténtalo de nuevo.", null)
+
             } catch (e: Exception) {
-                android.util.Log.e("USERS_ACTIVITY", "❌ Exception eliminando: ${e.message}", e)
-                Toast.makeText(this@UsersActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                loadingDialog.dismiss()
+                android.util.Log.e("USERS_ACTIVITY", "❌ Exception inesperada: ${e.message}", e)
+                mostrarErrorEliminacion("❌ Error inesperado: ${e.localizedMessage ?: "Error desconocido"}", null)
             }
         }
     }
 
+    private fun mostrarErrorEliminacion(mensaje: String, detallesTecnicos: String?) {
+        val mensajeCompleto = if (detallesTecnicos != null) {
+            "$mensaje\n\nDetalles técnicos: $detallesTecnicos"
+        } else {
+            mensaje
+        }
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Error al eliminar usuario")
+            .setMessage(mensajeCompleto)
+            .setPositiveButton("OK", null)
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .show()
+    }
+
     private fun toggleUsuarioActivo(usuario: Usuario) {
+        // Como no tienes el endpoint toggle-active, usaremos una actualización parcial
+        val nuevoEstado = !(usuario.activo ?: true)
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("${if (nuevoEstado) "Activar" else "Desactivar"} Usuario")
+            .setMessage("¿Estás seguro de que quieres ${if (nuevoEstado) "activar" else "desactivar"} al usuario '${usuario.nombre} ${usuario.apellidos}'?")
+            .setPositiveButton("Sí") { _, _ ->
+                actualizarEstadoUsuario(usuario, nuevoEstado)
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
+    }
+
+    private fun actualizarEstadoUsuario(usuario: Usuario, nuevoEstado: Boolean) {
         lifecycleScope.launch {
             try {
-                val response = apiService.toggleUserActive(usuario.id!!)
+                // Usar updateUser en lugar del método que no existe
+                val updateRequest = UpdateUserRequest(
+                    nombre = usuario.nombre,
+                    apellidos = usuario.apellidos,
+                    email = usuario.email,
+                    rol = usuario.rol,
+                    activo = nuevoEstado
+                )
+
+                val response = apiService.updateUser(usuario.id!!, updateRequest)
 
                 if (response.isSuccessful && response.body() != null) {
-                    val usuarioActualizado = response.body()!!
-                    val mensaje = if (usuarioActualizado.activo == true) {
+                    val mensaje = if (nuevoEstado) {
                         "Usuario activado correctamente"
                     } else {
                         "Usuario desactivado correctamente"
@@ -168,9 +278,12 @@ class UsersActivity : AppCompatActivity() {
                     // Recargar la lista para mostrar el cambio
                     loadUsers()
                 } else {
+                    val errorBody = response.errorBody()?.string()
+                    android.util.Log.e("USERS_ACTIVITY", "❌ Error actualizando estado: $errorBody")
                     Toast.makeText(this@UsersActivity, "Error al cambiar estado del usuario", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
+                android.util.Log.e("USERS_ACTIVITY", "❌ Exception actualizando estado: ${e.message}", e)
                 Toast.makeText(this@UsersActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }

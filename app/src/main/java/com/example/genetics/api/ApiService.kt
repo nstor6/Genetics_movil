@@ -130,29 +130,30 @@ interface ApiService {
     suspend fun changePassword(@Body request: ChangePasswordRequest): Response<Unit>
 
     // === GESTIÓN DE USUARIOS (Solo para administradores) ===
+    // ✅ BASADO EN TU urls.py: api/auth/ incluye usuarios.urls
 
-    // Listar todos los usuarios
-    @GET("usuarios/")
+    // Listar todos los usuarios - Sin endpoint específico (usar auth/ directo)
+    @GET("auth/")
     suspend fun getUsers(): Response<List<Usuario>>
 
-    // Obtener usuario específico
-    @GET("usuarios/{id}/")
+    // Obtener usuario específico por ID
+    @GET("auth/{id}/")
     suspend fun getUser(@Path("id") id: Int): Response<Usuario>
 
     // Crear nuevo usuario (registro)
-    @POST("auth/registro/")
+    @POST("auth/register/")
     suspend fun createUser(@Body request: CreateUserRequest): Response<Usuario>
 
-    // Actualizar usuario
-    @PUT("usuarios/{id}/")
+    // Actualizar usuario existente
+    @PUT("auth/{id}/")
     suspend fun updateUser(@Path("id") id: Int, @Body request: UpdateUserRequest): Response<Usuario>
 
     // Eliminar usuario
-    @DELETE("usuarios/{id}/")
+    @DELETE("auth/{id}/")
     suspend fun deleteUser(@Path("id") id: Int): Response<Unit>
 
     // Activar/Desactivar usuario
-    @PATCH("usuarios/{id}/toggle-active/")
+    @PATCH("auth/{id}/toggle-active/")
     suspend fun toggleUserActive(@Path("id") id: Int): Response<Usuario>
 
     // === GESTIÓN DE PERFILES ===
@@ -183,4 +184,5 @@ interface ApiService {
     // Obtener logs de actividad del usuario
     @GET("users/{id}/activity-logs/")
     suspend fun <ActivityLog> getUserActivityLogs(@Path("id") id: Int): Response<List<ActivityLog>>
+
 }

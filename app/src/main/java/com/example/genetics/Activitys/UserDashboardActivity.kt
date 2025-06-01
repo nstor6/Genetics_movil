@@ -10,174 +10,175 @@ import com.example.genetics.Activitys.AnimalsActivity
 import com.example.genetics.Activitys.CalendarActivity
 import com.example.genetics.Activitys.IncidentsActivity
 import com.example.genetics.Activitys.TreatmentsActivity
-import com.example.genetics.Activitys.UsersActivity
 import com.example.genetics.Create.AddAnimalActivity
 import com.example.genetics.Create.AddEventActivity
 import com.example.genetics.Create.AddIncidentActivity
 import com.example.genetics.Create.AddTreatmentActivity
-import com.example.genetics.Create.AddUserActivity
 import com.example.genetics.LoginActivity
 import com.example.genetics.R
 import com.example.genetics.api.RetrofitClient
-import com.example.genetics.databinding.ActivityDashboardBinding
+import com.example.genetics.databinding.ActivityUserDashboardBinding
 import com.example.genetics.utils.safeApiCall
 import com.example.genetics.utils.onSuccess
 import com.example.genetics.utils.onError
 import kotlinx.coroutines.launch
 
-class DashboardActivity : AppCompatActivity() {
+class UserDashboardActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityDashboardBinding
+    private lateinit var binding: ActivityUserDashboardBinding
     private val apiService = RetrofitClient.getApiService()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityDashboardBinding.inflate(layoutInflater)
+        binding = ActivityUserDashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        Log.d("DASHBOARD", "🚀 Dashboard iniciado")
+        Log.d("USER_DASHBOARD", "🚀 Dashboard de Usuario iniciado")
         setupUI()
         loadStats()
     }
 
     private fun setupUI() {
-        Log.d("DASHBOARD", "🔧 Configurando UI...")
+        Log.d("USER_DASHBOARD", "🔧 Configurando UI para usuario normal...")
 
-        // 🔧 TARJETAS CLICKEABLES - Navegar a las respectivas activities
+        // 🔧 TARJETAS CLICKEABLES - Solo las que puede usar un usuario normal
         binding.cardAnimals.setOnClickListener {
-            Log.d("DASHBOARD", "🐄 Click en Animals")
+            Log.d("USER_DASHBOARD", "🐄 Click en Animals")
             startActivity(Intent(this, AnimalsActivity::class.java))
         }
 
         binding.cardIncidents.setOnClickListener {
-            Log.d("DASHBOARD", "🚨 Click en Incidents")
+            Log.d("USER_DASHBOARD", "🚨 Click en Incidents")
             startActivity(Intent(this, IncidentsActivity::class.java))
         }
 
         binding.cardTreatments.setOnClickListener {
-            Log.d("DASHBOARD", "💊 Click en Treatments")
+            Log.d("USER_DASHBOARD", "💊 Click en Treatments")
             startActivity(Intent(this, TreatmentsActivity::class.java))
         }
 
         binding.cardEvents.setOnClickListener {
-            Log.d("DASHBOARD", "📅 Click en Events")
+            Log.d("USER_DASHBOARD", "📅 Click en Events")
             startActivity(Intent(this, CalendarActivity::class.java))
         }
 
-        // ✅ TARJETA DE USUARIOS - Siempre visible (ya que este dashboard es solo para admins)
-        binding.cardUsers.setOnClickListener {
-            Log.d("DASHBOARD", "👥 Click en Users")
-            startActivity(Intent(this, UsersActivity::class.java))
-        }
-
-        // ✅ CONFIGURAR NAVEGACIÓN BOTTOM
+        // ✅ CONFIGURAR NAVEGACIÓN BOTTOM PARA USUARIOS
         setupBottomNavigation()
 
-        // 🔧 BOTONES DE ACCIONES RÁPIDAS
-        binding.buttonViewAnimals.setOnClickListener {
-            Log.d("DASHBOARD", "🆕 Click en buttonViewAnimals")
+        // 🔧 BOTONES DE ACCIONES RÁPIDAS - Solo las permitidas
+        binding.buttonNewAnimal.setOnClickListener {
+            Log.d("USER_DASHBOARD", "🆕 Click en buttonNewAnimal")
             startActivity(Intent(this, AddAnimalActivity::class.java))
         }
 
         binding.buttonNewIncident.setOnClickListener {
-            Log.d("DASHBOARD", "🆕 Click en buttonNewIncident")
+            Log.d("USER_DASHBOARD", "🆕 Click en buttonNewIncident")
             startActivity(Intent(this, AddIncidentActivity::class.java))
         }
 
         binding.buttonNewTreatment.setOnClickListener {
-            Log.d("DASHBOARD", "🆕 Click en buttonNewTreatment")
+            Log.d("USER_DASHBOARD", "🆕 Click en buttonNewTreatment")
             startActivity(Intent(this, AddTreatmentActivity::class.java))
         }
 
         binding.buttonNewEvent.setOnClickListener {
-            Log.d("DASHBOARD", "🆕 Click en buttonNewEvent")
+            Log.d("USER_DASHBOARD", "🆕 Click en buttonNewEvent")
             startActivity(Intent(this, AddEventActivity::class.java))
         }
 
-        // ✅ BOTÓN DE NUEVO USUARIO - Siempre visible (solo para admins)
-        binding.buttonNewUser.setOnClickListener {
-            Log.d("DASHBOARD", "🆕👥 Click en buttonNewUser")
-            startActivity(Intent(this, AddUserActivity::class.java))
-        }
+        // Cargar información del usuario actual
+        cargarInfoUsuario()
     }
 
-    // ✅ FUNCIÓN BÁSICA: Bottom Navigation sin tanto menú complejo
-    private fun setupBottomNavigation() {
-        Log.d("DASHBOARD", "🔧 Configurando Bottom Navigation...")
+    private fun cargarInfoUsuario() {
+        lifecycleScope.launch {
+            try {
+                val response = apiService.getCurrentUser()
+                if (response.isSuccessful && response.body() != null) {
+                    val user = response.body()!!
 
-        try {
-            binding.bottomNavigation.setOnItemSelectedListener { item ->
-                Log.d("DASHBOARD", "📱 Bottom Nav item selected: ${item.itemId}")
-                when (item.itemId) {
-                    R.id.nav_animals -> {
-                        Log.d("DASHBOARD", "📱 Nav a Animals")
-                        startActivity(Intent(this, AnimalsActivity::class.java))
-                        true
+                    // Personalizar subtítulo con nombre del usuario
+                    val nombreCompleto = "${user.nombre} ${user.apellidos}".trim()
+                    if (nombreCompleto.isNotEmpty()) {
+                        binding.textSubtitle.text = "Panel de Control - $nombreCompleto"
+                    } else {
+                        binding.textSubtitle.text = "Panel de Control - Usuario"
                     }
-                    R.id.nav_incidents -> {
-                        Log.d("DASHBOARD", "📱 Nav a Incidents")
-                        startActivity(Intent(this, IncidentsActivity::class.java))
-                        true
+
+                    // Mostrar rol si es relevante
+                    val rolFormateado = when (user.rol) {
+                        "admin" -> "👑 Administrador"
+                        "usuario" -> "👤 Usuario"
+                        "dueño" -> "🏠 Dueño"
+                        else -> "Usuario"
                     }
-                    R.id.nav_treatments -> {
-                        Log.d("DASHBOARD", "📱 Nav a Treatments")
-                        startActivity(Intent(this, TreatmentsActivity::class.java))
-                        true
-                    }
-                    R.id.nav_calendar -> {
-                        Log.d("DASHBOARD", "📱 Nav a Calendar")
-                        startActivity(Intent(this, CalendarActivity::class.java))
-                        true
-                    }
-                    R.id.nav_settings -> {
-                        Log.d("DASHBOARD", "📱 Nav a Settings - Mostrando menú de ajustes")
-                        showSettingsMenu()
-                        true
-                    }
-                    else -> {
-                        Log.w("DASHBOARD", "⚠️ Item no reconocido en Bottom Nav: ${item.itemId}")
-                        false
-                    }
+
+                    Log.d("USER_DASHBOARD", "✅ Usuario cargado: ${user.nombre} ($rolFormateado)")
                 }
+            } catch (e: Exception) {
+                Log.e("USER_DASHBOARD", "❌ Error cargando usuario: ${e.message}")
+                // Mantener texto por defecto
+                binding.textSubtitle.text = "Panel de Control - Usuario"
             }
-            Log.d("DASHBOARD", "✅ Bottom Navigation configurado")
-        } catch (e: Exception) {
-            Log.e("DASHBOARD", "❌ Error configurando Bottom Navigation: ${e.message}")
         }
     }
 
-    // ✅ MENÚ DE AJUSTES SIMPLIFICADO
-    private fun showSettingsMenu() {
+    private fun setupBottomNavigation() {
+        Log.d("USER_DASHBOARD", "🔧 Configurando Bottom Navigation para usuario...")
+
+        binding.bottomNavigation.setOnItemSelectedListener { item ->
+            Log.d("USER_DASHBOARD", "📱 Bottom Nav item selected: ${item.itemId}")
+            when (item.itemId) {
+                R.id.nav_animals -> {
+                    startActivity(Intent(this, AnimalsActivity::class.java))
+                    true
+                }
+                R.id.nav_incidents -> {
+                    startActivity(Intent(this, IncidentsActivity::class.java))
+                    true
+                }
+                R.id.nav_treatments -> {
+                    startActivity(Intent(this, TreatmentsActivity::class.java))
+                    true
+                }
+                R.id.nav_calendar -> {
+                    startActivity(Intent(this, CalendarActivity::class.java))
+                    true
+                }
+                R.id.nav_profile -> {  // ✅ Perfil en lugar de configuración
+                    showUserMenu()
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
+    private fun showUserMenu() {
         androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("⚙️ Configuración")
+            .setTitle("👤 Mi Perfil")
             .setItems(arrayOf(
-                "👥 Gestionar usuarios",
                 "🔄 Actualizar datos",
-                "👤 Mi perfil",
-                "⚙️ Configuración",
+                "👤 Ver mi perfil",
+                "🔔 Notificaciones",
+                "📱 Información de la app",
                 "🚪 Cerrar sesión"
             )) { _, which ->
                 when (which) {
                     0 -> {
-                        // Gestionar usuarios
-                        Log.d("DASHBOARD", "⚙️ Abriendo gestión de usuarios desde ajustes")
-                        startActivity(Intent(this, UsersActivity::class.java))
-                    }
-                    1 -> {
-                        // Actualizar datos
                         Toast.makeText(this, "Actualizando datos...", Toast.LENGTH_SHORT).show()
                         loadStats()
                     }
+                    1 -> {
+                        Toast.makeText(this, "Ver perfil - Próximamente", Toast.LENGTH_SHORT).show()
+                    }
                     2 -> {
-                        // Mi perfil
-                        Toast.makeText(this, "Mi perfil - Próximamente", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Configuración de notificaciones - Próximamente", Toast.LENGTH_SHORT).show()
                     }
                     3 -> {
-                        // Configuración
-                        showConfigurationMenu()
+                        mostrarInfoApp()
                     }
                     4 -> {
-                        // Cerrar sesión
                         logout()
                     }
                 }
@@ -186,50 +187,15 @@ class DashboardActivity : AppCompatActivity() {
             .show()
     }
 
-    // ✅ MENÚ DE CONFIGURACIÓN SIMPLIFICADO
-    private fun showConfigurationMenu() {
-        androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("⚙️ Configuración")
-            .setItems(arrayOf(
-                "🌐 Configurar servidor",
-                "📊 Configurar sincronización",
-                "🔔 Notificaciones",
-                "🎨 Tema de la aplicación",
-                "📱 Información de la app"
-            )) { _, which ->
-                when (which) {
-                    0 -> {
-                        Toast.makeText(this, "Configuración de servidor - Próximamente", Toast.LENGTH_SHORT).show()
-                    }
-                    1 -> {
-                        Toast.makeText(this, "Configuración de sincronización - Próximamente", Toast.LENGTH_SHORT).show()
-                    }
-                    2 -> {
-                        Toast.makeText(this, "Configuración de notificaciones - Próximamente", Toast.LENGTH_SHORT).show()
-                    }
-                    3 -> {
-                        Toast.makeText(this, "Configuración de tema - Próximamente", Toast.LENGTH_SHORT).show()
-                    }
-                    4 -> {
-                        mostrarInfoApp()
-                    }
-                }
-            }
-            .setNegativeButton("Volver", null)
-            .show()
-    }
-
-    // ✅ INFORMACIÓN DE LA APP
     private fun mostrarInfoApp() {
         val mensaje = buildString {
             append("📱 Genetics - Gestión Ganadera\n\n")
-            append("🏢 Desarrollado para la gestión integral de ganado\n\n")
-            append("✨ Funcionalidades:\n")
-            append("• 🐄 Gestión de animales\n")
-            append("• 🚨 Control de incidencias\n")
-            append("• 💊 Registro de tratamientos\n")
-            append("• 📅 Calendario de eventos\n")
-            append("• 👥 Administración de usuarios\n\n")
+            append("🏢 Sistema integral de gestión de ganado\n\n")
+            append("✨ Tus funcionalidades:\n")
+            append("• 🐄 Ver y gestionar animales\n")
+            append("• 🚨 Reportar incidencias\n")
+            append("• 💊 Registrar tratamientos\n")
+            append("• 📅 Ver calendario de eventos\n\n")
             append("📞 Soporte: genetics@example.com\n")
             append("🌐 Web: www.genetics-app.com")
         }
@@ -247,7 +213,6 @@ class DashboardActivity : AppCompatActivity() {
             loadIncidentsStats()
             loadTreatmentsStats()
             loadEventsStats()
-            loadUsersStats()
         }
     }
 
@@ -259,10 +224,12 @@ class DashboardActivity : AppCompatActivity() {
                 if (response.isSuccessful) {
                     val animals = response.body() ?: emptyList()
                     binding.textAnimalsCount.text = animals.size.toString()
+                    Log.d("USER_DASHBOARD", "📊 Animales cargados: ${animals.size}")
                 }
             }
             .onError { message ->
-                android.util.Log.w("DASHBOARD", "Error cargando animales: $message")
+                Log.w("USER_DASHBOARD", "Error cargando animales: $message")
+                binding.textAnimalsCount.text = "0"
             }
     }
 
@@ -275,10 +242,12 @@ class DashboardActivity : AppCompatActivity() {
                     val incidents = response.body() ?: emptyList()
                     val pending = incidents.count { it.estado == "pendiente" }
                     binding.textIncidentsCount.text = pending.toString()
+                    Log.d("USER_DASHBOARD", "📊 Incidencias pendientes: $pending de ${incidents.size}")
                 }
             }
             .onError { message ->
-                android.util.Log.w("DASHBOARD", "Error cargando incidencias: $message")
+                Log.w("USER_DASHBOARD", "Error cargando incidencias: $message")
+                binding.textIncidentsCount.text = "0"
             }
     }
 
@@ -301,10 +270,12 @@ class DashboardActivity : AppCompatActivity() {
                         }
                     }
                     binding.textTreatmentsCount.text = recentTreatments.size.toString()
+                    Log.d("USER_DASHBOARD", "📊 Tratamientos recientes: ${recentTreatments.size} de ${treatments.size}")
                 }
             }
             .onError { message ->
-                android.util.Log.w("DASHBOARD", "Error cargando tratamientos: $message")
+                Log.w("USER_DASHBOARD", "Error cargando tratamientos: $message")
+                binding.textTreatmentsCount.text = "0"
             }
     }
 
@@ -329,36 +300,21 @@ class DashboardActivity : AppCompatActivity() {
                         }
                     }
                     binding.textEventsCount.text = upcomingEvents.size.toString()
+                    Log.d("USER_DASHBOARD", "📊 Eventos próximos: ${upcomingEvents.size} de ${events.size}")
                 }
             }
             .onError { message ->
-                android.util.Log.w("DASHBOARD", "Error cargando eventos: $message")
-            }
-    }
-
-    private suspend fun loadUsersStats() {
-        safeApiCall("LOAD_USERS_STATS") {
-            apiService.getUsers()
-        }
-            .onSuccess { response ->
-                if (response.isSuccessful) {
-                    val users = response.body() ?: emptyList()
-                    val activeUsers = users.count { it.activo == true }
-                    binding.textUsersCount.text = activeUsers.toString()
-                }
-            }
-            .onError { message ->
-                android.util.Log.w("DASHBOARD", "Error cargando usuarios: $message")
-                binding.textUsersCount.text = "0"
+                Log.w("USER_DASHBOARD", "Error cargando eventos: $message")
+                binding.textEventsCount.text = "0"
             }
     }
 
     private fun logout() {
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle("🚪 Cerrar Sesión")
-            .setMessage("¿Estás seguro de que quieres cerrar sesión?\n\nTendrás que volver a introducir tus credenciales.")
+            .setMessage("¿Estás seguro de que quieres cerrar sesión?")
             .setPositiveButton("Sí, cerrar sesión") { _, _ ->
-                Log.d("DASHBOARD", "🚪 Cerrando sesión...")
+                Log.d("USER_DASHBOARD", "🚪 Cerrando sesión...")
                 RetrofitClient.clearToken()
                 startActivity(Intent(this, LoginActivity::class.java))
                 finishAffinity()
@@ -370,11 +326,16 @@ class DashboardActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        // Limpiar selección del bottom navigation
         binding.bottomNavigation.menu.setGroupCheckable(0, true, false)
         for (i in 0 until binding.bottomNavigation.menu.size()) {
             binding.bottomNavigation.menu.getItem(i).isChecked = false
         }
         binding.bottomNavigation.menu.setGroupCheckable(0, true, true)
+
+        // Recargar estadísticas al volver
         loadStats()
+
+        Log.d("USER_DASHBOARD", "🔄 onResume - Dashboard actualizado")
     }
 }

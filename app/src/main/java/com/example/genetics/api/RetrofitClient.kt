@@ -14,12 +14,11 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    // 🔧 REEMPLAZA CON TU URL ACTUAL
     private const val BASE_URL = "https://8e4c-83-97-144-149.ngrok-free.app/api/"
 
     private var retrofit: Retrofit? = null
-    private var sharedPreferences: SharedPreferences? = null // CAMBIADO: Ahora es nullable
-    private var appContext: Context? = null // CAMBIADO: Ahora es nullable
+    private var sharedPreferences: SharedPreferences? = null
+    private var appContext: Context? = null
 
     fun initialize(context: Context) {
         appContext = context.applicationContext
@@ -28,12 +27,10 @@ object RetrofitClient {
         Log.d("RETROFIT_CLIENT", "✅ RetrofitClient inicializado correctamente")
     }
 
-    // NUEVO: Método para verificar si está inicializado
     private fun isInitialized(): Boolean {
         return sharedPreferences != null && appContext != null
     }
 
-    // NUEVO: Método para asegurar inicialización
     private fun ensureInitialized() {
         if (!isInitialized()) {
             throw IllegalStateException(
@@ -44,7 +41,7 @@ object RetrofitClient {
     }
 
     private fun getOkHttpClient(): OkHttpClient {
-        ensureInitialized() // Verificar inicialización
+        ensureInitialized()
 
         val logging = HttpLoggingInterceptor { message ->
             Log.d("HTTP_LOG", message)
@@ -52,51 +49,70 @@ object RetrofitClient {
             level = HttpLoggingInterceptor.Level.BODY
         }
 
-        // Interceptor de autenticación con redirección automática
+        // 🔧 INTERCEPTOR DE AUTENTICACIÓN CORREGIDO
         val authInterceptor = Interceptor { chain ->
             val request = chain.request()
             val url = request.url.toString()
 
-            // No verificar token para peticiones de login/registro
-            val isLoginRequest = url.contains("/auth/login") || url.contains("/auth/register")
+            Log.d("AUTH_INTERCEPTOR", "🌐 Petición a: $url")
 
-            if (!isLoginRequest) {
-                val token = getToken()
-                Log.d("AUTH_INTERCEPTOR", "🔑 Token: ${if (token != null) "✅ Presente" else "❌ Ausente"}")
-
-                // Si no hay token Y no es una petición de login, redirigir
-                if (token == null) {
-                    Log.w("AUTH_INTERCEPTOR", "🚨 No hay token, redirigiendo al login...")
-                    redirectToLogin()
-                    // Continuar con la petición sin token (fallará pero evita crash)
-                }
-            } else {
-                Log.d("AUTH_INTERCEPTOR", "🔓 Petición de login/registro, omitiendo verificación de token")
-            }
+            // 🔧 LISTA ACTUALIZADA de endpoints que NO requieren token
+            val isPublicEndpoint = url.contains("/auth/login") ||
+                    url.contains("/auth/register") ||
+                    url.contains("/auth/registro") ||
+                    url.contains("/auth/refresh")
 
             val requestBuilder = request.newBuilder()
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Accept", "application/json")
 
-            // Solo agregar Authorization si no es login/registro Y hay token
-            if (!isLoginRequest) {
+            // 🔧 SIEMPRE añadir token si existe, excepto para endpoints públicos
+            if (!isPublicEndpoint) {
                 val token = getToken()
+                Log.d("AUTH_INTERCEPTOR", "🔑 Token para ${url}: ${if (token != null) "✅ Presente (${token.take(20)}...)" else "❌ Ausente"}")
+
                 if (token != null) {
+                    // 🔧 ASEGURAR formato correcto del token
                     requestBuilder.addHeader("Authorization", "Bearer $token")
+                    Log.d("AUTH_INTERCEPTOR", "🔑 Header Authorization añadido: Bearer ${token.take(20)}...")
+                } else {
+                    Log.w("AUTH_INTERCEPTOR", "🚨 No hay token para endpoint protegido: $url")
+                    // No redirigir inmediatamente, dejar que la respuesta 401 maneje esto
                 }
+            } else {
+                Log.d("AUTH_INTERCEPTOR", "🔓 Endpoint público, no se añade token")
             }
 
             val finalRequest = requestBuilder.build()
             Log.d("HTTP_REQUEST", "🌐 ${finalRequest.method} ${finalRequest.url}")
 
+            // 🔧 LOG DE HEADERS PARA DEBUGGING
+            finalRequest.headers.forEach { (name, value) ->
+                if (name.equals("Authorization", ignoreCase = true)) {
+                    Log.d("HTTP_REQUEST", "📋 Header: $name: Bearer ${value.removePrefix("Bearer ").take(20)}...")
+                } else {
+                    Log.d("HTTP_REQUEST", "📋 Header: $name: $value")
+                }
+            }
+
             val response = chain.proceed(finalRequest)
             Log.d("HTTP_RESPONSE", "📡 Código: ${response.code}")
+            Log.d("HTTP_RESPONSE", "📡 Mensaje: ${response.message}")
 
-            // Solo verificar 401 para peticiones que NO son de login
-            if (!isLoginRequest && response.code == 401) {
-                Log.w("AUTH_INTERCEPTOR", "🚨 Token inválido (401), redirigiendo al login...")
-                clearToken()
-                redirectToLogin()
+            // 🔧 MANEJO MEJORADO DE 401
+            if (response.code == 401 && !isPublicEndpoint) {
+                Log.w("AUTH_INTERCEPTOR", "🚨 401 Unauthorized para: $url")
+                val responseBody = response.peekBody(1024).string()
+                Log.w("AUTH_INTERCEPTOR", "🚨 Respuesta 401: $responseBody")
+
+                // Solo limpiar token y redirigir si realmente es un problema de autenticación
+                if (responseBody.contains("Authentication credentials") ||
+                    responseBody.contains("Invalid token") ||
+                    responseBody.contains("Token expired")) {
+                    Log.w("AUTH_INTERCEPTOR", "🚨 Token inválido, limpiando y redirigiendo...")
+                    clearToken()
+                    redirectToLogin()
+                }
             }
 
             response
@@ -105,19 +121,16 @@ object RetrofitClient {
         return OkHttpClient.Builder()
             .addInterceptor(logging)
             .addInterceptor(authInterceptor)
-            // 🔧 TIMEOUTS OPTIMIZADOS para reducir cancelaciones
-            .connectTimeout(15, TimeUnit.SECONDS)    // Tiempo para establecer conexión
-            .readTimeout(20, TimeUnit.SECONDS)       // Tiempo para leer respuesta
-            .writeTimeout(15, TimeUnit.SECONDS)      // Tiempo para enviar datos
-            .callTimeout(25, TimeUnit.SECONDS)       // Tiempo total máximo por llamada
-            // 🔧 CONFIGURACIONES ADICIONALES
-            .retryOnConnectionFailure(true)          // Reintentar automáticamente
-            .followRedirects(true)                   // Seguir redirecciones HTTP
-            .followSslRedirects(true)               // Seguir redirecciones HTTPS
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .callTimeout(60, TimeUnit.SECONDS)
+            .retryOnConnectionFailure(true)
+            .followRedirects(true)
+            .followSslRedirects(true)
             .build()
     }
 
-    // Método para redirigir al login
     private fun redirectToLogin() {
         try {
             appContext?.let { context ->
@@ -135,22 +148,26 @@ object RetrofitClient {
     }
 
     fun getApiService(): ApiService {
-        ensureInitialized() // AÑADIDO: Verificar inicialización
+        ensureInitialized()
 
         if (retrofit == null) {
             Log.d("RETROFIT_CLIENT", "🚀 Creando nueva instancia de Retrofit")
+            Log.d("RETROFIT_CLIENT", "🌐 URL Base: $BASE_URL")
+
             retrofit = Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .client(getOkHttpClient())
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
+
+            Log.d("RETROFIT_CLIENT", "✅ Retrofit creado exitosamente")
         }
         return retrofit!!.create(ApiService::class.java)
     }
 
     fun saveToken(token: String) {
-        ensureInitialized() // AÑADIDO: Verificar inicialización
-        Log.d("RETROFIT_CLIENT", "💾 Guardando token: ${token.take(10)}...")
+        ensureInitialized()
+        Log.d("RETROFIT_CLIENT", "💾 Guardando token: ${token.take(20)}...")
         sharedPreferences!!.edit()
             .putString("jwt_token", token)
             .apply()
@@ -161,7 +178,13 @@ object RetrofitClient {
             Log.w("RETROFIT_CLIENT", "⚠️ RetrofitClient no inicializado, retornando null para token")
             return null
         }
-        return sharedPreferences!!.getString("jwt_token", null)
+        val token = sharedPreferences!!.getString("jwt_token", null)
+        if (token != null) {
+            Log.d("RETROFIT_CLIENT", "🔍 Token recuperado: ${token.take(20)}...")
+        } else {
+            Log.w("RETROFIT_CLIENT", "🔍 No se encontró token guardado")
+        }
+        return token
     }
 
     fun clearToken() {
@@ -175,7 +198,6 @@ object RetrofitClient {
             .remove("jwt_token")
             .apply()
 
-        // Limpiar también la instancia de Retrofit para forzar recreación
         retrofit = null
     }
 
@@ -188,5 +210,19 @@ object RetrofitClient {
         val hasToken = getToken() != null
         Log.d("RETROFIT_CLIENT", "🔐 ¿Usuario logueado? $hasToken")
         return hasToken
+    }
+
+    // 🔧 NUEVA FUNCIÓN: Debug del token actual
+    fun debugToken() {
+        val token = getToken()
+        if (token != null) {
+            Log.d("RETROFIT_CLIENT", "🔍 DEBUG Token completo: $token")
+            Log.d("RETROFIT_CLIENT", "🔍 DEBUG Token length: ${token.length}")
+            // Verificar que el token tenga el formato correcto (JWT típicamente tiene 3 partes separadas por puntos)
+            val parts = token.split(".")
+            Log.d("RETROFIT_CLIENT", "🔍 DEBUG Token parts: ${parts.size} (debería ser 3 para JWT)")
+        } else {
+            Log.w("RETROFIT_CLIENT", "🔍 DEBUG: No hay token")
+        }
     }
 }

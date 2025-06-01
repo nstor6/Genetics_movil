@@ -94,12 +94,20 @@ class AddUserActivity : AppCompatActivity() {
             binding.editTextNombre.error = "El nombre es obligatorio"
             binding.editTextNombre.requestFocus()
             isValid = false
+        } else if (nombre.length < 2) {
+            binding.editTextNombre.error = "El nombre debe tener al menos 2 caracteres"
+            binding.editTextNombre.requestFocus()
+            isValid = false
         }
 
         // Validar apellidos
         val apellidos = binding.editTextApellidos.text.toString().trim()
         if (apellidos.isEmpty()) {
             binding.editTextApellidos.error = "Los apellidos son obligatorios"
+            if (isValid) binding.editTextApellidos.requestFocus()
+            isValid = false
+        } else if (apellidos.length < 2) {
+            binding.editTextApellidos.error = "Los apellidos deben tener al menos 2 caracteres"
             if (isValid) binding.editTextApellidos.requestFocus()
             isValid = false
         }
@@ -139,6 +147,7 @@ class AddUserActivity : AppCompatActivity() {
     }
 
     private fun crearUsuario() {
+        // Deshabilitar botón para evitar doble click
         binding.buttonSave.isEnabled = false
         binding.buttonSave.text = "Creando..."
 
@@ -158,39 +167,79 @@ class AddUserActivity : AppCompatActivity() {
             rol = rolSeleccionado
         )
 
+        android.util.Log.d("ADD_USER", "🔄 Iniciando creación de usuario...")
+        android.util.Log.d("ADD_USER", "📤 Datos a enviar: nombre=${nuevoUsuario.nombre}, email=${nuevoUsuario.email}, rol=${nuevoUsuario.rol}")
+
         lifecycleScope.launch {
             try {
-                android.util.Log.d("ADD_USER", "🔄 Creando usuario: ${nuevoUsuario.email}")
+                android.util.Log.d("ADD_USER", "📡 Enviando petición al servidor...")
 
                 val response = apiService.createUser(nuevoUsuario)
 
+                android.util.Log.d("ADD_USER", "📡 Response recibida - Código: ${response.code()}")
+                android.util.Log.d("ADD_USER", "📡 Response exitosa: ${response.isSuccessful}")
+
                 if (response.isSuccessful && response.body() != null) {
                     val usuarioCreado = response.body()!!
-                    android.util.Log.d("ADD_USER", "✅ Usuario creado: ${usuarioCreado.id}")
+                    android.util.Log.d("ADD_USER", "✅ Usuario creado exitosamente - ID: ${usuarioCreado.id}")
 
-                    Toast.makeText(this@AddUserActivity, "Usuario creado correctamente", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@AddUserActivity, "✅ Usuario creado correctamente", Toast.LENGTH_SHORT).show()
                     setResult(RESULT_OK)
                     finish()
+
                 } else {
                     val errorBody = response.errorBody()?.string()
-                    android.util.Log.e("ADD_USER", "❌ Error: $errorBody")
+                    android.util.Log.e("ADD_USER", "❌ Error del servidor: $errorBody")
+                    android.util.Log.e("ADD_USER", "❌ Código de error: ${response.code()}")
 
-                    // Manejar errores específicos
+                    // Manejar errores específicos del servidor
                     val errorMessage = when (response.code()) {
-                        400 -> "Datos incorrectos. Revisa la información introducida."
-                        409 -> "Ya existe un usuario con este email."
-                        422 -> "Email no válido o datos faltantes."
-                        else -> "Error al crear usuario: ${response.code()}"
+                        400 -> {
+                            android.util.Log.e("ADD_USER", "❌ Error 400: Datos incorrectos")
+                            "Datos incorrectos. Revisa la información introducida."
+                        }
+                        409 -> {
+                            android.util.Log.e("ADD_USER", "❌ Error 409: Email ya existe")
+                            "Ya existe un usuario con este email."
+                        }
+                        422 -> {
+                            android.util.Log.e("ADD_USER", "❌ Error 422: Datos no válidos")
+                            "Email no válido o datos faltantes."
+                        }
+                        500 -> {
+                            android.util.Log.e("ADD_USER", "❌ Error 500: Error del servidor")
+                            "Error interno del servidor. Inténtalo más tarde."
+                        }
+                        else -> {
+                            android.util.Log.e("ADD_USER", "❌ Error desconocido: ${response.code()}")
+                            "Error al crear usuario (${response.code()}). Contacta con soporte."
+                        }
                     }
 
                     Toast.makeText(this@AddUserActivity, errorMessage, Toast.LENGTH_LONG).show()
                 }
+
+            } catch (e: java.net.ConnectException) {
+                android.util.Log.e("ADD_USER", "❌ Error de conexión: ${e.message}")
+                Toast.makeText(this@AddUserActivity, "❌ No se puede conectar al servidor. Verifica tu conexión a internet.", Toast.LENGTH_LONG).show()
+
+            } catch (e: java.net.SocketTimeoutException) {
+                android.util.Log.e("ADD_USER", "❌ Timeout: ${e.message}")
+                Toast.makeText(this@AddUserActivity, "❌ La conexión tardó demasiado. Inténtalo de nuevo.", Toast.LENGTH_LONG).show()
+
+            } catch (e: java.net.UnknownHostException) {
+                android.util.Log.e("ADD_USER", "❌ Host desconocido: ${e.message}")
+                Toast.makeText(this@AddUserActivity, "❌ No se puede encontrar el servidor. Verifica la configuración.", Toast.LENGTH_LONG).show()
+
             } catch (e: Exception) {
-                android.util.Log.e("ADD_USER", "❌ Exception: ${e.message}", e)
-                Toast.makeText(this@AddUserActivity, "Error de conexión: ${e.message}", Toast.LENGTH_LONG).show()
+                android.util.Log.e("ADD_USER", "❌ Exception inesperada: ${e.message}", e)
+                Toast.makeText(this@AddUserActivity, "❌ Error inesperado: ${e.localizedMessage ?: e.message ?: "Error desconocido"}", Toast.LENGTH_LONG).show()
+
             } finally {
+                // Restaurar botón siempre
                 binding.buttonSave.isEnabled = true
                 binding.buttonSave.text = "👤 Crear Usuario"
+                android.util.Log.d("ADD_USER", "🔄 Botón restaurado")
             }
         }
     }

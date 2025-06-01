@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.genetics.Activitys.DashboardActivity
+import com.example.genetics.Activitys.UserDashboardActivity
 import com.example.genetics.api.LoginRequest
 import com.example.genetics.api.RetrofitClient
 import com.example.genetics.databinding.ActivityLoginBinding
@@ -89,11 +90,10 @@ class LoginActivity : AppCompatActivity() {
                     // Guardar token
                     RetrofitClient.saveToken(loginResponse.access)
 
-                    // Ir al dashboard
-                    startActivity(Intent(this@LoginActivity, DashboardActivity::class.java))
-                    finish()
+                    // 🆕 AHORA CON EL ENDPOINT /auth/me/ FUNCIONANDO
+                    Log.d("LOGIN_DEBUG", "🔍 Verificando rol del usuario después del login...")
+                    verificarRolYRedirigir()
 
-                    Toast.makeText(this@LoginActivity, "¡Bienvenido a Genetics!", Toast.LENGTH_SHORT).show()
                 } else {
                     val errorBody = response.errorBody()?.string()
                     Log.e("LOGIN_DEBUG", "Error response: $errorBody")
@@ -109,6 +109,94 @@ class LoginActivity : AppCompatActivity() {
                 binding.buttonLogin.isEnabled = true
                 binding.buttonLogin.text = "Entrar"
             }
+        }
+    }
+
+    /**
+     * 🆕 FUNCIÓN ACTUALIZADA: Verifica el rol usando el endpoint /auth/me/ y redirige apropiadamente
+     */
+    private suspend fun verificarRolYRedirigir() {
+        try {
+            Log.d("LOGIN_DEBUG", "📡 Llamando a /api/auth/me/ para obtener datos del usuario...")
+
+            val userResponse = apiService.getCurrentUser()
+
+            if (userResponse.isSuccessful && userResponse.body() != null) {
+                val usuario = userResponse.body()!!
+
+                Log.d("LOGIN_DEBUG", "✅ Usuario obtenido exitosamente:")
+                Log.d("LOGIN_DEBUG", "   - ID: ${usuario.id}")
+                Log.d("LOGIN_DEBUG", "   - Nombre: ${usuario.nombre} ${usuario.apellidos}")
+                Log.d("LOGIN_DEBUG", "   - Email: ${usuario.email}")
+                Log.d("LOGIN_DEBUG", "   - Rol: '${usuario.rol}'")
+                Log.d("LOGIN_DEBUG", "   - isStaff: ${usuario.isStaff}")
+                Log.d("LOGIN_DEBUG", "   - Activo: ${usuario.activo}")
+
+                // ✅ LÓGICA DE REDIRECCIÓN BASADA EN ROL
+                val isAdmin = usuario.rol == "admin" || usuario.isStaff == true
+
+                if (isAdmin) {
+                    Log.d("LOGIN_DEBUG", "👑 ADMINISTRADOR detectado - Abriendo DashboardActivity completo")
+
+                    Toast.makeText(
+                        this@LoginActivity,
+                        "¡Bienvenido, Admin ${usuario.nombre}! 👑",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    startActivity(Intent(this@LoginActivity, DashboardActivity::class.java))
+
+                } else {
+                    Log.d("LOGIN_DEBUG", "👤 USUARIO NORMAL detectado - Abriendo UserDashboardActivity")
+
+                    Toast.makeText(
+                        this@LoginActivity,
+                        "¡Bienvenido, ${usuario.nombre}! 👤",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    startActivity(Intent(this@LoginActivity, UserDashboardActivity::class.java))
+                }
+
+                finish()
+
+            } else {
+                // Error obteniendo datos del usuario
+                val errorBody = userResponse.errorBody()?.string()
+                Log.e("LOGIN_DEBUG", "❌ Error obteniendo datos del usuario después del login")
+                Log.e("LOGIN_DEBUG", "   - Response code: ${userResponse.code()}")
+                Log.e("LOGIN_DEBUG", "   - Error body: $errorBody")
+
+                when (userResponse.code()) {
+                    401 -> {
+                        Log.e("LOGIN_DEBUG", "🚨 Token inválido o expirado")
+                        Toast.makeText(this@LoginActivity, "Sesión inválida. Intenta de nuevo.", Toast.LENGTH_LONG).show()
+                        RetrofitClient.clearToken()
+                    }
+                    404 -> {
+                        Log.e("LOGIN_DEBUG", "🚨 Endpoint /auth/me/ no encontrado en el servidor")
+                        Toast.makeText(this@LoginActivity, "Configuración del servidor incompleta.", Toast.LENGTH_LONG).show()
+                        // Fallback: ir al dashboard de usuario por defecto
+                        startActivity(Intent(this@LoginActivity, UserDashboardActivity::class.java))
+                        finish()
+                    }
+                    else -> {
+                        Log.w("LOGIN_DEBUG", "⚠️ Error desconocido, usando dashboard de usuario por defecto")
+                        Toast.makeText(this@LoginActivity, "¡Bienvenido a Genetics!", Toast.LENGTH_SHORT).show()
+                        startActivity(Intent(this@LoginActivity, UserDashboardActivity::class.java))
+                        finish()
+                    }
+                }
+            }
+
+        } catch (e: Exception) {
+            Log.e("LOGIN_DEBUG", "❌ Exception verificando rol del usuario: ${e.message}", e)
+
+            // En caso de error de red o excepción, ir al dashboard de usuario por defecto
+            Log.w("LOGIN_DEBUG", "⚠️ Error de conexión, usando dashboard de usuario por defecto")
+            Toast.makeText(this@LoginActivity, "¡Bienvenido a Genetics!", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this@LoginActivity, UserDashboardActivity::class.java))
+            finish()
         }
     }
 }
