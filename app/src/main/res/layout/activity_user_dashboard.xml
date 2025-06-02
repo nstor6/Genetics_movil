@@ -272,15 +272,7 @@
                 android:orientation="vertical"
                 android:layout_marginBottom="16dp">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/buttonNewAnimal"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:text="🐄 Nuevo Animal"
-                    android:textSize="16sp"
-                    app:backgroundTint="@color/colorPrimary"
-                    app:cornerRadius="12dp"
-                    android:layout_marginBottom="8dp" />
+                <!-- ❌ ELIMINADO: buttonNewAnimal - Los usuarios NO pueden crear animales -->
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/buttonNewIncident"

@@ -6,11 +6,10 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.example.genetics.Activitys.AnimalsActivity
 import com.example.genetics.Activitys.CalendarActivity
 import com.example.genetics.Activitys.IncidentsActivity
 import com.example.genetics.Activitys.TreatmentsActivity
-import com.example.genetics.Create.AddAnimalActivity
+import com.example.genetics.Activitys.UserAnimalsActivity  // ✅ NUEVA IMPORTACIÓN
 import com.example.genetics.Create.AddEventActivity
 import com.example.genetics.Create.AddIncidentActivity
 import com.example.genetics.Create.AddTreatmentActivity
@@ -43,8 +42,9 @@ class UserDashboardActivity : AppCompatActivity() {
 
         // 🔧 TARJETAS CLICKEABLES - Solo las que puede usar un usuario normal
         binding.cardAnimals.setOnClickListener {
-            Log.d("USER_DASHBOARD", "🐄 Click en Animals")
-            startActivity(Intent(this, AnimalsActivity::class.java))
+            Log.d("USER_DASHBOARD", "🐄 Click en Animals - Abriendo versión de SOLO LECTURA")
+            // ✅ CAMBIO PRINCIPAL: Usar UserAnimalsActivity en lugar de AnimalsActivity
+            startActivity(Intent(this, UserAnimalsActivity::class.java))
         }
 
         binding.cardIncidents.setOnClickListener {
@@ -65,11 +65,8 @@ class UserDashboardActivity : AppCompatActivity() {
         // ✅ CONFIGURAR NAVEGACIÓN BOTTOM PARA USUARIOS
         setupBottomNavigation()
 
-        // 🔧 BOTONES DE ACCIONES RÁPIDAS - Solo las permitidas
-        binding.buttonNewAnimal.setOnClickListener {
-            Log.d("USER_DASHBOARD", "🆕 Click en buttonNewAnimal")
-            startActivity(Intent(this, AddAnimalActivity::class.java))
-        }
+        // 🔧 BOTONES DE ACCIONES RÁPIDAS - Solo las permitidas para usuarios
+        // ❌ ELIMINADO: buttonNewAnimal - Los usuarios NO pueden crear animales
 
         binding.buttonNewIncident.setOnClickListener {
             Log.d("USER_DASHBOARD", "🆕 Click en buttonNewIncident")
@@ -130,7 +127,8 @@ class UserDashboardActivity : AppCompatActivity() {
             Log.d("USER_DASHBOARD", "📱 Bottom Nav item selected: ${item.itemId}")
             when (item.itemId) {
                 R.id.nav_animals -> {
-                    startActivity(Intent(this, AnimalsActivity::class.java))
+                    // ✅ CAMBIO: Usar UserAnimalsActivity de solo lectura
+                    startActivity(Intent(this, UserAnimalsActivity::class.java))
                     true
                 }
                 R.id.nav_incidents -> {
@@ -192,10 +190,11 @@ class UserDashboardActivity : AppCompatActivity() {
             append("📱 Genetics - Gestión Ganadera\n\n")
             append("🏢 Sistema integral de gestión de ganado\n\n")
             append("✨ Tus funcionalidades:\n")
-            append("• 🐄 Ver y gestionar animales\n")
+            append("• 👁️ Ver información de animales (solo lectura)\n")  // ✅ ACTUALIZADO
             append("• 🚨 Reportar incidencias\n")
             append("• 💊 Registrar tratamientos\n")
             append("• 📅 Ver calendario de eventos\n\n")
+            append("ℹ️ Para crear o editar animales, contacta con un administrador.\n\n")  // ✅ NUEVA NOTA
             append("📞 Soporte: genetics@example.com\n")
             append("🌐 Web: www.genetics-app.com")
         }
