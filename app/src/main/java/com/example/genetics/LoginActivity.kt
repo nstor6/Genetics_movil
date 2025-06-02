@@ -23,7 +23,6 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // 🔧 CRÍTICO: Asegurar que RetrofitClient esté inicializado
         try {
             RetrofitClient.initialize(this)
             apiService = RetrofitClient.getApiService()
@@ -40,13 +39,10 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun setupUI() {
-        // Los campos empiezan vacíos (sin pre-llenar credenciales)
-
         binding.buttonLogin.setOnClickListener {
             login()
         }
 
-        // Botón demo que llena las credenciales automáticamente
         binding.buttonDemo.setOnClickListener {
             fillDemoData()
         }
@@ -69,7 +65,6 @@ class LoginActivity : AppCompatActivity() {
             return
         }
 
-        // Mostrar loading
         binding.buttonLogin.isEnabled = false
         binding.buttonLogin.text = "Entrando..."
 
@@ -87,17 +82,14 @@ class LoginActivity : AppCompatActivity() {
 
                     Log.d("LOGIN_DEBUG", "Login exitoso! Token recibido")
 
-                    // Guardar token
                     RetrofitClient.saveToken(loginResponse.access)
 
-                    // 🆕 AHORA CON EL ENDPOINT /auth/me/ FUNCIONANDO
                     Log.d("LOGIN_DEBUG", "🔍 Verificando rol del usuario después del login...")
                     verificarRolYRedirigir()
 
                 } else {
                     val errorBody = response.errorBody()?.string()
                     Log.e("LOGIN_DEBUG", "Error response: $errorBody")
-                    Log.e("LOGIN_DEBUG", "Response code: ${response.code()}")
                     Toast.makeText(this@LoginActivity, "Credenciales incorrectas", Toast.LENGTH_LONG).show()
                 }
             } catch (e: Exception) {
@@ -105,16 +97,12 @@ class LoginActivity : AppCompatActivity() {
                 e.printStackTrace()
                 Toast.makeText(this@LoginActivity, "Error de conexión: ${e.message}", Toast.LENGTH_LONG).show()
             } finally {
-                // Restaurar botón
                 binding.buttonLogin.isEnabled = true
                 binding.buttonLogin.text = "Entrar"
             }
         }
     }
 
-    /**
-     * 🆕 FUNCIÓN ACTUALIZADA: Verifica el rol usando el endpoint /auth/me/ y redirige apropiadamente
-     */
     private suspend fun verificarRolYRedirigir() {
         try {
             Log.d("LOGIN_DEBUG", "📡 Llamando a /api/auth/me/ para obtener datos del usuario...")
@@ -132,36 +120,22 @@ class LoginActivity : AppCompatActivity() {
                 Log.d("LOGIN_DEBUG", "   - isStaff: ${usuario.isStaff}")
                 Log.d("LOGIN_DEBUG", "   - Activo: ${usuario.activo}")
 
-                // ✅ LÓGICA DE REDIRECCIÓN BASADA EN ROL
-                val isAdmin = usuario.rol == "admin" || usuario.isStaff == true
+                // 👑 Validación segura del rol
+                val isAdmin = usuario.rol?.trim()?.lowercase() == "admin" || usuario.isStaff == true
 
                 if (isAdmin) {
                     Log.d("LOGIN_DEBUG", "👑 ADMINISTRADOR detectado - Abriendo DashboardActivity completo")
-
-                    Toast.makeText(
-                        this@LoginActivity,
-                        "¡Bienvenido, Admin ${usuario.nombre}! 👑",
-                        Toast.LENGTH_SHORT
-                    ).show()
-
+                    Toast.makeText(this@LoginActivity, "¡Bienvenido, Admin ${usuario.nombre}! 👑", Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this@LoginActivity, DashboardActivity::class.java))
-
                 } else {
                     Log.d("LOGIN_DEBUG", "👤 USUARIO NORMAL detectado - Abriendo UserDashboardActivity")
-
-                    Toast.makeText(
-                        this@LoginActivity,
-                        "¡Bienvenido, ${usuario.nombre}! 👤",
-                        Toast.LENGTH_SHORT
-                    ).show()
-
+                    Toast.makeText(this@LoginActivity, "¡Bienvenido, ${usuario.nombre}! 👤", Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this@LoginActivity, UserDashboardActivity::class.java))
                 }
 
                 finish()
 
             } else {
-                // Error obteniendo datos del usuario
                 val errorBody = userResponse.errorBody()?.string()
                 Log.e("LOGIN_DEBUG", "❌ Error obteniendo datos del usuario después del login")
                 Log.e("LOGIN_DEBUG", "   - Response code: ${userResponse.code()}")
@@ -176,7 +150,6 @@ class LoginActivity : AppCompatActivity() {
                     404 -> {
                         Log.e("LOGIN_DEBUG", "🚨 Endpoint /auth/me/ no encontrado en el servidor")
                         Toast.makeText(this@LoginActivity, "Configuración del servidor incompleta.", Toast.LENGTH_LONG).show()
-                        // Fallback: ir al dashboard de usuario por defecto
                         startActivity(Intent(this@LoginActivity, UserDashboardActivity::class.java))
                         finish()
                     }
@@ -191,8 +164,6 @@ class LoginActivity : AppCompatActivity() {
 
         } catch (e: Exception) {
             Log.e("LOGIN_DEBUG", "❌ Exception verificando rol del usuario: ${e.message}", e)
-
-            // En caso de error de red o excepción, ir al dashboard de usuario por defecto
             Log.w("LOGIN_DEBUG", "⚠️ Error de conexión, usando dashboard de usuario por defecto")
             Toast.makeText(this@LoginActivity, "¡Bienvenido a Genetics!", Toast.LENGTH_SHORT).show()
             startActivity(Intent(this@LoginActivity, UserDashboardActivity::class.java))
