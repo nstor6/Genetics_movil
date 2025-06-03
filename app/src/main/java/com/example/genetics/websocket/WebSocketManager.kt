@@ -9,13 +9,9 @@ import org.json.JSONObject
 
 object WebSocketManager {
 
-    private var notificationsListener: ((JSONObject) -> Unit)? = null
-    private var animalsListener: ((JSONObject) -> Unit)? = null
-    private var logsListener: ((JSONObject) -> Unit)? = null
-
-    private var notificationsStatusListener: ((Boolean) -> Unit)? = null
-    private var animalsStatusListener: ((Boolean) -> Unit)? = null
-    private var logsStatusListener: ((Boolean) -> Unit)? = null
+    private var notificationsListener: WebSocketListener? = null
+    private var animalsListener: WebSocketListener? = null
+    private var logsListener: WebSocketListener? = null
 
     /**
      * Conectar WebSocket de notificaciones
@@ -24,42 +20,39 @@ object WebSocketManager {
         onNotification: (JSONObject) -> Unit,
         onStatusChange: (Boolean) -> Unit
     ) {
-        notificationsListener = onNotification
-        notificationsStatusListener = onStatusChange
-
-        val listener = object : WebSocketListener() {
+        notificationsListener = object : WebSocketListener() {
             override fun onOpen(webSocket: WebSocket, response: Response) {
-                Log.d("WEBSOCKET_MANAGER", "✅ Notificaciones WebSocket conectado")
+                Log.d("WS_NOTIFICATIONS", "🔔 WebSocket abierto")
                 onStatusChange(true)
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
                 try {
-                    val jsonObject = JSONObject(text)
-                    Log.d("WEBSOCKET_MANAGER", "📢 Notificación recibida: $text")
-                    onNotification(jsonObject)
+                    Log.d("WS_NOTIFICATIONS", "📨 Mensaje recibido: $text")
+                    val json = JSONObject(text)
+                    onNotification(json)
                 } catch (e: Exception) {
-                    Log.e("WEBSOCKET_MANAGER", "❌ Error parseando mensaje de notificación: ${e.message}")
+                    Log.e("WS_NOTIFICATIONS", "❌ Error parseando mensaje: ${e.message}")
                 }
             }
 
             override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-                Log.w("WEBSOCKET_MANAGER", "⚠️ Notificaciones WebSocket cerrando: $code - $reason")
+                Log.d("WS_NOTIFICATIONS", "🔔 WebSocket cerrando: $code - $reason")
                 onStatusChange(false)
             }
 
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-                Log.w("WEBSOCKET_MANAGER", "❌ Notificaciones WebSocket cerrado: $code - $reason")
+                Log.d("WS_NOTIFICATIONS", "🔔 WebSocket cerrado: $code - $reason")
                 onStatusChange(false)
             }
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-                Log.e("WEBSOCKET_MANAGER", "❌ Error en notificaciones WebSocket: ${t.message}")
+                Log.e("WS_NOTIFICATIONS", "❌ Error en WebSocket: ${t.message}")
                 onStatusChange(false)
             }
         }
 
-        RetrofitClient.connectNotificationsWebSocket(listener)
+        RetrofitClient.connectNotificationsWebSocket(notificationsListener!!)
     }
 
     /**
@@ -69,169 +62,107 @@ object WebSocketManager {
         onUpdate: (JSONObject) -> Unit,
         onStatusChange: (Boolean) -> Unit
     ) {
-        animalsListener = onUpdate
-        animalsStatusListener = onStatusChange
-
-        val listener = object : WebSocketListener() {
+        animalsListener = object : WebSocketListener() {
             override fun onOpen(webSocket: WebSocket, response: Response) {
-                Log.d("WEBSOCKET_MANAGER", "✅ Animales WebSocket conectado")
+                Log.d("WS_ANIMALS", "🐄 WebSocket abierto")
                 onStatusChange(true)
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
                 try {
-                    val jsonObject = JSONObject(text)
-                    Log.d("WEBSOCKET_MANAGER", "🐄 Actualización de animal recibida: $text")
-                    onUpdate(jsonObject)
+                    Log.d("WS_ANIMALS", "📨 Mensaje recibido: $text")
+                    val json = JSONObject(text)
+                    onUpdate(json)
                 } catch (e: Exception) {
-                    Log.e("WEBSOCKET_MANAGER", "❌ Error parseando mensaje de animal: ${e.message}")
+                    Log.e("WS_ANIMALS", "❌ Error parseando mensaje: ${e.message}")
                 }
             }
 
             override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-                Log.w("WEBSOCKET_MANAGER", "⚠️ Animales WebSocket cerrando: $code - $reason")
+                Log.d("WS_ANIMALS", "🐄 WebSocket cerrando: $code - $reason")
                 onStatusChange(false)
             }
 
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-                Log.w("WEBSOCKET_MANAGER", "❌ Animales WebSocket cerrado: $code - $reason")
+                Log.d("WS_ANIMALS", "🐄 WebSocket cerrado: $code - $reason")
                 onStatusChange(false)
             }
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-                Log.e("WEBSOCKET_MANAGER", "❌ Error en animales WebSocket: ${t.message}")
+                Log.e("WS_ANIMALS", "❌ Error en WebSocket: ${t.message}")
                 onStatusChange(false)
             }
         }
 
-        RetrofitClient.connectAnimalsWebSocket(listener)
+        RetrofitClient.connectAnimalsWebSocket(animalsListener!!)
     }
 
     /**
-     * Conectar WebSocket de logs (solo para admins)
+     * Conectar WebSocket de logs (solo admins)
      */
     fun connectLogs(
         onLog: (JSONObject) -> Unit,
         onStatusChange: (Boolean) -> Unit
     ) {
-        logsListener = onLog
-        logsStatusListener = onStatusChange
-
-        val listener = object : WebSocketListener() {
+        logsListener = object : WebSocketListener() {
             override fun onOpen(webSocket: WebSocket, response: Response) {
-                Log.d("WEBSOCKET_MANAGER", "✅ Logs WebSocket conectado")
+                Log.d("WS_LOGS", "📋 WebSocket abierto")
                 onStatusChange(true)
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
                 try {
-                    val jsonObject = JSONObject(text)
-                    Log.d("WEBSOCKET_MANAGER", "📋 Log recibido: $text")
-                    onLog(jsonObject)
+                    Log.d("WS_LOGS", "📨 Mensaje recibido: $text")
+                    val json = JSONObject(text)
+                    onLog(json)
                 } catch (e: Exception) {
-                    Log.e("WEBSOCKET_MANAGER", "❌ Error parseando mensaje de log: ${e.message}")
+                    Log.e("WS_LOGS", "❌ Error parseando mensaje: ${e.message}")
                 }
             }
 
             override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-                Log.w("WEBSOCKET_MANAGER", "⚠️ Logs WebSocket cerrando: $code - $reason")
+                Log.d("WS_LOGS", "📋 WebSocket cerrando: $code - $reason")
                 onStatusChange(false)
             }
 
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-                Log.w("WEBSOCKET_MANAGER", "❌ Logs WebSocket cerrado: $code - $reason")
+                Log.d("WS_LOGS", "📋 WebSocket cerrado: $code - $reason")
                 onStatusChange(false)
             }
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-                Log.e("WEBSOCKET_MANAGER", "❌ Error en logs WebSocket: ${t.message}")
+                Log.e("WS_LOGS", "❌ Error en WebSocket: ${t.message}")
                 onStatusChange(false)
             }
         }
 
-        RetrofitClient.connectLogsWebSocket(listener)
+        RetrofitClient.connectLogsWebSocket(logsListener!!)
+    }
+
+    /**
+     * Enviar mensaje a WebSocket de notificaciones
+     */
+    fun sendNotificationMessage(type: String, data: Map<String, Any>? = null): Boolean {
+        val message = JSONObject().apply {
+            put("type", type)
+            data?.forEach { (key, value) -> put(key, value) }
+        }
+        return RetrofitClient.sendNotificationMessage(message.toString())
     }
 
     /**
      * Desconectar todos los WebSockets
      */
     fun disconnectAll() {
-        Log.d("WEBSOCKET_MANAGER", "🔌 Desconectando todos los WebSockets")
-        RetrofitClient.disconnectAllWebSockets()
-
-        // Limpiar listeners
-        notificationsListener = null
-        animalsListener = null
-        logsListener = null
-        notificationsStatusListener = null
-        animalsStatusListener = null
-        logsStatusListener = null
-    }
-
-    /**
-     * Desconectar WebSocket específico
-     */
-    fun disconnectNotifications() {
         RetrofitClient.disconnectNotificationsWebSocket()
-        notificationsListener = null
-        notificationsStatusListener = null
-    }
-
-    fun disconnectAnimals() {
         RetrofitClient.disconnectAnimalsWebSocket()
-        animalsListener = null
-        animalsStatusListener = null
-    }
-
-    fun disconnectLogs() {
         RetrofitClient.disconnectLogsWebSocket()
+
+        notificationsListener = null
+        animalsListener = null
         logsListener = null
-        logsStatusListener = null
-    }
 
-    /**
-     * Enviar mensajes por WebSocket
-     */
-    fun sendNotificationMessage(message: String): Boolean {
-        return try {
-            val jsonMessage = if (message.startsWith("{")) {
-                message
-            } else {
-                """{"type": "$message"}"""
-            }
-            RetrofitClient.sendNotificationMessage(jsonMessage)
-        } catch (e: Exception) {
-            Log.e("WEBSOCKET_MANAGER", "❌ Error enviando mensaje de notificación: ${e.message}")
-            false
-        }
-    }
-
-    fun sendAnimalsMessage(message: String): Boolean {
-        return try {
-            val jsonMessage = if (message.startsWith("{")) {
-                message
-            } else {
-                """{"type": "$message"}"""
-            }
-            RetrofitClient.sendAnimalsMessage(jsonMessage)
-        } catch (e: Exception) {
-            Log.e("WEBSOCKET_MANAGER", "❌ Error enviando mensaje de animales: ${e.message}")
-            false
-        }
-    }
-
-    fun sendLogsMessage(message: String): Boolean {
-        return try {
-            val jsonMessage = if (message.startsWith("{")) {
-                message
-            } else {
-                """{"type": "$message"}"""
-            }
-            RetrofitClient.sendLogsMessage(jsonMessage)
-        } catch (e: Exception) {
-            Log.e("WEBSOCKET_MANAGER", "❌ Error enviando mensaje de logs: ${e.message}")
-            false
-        }
+        Log.d("WEBSOCKET_MANAGER", "🔌 Todos los WebSockets desconectados")
     }
 
     /**
@@ -243,21 +174,5 @@ object WebSocketManager {
             "animals" to RetrofitClient.isAnimalsWebSocketConnected(),
             "logs" to RetrofitClient.isLogsWebSocketConnected()
         )
-    }
-
-    /**
-     * Verificar si al menos una conexión está activa
-     */
-    fun isAnyConnected(): Boolean {
-        val status = getConnectionStatus()
-        return status.values.any { it }
-    }
-
-    /**
-     * Verificar si todas las conexiones están activas
-     */
-    fun areAllConnected(): Boolean {
-        val status = getConnectionStatus()
-        return status.values.all { it }
     }
 }

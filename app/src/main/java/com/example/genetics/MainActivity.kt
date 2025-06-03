@@ -18,7 +18,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+
+        // ❌ NO ESTABLECER CONTENIDO - Solo procesar autenticación
+        // setContentView(R.layout.activity_main)
 
         Log.d("MAIN_ACTIVITY", "🚀 ===== INICIANDO GENETICS APP =====")
         Log.d("MAIN_ACTIVITY", "📱 Dispositivo: ${android.os.Build.MODEL}")

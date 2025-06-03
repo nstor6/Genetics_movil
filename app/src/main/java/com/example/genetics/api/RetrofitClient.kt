@@ -16,19 +16,8 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    // 🔧 ACTUALIZA ESTA URL SEGÚN TU CONFIGURACIÓN
     // Para emulador Android Studio:
-    private const val BASE_URL = "http://10.0.2.2:8000/api/"
-
-    // Para dispositivo físico (cambia XXX por tu IP):
-    // private const val BASE_URL = "http://192.168.1.XXX:8000/api/"
-
-    // Para ngrok (actualiza con tu URL actual):
-    // private const val BASE_URL = "https://51b6-81-42-254-142.ngrok-free.app/api/"
-
-    // Para servidor en la nube:
-    // private const val BASE_URL = "https://tu-dominio.com/api/"
-
+    private const val BASE_URL = "https://ba39-81-42-254-142.ngrok-free.app/api/"
     private const val WS_BASE_URL = "ws://10.0.2.2:8000/ws/"
 
     // Variables globales
@@ -227,16 +216,16 @@ object RetrofitClient {
             okHttpClient = OkHttpClient.Builder()
                 .addInterceptor(logging)
                 .addInterceptor(authInterceptor)
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .writeTimeout(30, TimeUnit.SECONDS)
-                .callTimeout(60, TimeUnit.SECONDS)
+                .connectTimeout(10, TimeUnit.SECONDS)      // ✅ CAMBIADO de 30 a 10
+                .readTimeout(15, TimeUnit.SECONDS)         // ✅ CAMBIADO de 30 a 15
+                .writeTimeout(15, TimeUnit.SECONDS)        // ✅ CAMBIADO de 30 a 15
+                .callTimeout(20, TimeUnit.SECONDS)         // ✅ CAMBIADO de 60 a 20
                 .retryOnConnectionFailure(true)
                 .followRedirects(true)
                 .followSslRedirects(true)
                 .build()
 
-            Log.d("RETROFIT_CLIENT", "✅ OkHttpClient creado")
+            Log.d("RETROFIT_CLIENT", "✅ OkHttpClient creado con timeouts optimizados")
         }
 
         return okHttpClient!!
@@ -416,8 +405,7 @@ object RetrofitClient {
         Log.d("RETROFIT_CLIENT", "=============================")
     }
 
-    // ========== WEBSOCKETS ADICIONALES (AGREGAR AL FINAL DEL ARCHIVO) ==========
-
+    // ========== WEBSOCKETS ADICIONALES ==========
     /**
      * Conectar WebSocket de animales
      */
@@ -520,15 +508,4 @@ object RetrofitClient {
     fun isLogsWebSocketConnected(): Boolean {
         return logsWebSocket != null
     }
-
-    /**
-     * Actualizar método disconnectAllWebSockets() para incluir todos
-     */
-    private fun disconnectAllWebSocketsComplete() {
-        disconnectNotificationsWebSocket()
-        disconnectAnimalsWebSocket()
-        disconnectLogsWebSocket()
-        Log.d("WEBSOCKET", "🔌 Todos los WebSockets desconectados completamente")
-    }
-
 }
