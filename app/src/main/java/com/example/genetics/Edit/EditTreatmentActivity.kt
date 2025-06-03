@@ -71,8 +71,11 @@ class EditTreatmentActivity : AppCompatActivity() {
             try {
                 val response = apiService.getAnimales()
                 if (response.isSuccessful && response.body() != null) {
+                    val animalesResponse = response.body()!!
+                    val animals = animalesResponse.results
+
                     animalesList.clear()
-                    animalesList.addAll(response.body()!!)
+                    animalesList.addAll(animals)
                     setupSpinnerAnimales()
                 } else {
                     Toast.makeText(this@EditTreatmentActivity, "Error cargando animales", Toast.LENGTH_SHORT).show()
@@ -82,6 +85,7 @@ class EditTreatmentActivity : AppCompatActivity() {
             }
         }
     }
+
 
     private fun setupSpinnerAnimales() {
         val animalNames = mutableListOf<String>()
@@ -113,7 +117,8 @@ class EditTreatmentActivity : AppCompatActivity() {
             try {
                 val response = apiService.getTratamientos()
                 if (response.isSuccessful && response.body() != null) {
-                    val tratamientos = response.body()!!
+                    val tratamientosResponse = response.body()!!
+                    val tratamientos = tratamientosResponse.results
                     currentTratamiento = tratamientos.find { it.id == tratamientoId }
 
                     if (currentTratamiento != null) {

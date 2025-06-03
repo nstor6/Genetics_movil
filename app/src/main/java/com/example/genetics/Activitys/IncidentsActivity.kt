@@ -112,7 +112,8 @@ class IncidentsActivity : AppCompatActivity() {
                 android.util.Log.d("INCIDENTS_ACTIVITY", "📡 Response code: ${response.code()}")
 
                 if (response.isSuccessful && response.body() != null) {
-                    val incidents = response.body()!!
+                    val incidentsResponse = response.body()!!
+                    val incidents = incidentsResponse.results
                     android.util.Log.d("INCIDENTS_ACTIVITY", "✅ Incidencias recibidas: ${incidents.size}")
 
                     incidenciasOriginales.clear()
@@ -134,6 +135,7 @@ class IncidentsActivity : AppCompatActivity() {
             }
         }
     }
+
 
     private fun filterIncidents(filter: String) {
         when (filter) {

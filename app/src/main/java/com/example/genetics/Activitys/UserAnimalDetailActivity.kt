@@ -82,8 +82,9 @@ class UserAnimalDetailActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val response = apiService.getAnimales()
-                if (response.isSuccessful) {
-                    val animales = response.body() ?: emptyList()
+                if (response.isSuccessful && response.body() != null) {
+                    val animalesResponse = response.body()!!
+                    val animales = animalesResponse.results
                     val animalEncontrado = animales.find { it.id == animalId }
 
                     if (animalEncontrado != null) {
@@ -94,12 +95,17 @@ class UserAnimalDetailActivity : AppCompatActivity() {
                         Toast.makeText(this@UserAnimalDetailActivity, "Animal no encontrado", Toast.LENGTH_SHORT).show()
                         finish()
                     }
+                } else {
+                    Toast.makeText(this@UserAnimalDetailActivity, "Error en la respuesta del servidor", Toast.LENGTH_SHORT).show()
+                    finish()
                 }
             } catch (e: Exception) {
                 Toast.makeText(this@UserAnimalDetailActivity, "Error cargando datos: ${e.message}", Toast.LENGTH_SHORT).show()
+                finish()
             }
         }
     }
+
 
     private fun mostrarDatosAnimal() {
         supportActionBar?.title = "${animal.chapeta} - ${animal.nombre ?: "Sin nombre"} (Solo Lectura)"
@@ -215,11 +221,14 @@ class UserAnimalDetailActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val response = apiService.getIncidencias()
-                if (response.isSuccessful) {
-                    val todasIncidencias = response.body() ?: emptyList()
+                if (response.isSuccessful && response.body() != null) {
+                    val incidentesResponse = response.body()!!
+                    val todasIncidencias = incidentesResponse.results
                     val incidenciasAnimal = todasIncidencias.filter { it.animal == animal.id }
 
                     mostrarIncidencias(incidenciasAnimal)
+                } else {
+                    Toast.makeText(this@UserAnimalDetailActivity, "Error al cargar incidencias", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
                 Toast.makeText(this@UserAnimalDetailActivity, "Error cargando incidencias: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -227,23 +236,28 @@ class UserAnimalDetailActivity : AppCompatActivity() {
         }
     }
 
+
     private fun cargarTratamientos() {
         contentContainer.removeAllViews()
 
         lifecycleScope.launch {
             try {
                 val response = apiService.getTratamientos()
-                if (response.isSuccessful) {
-                    val todosTratamientos = response.body() ?: emptyList()
+                if (response.isSuccessful && response.body() != null) {
+                    val tratamientoResponse = response.body()!!
+                    val todosTratamientos = tratamientoResponse.results
                     val tratamientosAnimal = todosTratamientos.filter { it.animal == animal.id }
 
                     mostrarTratamientos(tratamientosAnimal)
+                } else {
+                    Toast.makeText(this@UserAnimalDetailActivity, "Error al cargar tratamientos", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
                 Toast.makeText(this@UserAnimalDetailActivity, "Error cargando tratamientos: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
+
 
     private fun mostrarIncidencias(incidencias: List<Incidencia>) {
         val scrollView = android.widget.ScrollView(this)

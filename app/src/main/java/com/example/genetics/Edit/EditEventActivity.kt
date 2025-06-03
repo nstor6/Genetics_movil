@@ -83,8 +83,11 @@ class EditEventActivity : AppCompatActivity() {
             try {
                 val response = apiService.getAnimales()
                 if (response.isSuccessful && response.body() != null) {
+                    val animalesResponse = response.body()!!
+                    val animals = animalesResponse.results
+
                     animalesList.clear()
-                    animalesList.addAll(response.body()!!)
+                    animalesList.addAll(animals)
                     setupSpinnerAnimales()
                 } else {
                     Toast.makeText(this@EditEventActivity, "Error cargando animales", Toast.LENGTH_SHORT).show()
@@ -96,6 +99,7 @@ class EditEventActivity : AppCompatActivity() {
             }
         }
     }
+
 
     private fun setupSpinnerAnimales() {
         val animalNames = mutableListOf("Sin animal específico")
@@ -127,7 +131,7 @@ class EditEventActivity : AppCompatActivity() {
             try {
                 val response = apiService.getEventos()
                 if (response.isSuccessful && response.body() != null) {
-                    val eventos = response.body()!!
+                    val eventos = response.body()!!.results
                     val evento = eventos.find { it.id == eventoId }
 
                     if (evento != null) {
@@ -144,6 +148,7 @@ class EditEventActivity : AppCompatActivity() {
             }
         }
     }
+
 
     private fun llenarFormulario(evento: Evento) {
         // Título y descripción

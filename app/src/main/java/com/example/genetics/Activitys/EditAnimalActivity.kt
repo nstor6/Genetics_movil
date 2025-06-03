@@ -73,7 +73,8 @@ class EditAnimalActivity : AppCompatActivity() {
             try {
                 val response = apiService.getAnimales()
                 if (response.isSuccessful && response.body() != null) {
-                    val animales = response.body()!!
+                    val animalesResponse = response.body()!!
+                    val animales = animalesResponse.results
                     currentAnimal = animales.find { it.id == animalId }
 
                     if (currentAnimal != null) {
@@ -94,6 +95,7 @@ class EditAnimalActivity : AppCompatActivity() {
             }
         }
     }
+
 
     private fun llenarFormulario(animal: Animals) {
         // Información básica

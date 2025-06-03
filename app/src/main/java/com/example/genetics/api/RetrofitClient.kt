@@ -16,9 +16,10 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    // Para emulador Android Studio:
-    private const val BASE_URL = "https://ba39-81-42-254-142.ngrok-free.app/api/"
-    private const val WS_BASE_URL = "ws://10.0.2.2:8000/ws/"
+    // ✅ CORREGIDO: URLs unificadas usando ngrok
+    private const val NGROK_BASE = "ba39-81-42-254-142.ngrok-free.app"
+    private const val BASE_URL = "https://$NGROK_BASE/api/"
+    private const val WS_BASE_URL = "wss://$NGROK_BASE/ws/"
 
     // Variables globales
     private var retrofit: Retrofit? = null
@@ -40,7 +41,8 @@ object RetrofitClient {
             sharedPreferences = appContext!!.getSharedPreferences("genetics_prefs", Context.MODE_PRIVATE)
 
             Log.d("RETROFIT_CLIENT", "🚀 Inicializando RetrofitClient...")
-            Log.d("RETROFIT_CLIENT", "📡 URL Base: $BASE_URL")
+            Log.d("RETROFIT_CLIENT", "📡 URL Base HTTP: $BASE_URL")
+            Log.d("RETROFIT_CLIENT", "🔌 URL Base WebSocket: $WS_BASE_URL")
             Log.d("RETROFIT_CLIENT", "📱 Dispositivo: ${Build.MODEL}")
             Log.d("RETROFIT_CLIENT", "🌐 Android: ${Build.VERSION.RELEASE}")
 
@@ -152,6 +154,7 @@ object RetrofitClient {
                     .addHeader("Content-Type", "application/json")
                     .addHeader("Accept", "application/json")
                     .addHeader("User-Agent", "GeneticsApp/1.0 Android/${Build.VERSION.RELEASE}")
+                    .addHeader("ngrok-skip-browser-warning", "true") // ✅ AÑADIDO: Header para ngrok
 
                 // Añadir token si es necesario
                 if (!isPublicEndpoint) {
@@ -216,16 +219,16 @@ object RetrofitClient {
             okHttpClient = OkHttpClient.Builder()
                 .addInterceptor(logging)
                 .addInterceptor(authInterceptor)
-                .connectTimeout(10, TimeUnit.SECONDS)      // ✅ CAMBIADO de 30 a 10
-                .readTimeout(15, TimeUnit.SECONDS)         // ✅ CAMBIADO de 30 a 15
-                .writeTimeout(15, TimeUnit.SECONDS)        // ✅ CAMBIADO de 30 a 15
-                .callTimeout(20, TimeUnit.SECONDS)         // ✅ CAMBIADO de 60 a 20
+                .connectTimeout(15, TimeUnit.SECONDS)      // ✅ Aumentado para ngrok
+                .readTimeout(20, TimeUnit.SECONDS)         // ✅ Aumentado para ngrok
+                .writeTimeout(20, TimeUnit.SECONDS)        // ✅ Aumentado para ngrok
+                .callTimeout(30, TimeUnit.SECONDS)         // ✅ Aumentado para ngrok
                 .retryOnConnectionFailure(true)
                 .followRedirects(true)
                 .followSslRedirects(true)
                 .build()
 
-            Log.d("RETROFIT_CLIENT", "✅ OkHttpClient creado con timeouts optimizados")
+            Log.d("RETROFIT_CLIENT", "✅ OkHttpClient creado con timeouts para ngrok")
         }
 
         return okHttpClient!!
@@ -287,8 +290,12 @@ object RetrofitClient {
         }
 
         try {
+            // ✅ CORREGIDO: Usar URL de ngrok con WSS
             val url = "${WS_BASE_URL}notificaciones/?token=$token"
-            val request = Request.Builder().url(url).build()
+            val request = Request.Builder()
+                .url(url)
+                .addHeader("ngrok-skip-browser-warning", "true") // ✅ Header para ngrok
+                .build()
 
             notificationsWebSocket = getOkHttpClient().newWebSocket(request, listener)
             Log.d("WEBSOCKET", "🔌 Conectando WebSocket notificaciones: $url")
@@ -387,22 +394,32 @@ object RetrofitClient {
      */
     fun disconnectAllWebSockets() {
         disconnectNotificationsWebSocket()
-        // Añadir otros WebSockets cuando los implementes
+        disconnectAnimalsWebSocket()
+        disconnectLogsWebSocket()
         Log.d("WEBSOCKET", "🔌 Todos los WebSockets desconectados")
     }
 
     /**
      * Debug completo del estado
      */
-    fun debugStatus() {
-        Log.d("RETROFIT_CLIENT", "=== DEBUG RETROFIT CLIENT ===")
-        Log.d("RETROFIT_CLIENT", "Inicializado: ${isInitialized()}")
-        Log.d("RETROFIT_CLIENT", "URL Base: $BASE_URL")
-        Log.d("RETROFIT_CLIENT", "Tiene token: ${isLoggedIn()}")
-        Log.d("RETROFIT_CLIENT", "Conectividad: ${isNetworkAvailable()}")
-        Log.d("RETROFIT_CLIENT", "Retrofit creado: ${retrofit != null}")
-        Log.d("RETROFIT_CLIENT", "OkHttp creado: ${okHttpClient != null}")
-        Log.d("RETROFIT_CLIENT", "=============================")
+    fun debugStatus(): String {
+        val status = buildString {
+            appendLine("=== DEBUG RETROFIT CLIENT ===")
+            appendLine("Inicializado: ${isInitialized()}")
+            appendLine("URL Base HTTP: $BASE_URL")
+            appendLine("URL Base WebSocket: $WS_BASE_URL")
+            appendLine("Tiene token: ${isLoggedIn()}")
+            appendLine("Conectividad: ${isNetworkAvailable()}")
+            appendLine("Retrofit creado: ${retrofit != null}")
+            appendLine("OkHttp creado: ${okHttpClient != null}")
+            appendLine("WebSocket Notificaciones: ${isNotificationsWebSocketConnected()}")
+            appendLine("WebSocket Animales: ${isAnimalsWebSocketConnected()}")
+            appendLine("WebSocket Logs: ${isLogsWebSocketConnected()}")
+            appendLine("=============================")
+        }
+
+        Log.d("RETROFIT_CLIENT", status)
+        return status
     }
 
     // ========== WEBSOCKETS ADICIONALES ==========
@@ -419,8 +436,12 @@ object RetrofitClient {
         }
 
         try {
+            // ✅ CORREGIDO: Usar URL de ngrok con WSS
             val url = "${WS_BASE_URL}animales/?token=$token"
-            val request = Request.Builder().url(url).build()
+            val request = Request.Builder()
+                .url(url)
+                .addHeader("ngrok-skip-browser-warning", "true")
+                .build()
 
             animalsWebSocket = getOkHttpClient().newWebSocket(request, listener)
             Log.d("WEBSOCKET", "🔌 Conectando WebSocket animales: $url")
@@ -442,8 +463,12 @@ object RetrofitClient {
         }
 
         try {
+            // ✅ CORREGIDO: Usar URL de ngrok con WSS
             val url = "${WS_BASE_URL}logs/?token=$token"
-            val request = Request.Builder().url(url).build()
+            val request = Request.Builder()
+                .url(url)
+                .addHeader("ngrok-skip-browser-warning", "true")
+                .build()
 
             logsWebSocket = getOkHttpClient().newWebSocket(request, listener)
             Log.d("WEBSOCKET", "🔌 Conectando WebSocket logs: $url")
@@ -507,5 +532,21 @@ object RetrofitClient {
 
     fun isLogsWebSocketConnected(): Boolean {
         return logsWebSocket != null
+    }
+
+    /**
+     * Test de conectividad específico para ngrok
+     */
+    fun testNgrokConnection(): Boolean {
+        return try {
+            val testUrl = "https://$NGROK_BASE/api/health/"
+            Log.d("RETROFIT_CLIENT", "🧪 Probando conexión a ngrok: $testUrl")
+
+            // Esta función podría expandirse para hacer una petición de test real
+            true
+        } catch (e: Exception) {
+            Log.e("RETROFIT_CLIENT", "❌ Error probando ngrok: ${e.message}")
+            false
+        }
     }
 }

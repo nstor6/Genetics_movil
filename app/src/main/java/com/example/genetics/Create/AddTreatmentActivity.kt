@@ -72,8 +72,11 @@ class AddTreatmentActivity : AppCompatActivity() {
             try {
                 val response = apiService.getAnimales()
                 if (response.isSuccessful && response.body() != null) {
+                    val animalesResponse = response.body()!!
+                    val animals = animalesResponse.results
+
                     animalesList.clear()
-                    animalesList.addAll(response.body()!!)
+                    animalesList.addAll(animals)
                     setupSpinnerAnimales()
                 } else {
                     Toast.makeText(this@AddTreatmentActivity, "Error cargando animales", Toast.LENGTH_SHORT).show()
@@ -85,6 +88,7 @@ class AddTreatmentActivity : AppCompatActivity() {
             }
         }
     }
+
 
     private fun setupSpinnerAnimales() {
         val animalNames = mutableListOf("Seleccionar animal")

@@ -167,7 +167,7 @@ class CalendarActivity : AppCompatActivity() {
                 android.util.Log.d("CALENDAR_ACTIVITY", "📡 Response code: ${response.code()}")
 
                 if (response.isSuccessful && response.body() != null) {
-                    val events = response.body()!!
+                    val events = response.body()!!.results
                     android.util.Log.d("CALENDAR_ACTIVITY", "✅ Eventos recibidos: ${events.size}")
 
                     eventosList.clear()

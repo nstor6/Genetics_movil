@@ -67,7 +67,8 @@ class UserAnimalsActivity : AppCompatActivity() {
                 val response = apiService.getAnimales()
 
                 if (response.isSuccessful && response.body() != null) {
-                    val animals = response.body()!!
+                    val animalesResponse = response.body()!!
+                    val animals = animalesResponse.results
 
                     animalsList.clear()
                     animalsList.addAll(animals)

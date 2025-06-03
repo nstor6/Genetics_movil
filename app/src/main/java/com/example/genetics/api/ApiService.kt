@@ -1,6 +1,10 @@
 package com.example.genetics.api
 
+import com.example.genetics.api.models.AnimalResponse
 import com.example.genetics.api.models.Animals
+import com.example.genetics.api.models.EventoResponse
+import com.example.genetics.api.models.IncidentResponse
+import com.example.genetics.api.models.TreatmentResponse
 import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.*
@@ -38,7 +42,7 @@ interface ApiService {
     // ========== ANIMALES ==========
 
     @GET("animales/")
-    suspend fun getAnimales(): Response<List<Animals>>
+    suspend fun getAnimales(): Response<AnimalResponse>
 
     @GET("animales/{id}/")
     suspend fun getAnimal(@Path("id") id: Int): Response<Animals>
@@ -65,7 +69,7 @@ interface ApiService {
     // ========== INCIDENCIAS ==========
 
     @GET("incidencias/")
-    suspend fun getIncidencias(): Response<List<Incidencia>>
+    suspend fun getIncidencias(): Response<IncidentResponse>
 
     @GET("incidencias/{id}/")
     suspend fun getIncidencia(@Path("id") id: Int): Response<Incidencia>
@@ -82,7 +86,7 @@ interface ApiService {
     // ========== TRATAMIENTOS ==========
 
     @GET("tratamientos/")
-    suspend fun getTratamientos(): Response<List<Tratamiento>>
+    suspend fun getTratamientos(): Response<TreatmentResponse>
 
     @GET("tratamientos/{id}/")
     suspend fun getTratamiento(@Path("id") id: Int): Response<Tratamiento>
@@ -99,7 +103,7 @@ interface ApiService {
     // ========== EVENTOS ==========
 
     @GET("eventos/")
-    suspend fun getEventos(): Response<List<Evento>>
+    suspend fun getEventos(): Response<EventoResponse>
 
     @GET("eventos/{id}/")
     suspend fun getEvento(@Path("id") id: Int): Response<Evento>

@@ -171,7 +171,8 @@ class TreatmentsActivity : AppCompatActivity() {
                 android.util.Log.d("TREATMENTS_ACTIVITY", "📡 Response code: ${response.code()}")
 
                 if (response.isSuccessful && response.body() != null) {
-                    val treatments = response.body()!!
+                    val treatmentResponse = response.body()!!
+                    val treatments = treatmentResponse.results
                     android.util.Log.d("TREATMENTS_ACTIVITY", "✅ Tratamientos recibidos: ${treatments.size}")
 
                     // Limpiar y actualizar la lista
@@ -202,6 +203,7 @@ class TreatmentsActivity : AppCompatActivity() {
             }
         }
     }
+
 
     private fun updateEmptyState(isEmpty: Boolean) {
         if (isEmpty) {

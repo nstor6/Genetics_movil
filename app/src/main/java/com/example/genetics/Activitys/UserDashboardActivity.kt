@@ -220,8 +220,9 @@ class UserDashboardActivity : AppCompatActivity() {
             apiService.getAnimales()
         }
             .onSuccess { response ->
-                if (response.isSuccessful) {
-                    val animals = response.body() ?: emptyList()
+                if (response.isSuccessful && response.body() != null) {
+                    val animalesResponse = response.body()!!
+                    val animals = animalesResponse.results
                     binding.textAnimalsCount.text = animals.size.toString()
                     Log.d("USER_DASHBOARD", "📊 Animales cargados: ${animals.size}")
                 }
@@ -232,14 +233,17 @@ class UserDashboardActivity : AppCompatActivity() {
             }
     }
 
+
     private suspend fun loadIncidentsStats() {
         safeApiCall("LOAD_INCIDENTS_STATS") {
             apiService.getIncidencias()
         }
             .onSuccess { response ->
-                if (response.isSuccessful) {
-                    val incidents = response.body() ?: emptyList()
+                if (response.isSuccessful && response.body() != null) {
+                    val incidentResponse = response.body()!!
+                    val incidents = incidentResponse.results
                     val pending = incidents.count { it.estado == "pendiente" }
+
                     binding.textIncidentsCount.text = pending.toString()
                     Log.d("USER_DASHBOARD", "📊 Incidencias pendientes: $pending de ${incidents.size}")
                 }
@@ -250,13 +254,16 @@ class UserDashboardActivity : AppCompatActivity() {
             }
     }
 
+
     private suspend fun loadTreatmentsStats() {
         safeApiCall("LOAD_TREATMENTS_STATS") {
             apiService.getTratamientos()
         }
             .onSuccess { response ->
-                if (response.isSuccessful) {
-                    val treatments = response.body() ?: emptyList()
+                if (response.isSuccessful && response.body() != null) {
+                    val treatmentResponse = response.body()!!
+                    val treatments = treatmentResponse.results
+
                     val recentTreatments = treatments.filter {
                         try {
                             val treatmentDate = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).parse(it.fecha)
@@ -268,6 +275,7 @@ class UserDashboardActivity : AppCompatActivity() {
                             false
                         }
                     }
+
                     binding.textTreatmentsCount.text = recentTreatments.size.toString()
                     Log.d("USER_DASHBOARD", "📊 Tratamientos recientes: ${recentTreatments.size} de ${treatments.size}")
                 }
@@ -278,13 +286,14 @@ class UserDashboardActivity : AppCompatActivity() {
             }
     }
 
+
     private suspend fun loadEventsStats() {
         safeApiCall("LOAD_EVENTS_STATS") {
             apiService.getEventos()
         }
             .onSuccess { response ->
                 if (response.isSuccessful) {
-                    val events = response.body() ?: emptyList()
+                    val events = response.body()?.results ?: emptyList()
                     val upcomingEvents = events.filter { evento ->
                         try {
                             val eventoFecha = evento.fecha_inicio.substring(0, 10)
@@ -307,6 +316,7 @@ class UserDashboardActivity : AppCompatActivity() {
                 binding.textEventsCount.text = "0"
             }
     }
+
 
     private fun logout() {
         androidx.appcompat.app.AlertDialog.Builder(this)
