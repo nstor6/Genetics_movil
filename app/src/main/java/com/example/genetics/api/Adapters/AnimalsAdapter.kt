@@ -10,12 +10,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.genetics.Create.AddIncidentActivity
 import com.example.genetics.Create.AddTreatmentActivity
 import com.example.genetics.R
-import com.example.genetics.api.Animals
+import com.example.genetics.api.models.Animals
 import java.util.Locale
 
-// Actualizar la clase AnimalsAdapter para incluir callback de edición:
+/**
+ * Adapter corregido para lista de animales (Admin)
+ * Usa el modelo Animals unificado
+ */
 class AnimalsAdapter(
-    private val animalsList: List<Animals>,
+    private val animalsList: List<Animals>, // ✅ Usar Animals (no Animal)
     private val onItemClick: ((Animals) -> Unit)? = null,
     private val onEditClick: ((Animals) -> Unit)? = null
 ) : RecyclerView.Adapter<AnimalsAdapter.AnimalViewHolder>() {
@@ -54,7 +57,12 @@ class AnimalsAdapter(
 
         private fun mostrarOpcionesAnimal(animal: Animals) {
             val context = itemView.context
-            val opciones = arrayOf("👁️ Ver detalles", "✏️ Editar animal", "🚨 Nueva incidencia", "💊 Nuevo tratamiento")
+            val opciones = arrayOf(
+                "👁️ Ver detalles",
+                "✏️ Editar animal",
+                "🚨 Nueva incidencia",
+                "💊 Nuevo tratamiento"
+            )
 
             androidx.appcompat.app.AlertDialog.Builder(context)
                 .setTitle("Opciones para ${animal.chapeta}")
@@ -81,9 +89,8 @@ class AnimalsAdapter(
                 .show()
         }
 
-        // El resto del método bind() permanece igual...
         fun bind(animal: Animals) {
-            // Usar operador safe call (?.) y elvis operator (?:)
+            // ✅ USAR SAFE CALLS Y OPERADOR ELVIS
             textChapeta.text = "📋 ${animal.chapeta ?: "N/A"}"
 
             textNombre.text = if (animal.nombre.isNullOrEmpty()) {

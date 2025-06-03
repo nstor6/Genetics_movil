@@ -1,7 +1,11 @@
-package com.example.genetics.api
+package com.example.genetics.api.models
 
 import com.google.gson.annotations.SerializedName
 
+/**
+ * Modelo principal para Animals
+ * Este es el modelo que se usa en toda la aplicación
+ */
 data class Animals(
     @SerializedName("id")
     val id: Int? = null,
@@ -62,4 +66,23 @@ data class Animals(
 
     @SerializedName("modificado_por")
     val modificado_por: Int? = null
-)
+) {
+    companion object {
+        /**
+         * Crear instancia vacía para formularios
+         */
+        fun empty(): Animals {
+            return Animals()
+        }
+
+        /**
+         * Validar que los campos obligatorios estén presentes
+         */
+        fun Animals.isValid(): Boolean {
+            return !chapeta.isNullOrBlank() &&
+                    !sexo.isNullOrBlank() &&
+                    !fecha_nacimiento.isNullOrBlank() &&
+                    !raza.isNullOrBlank()
+        }
+    }
+}

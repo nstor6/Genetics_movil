@@ -7,12 +7,14 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.genetics.R
-import com.example.genetics.api.Animals
+import com.example.genetics.api.models.Animals
 import java.util.Locale
 
-// ✅ Adapter de SOLO LECTURA para usuarios normales
+/**
+ * Adapter para usuarios normales (solo lectura)
+ */
 class UserAnimalsAdapter(
-    private val animalsList: List<Animals>,
+    private val animalsList: List<Animals>, // ✅ Usar Animals (no Animal)
     private val onItemClick: ((Animals) -> Unit)? = null
 ) : RecyclerView.Adapter<UserAnimalsAdapter.AnimalViewHolder>() {
 
@@ -36,11 +38,10 @@ class UserAnimalsAdapter(
             }
 
             // ❌ NO HAY LONG CLICK - Sin opciones de edición/eliminar
-            // Los usuarios no pueden editar ni eliminar animales
         }
 
         fun bind(animal: Animals) {
-            // Usar operador safe call (?.) y elvis operator (?:)
+            // ✅ USAR SAFE CALLS Y OPERADOR ELVIS - IGUAL QUE ARRIBA
             textChapeta.text = "📋 ${animal.chapeta ?: "N/A"}"
 
             textNombre.text = if (animal.nombre.isNullOrEmpty()) {
@@ -57,7 +58,6 @@ class UserAnimalsAdapter(
                 else -> "❓ No especificado"
             }
 
-            // Capitalizar primera letra de forma segura
             val estadoProductivo = animal.estado_productivo?.let { estado ->
                 if (estado.isNotEmpty()) {
                     estado.replaceFirstChar { char ->
@@ -82,10 +82,8 @@ class UserAnimalsAdapter(
 
             textEstadoReproductivo.text = "💕 $estadoReproductivo"
 
-            // Configurar imagen de forma segura
+            // Configurar imagen
             if (!animal.foto_perfil_url.isNullOrEmpty()) {
-                // TODO: Usar Glide o Picasso para cargar la imagen
-                // Glide.with(itemView.context).load(animal.foto_perfil_url).into(imageAnimal)
                 imageAnimal.setImageResource(R.drawable.cow_image)
             } else {
                 imageAnimal.setImageResource(R.drawable.cow_image)

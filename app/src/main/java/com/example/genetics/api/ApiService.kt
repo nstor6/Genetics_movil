@@ -1,10 +1,12 @@
 package com.example.genetics.api
 
+import com.example.genetics.api.models.Animals
 import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.*
 
-// Modelos de datos
+// ========== MODELOS DE REQUEST/RESPONSE ==========
+
 data class LoginRequest(
     val email: String,
     val password: String
@@ -15,76 +17,58 @@ data class LoginResponse(
     val refresh: String
 )
 
-data class Animal(
-    val id: Int? = null,
-    val chapeta: String,
-    val nombre: String?,
-    val sexo: String,
-    val fecha_nacimiento: String,
-    val raza: String,
-    val estado_reproductivo: String?,
-    val estado_productivo: String?,
-    val peso_actual: Float?,
-    val ubicacion_actual: String?,
-    val foto_perfil_url: String?,
-    val notas: String?
-)
+// ========== INTERFACE PRINCIPAL ==========
 
-data class Incidencia(
-    val id: Int? = null,
-    val animal: Int,
-    val tipo: String,
-    val descripcion: String,
-    val fecha_deteccion: String,
-    val estado: String,
-    val fecha_resolucion: String?
-)
-
-data class Tratamiento(
-    val id: Int? = null,
-    val animal: Int,
-    val fecha: String,
-    val medicamento: String,
-    val dosis: String,
-    val duracion: String,
-    val administrado_por: Int?,
-    val observaciones: String?
-)
-
-data class Evento(
-    val id: Int? = null,
-    val titulo: String,
-    val descripcion: String?,
-    val fecha_inicio: String,
-    val fecha_fin: String?,
-    val animal: Int?,
-    val tipo: String,
-    val recurrente: Boolean
-)
-
-// Interface para las llamadas a la API
 interface ApiService {
 
-    // Autenticación
+    // ========== AUTENTICACIÓN ==========
+
     @POST("auth/login/")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
 
-    // Animales
+    @POST("auth/refresh/")
+    suspend fun refreshToken(@Body refreshToken: Map<String, String>): Response<LoginResponse>
+
+    @GET("auth/me/")
+    suspend fun getCurrentUser(): Response<Usuario>
+
+    @POST("auth/logout/")
+    suspend fun logout(): Response<Unit>
+
+    // ========== ANIMALES ==========
+
     @GET("animales/")
     suspend fun getAnimales(): Response<List<Animals>>
 
+    @GET("animales/{id}/")
+    suspend fun getAnimal(@Path("id") id: Int): Response<Animals>
+
     @POST("animales/")
-    suspend fun crearAnimal(@Body animals: Animals): Response<Animals>
+    suspend fun crearAnimal(@Body animal: Animals): Response<Animals>
 
     @PUT("animales/{id}/")
-    suspend fun actualizarAnimal(@Path("id") id: Int, @Body animals: Animals): Response<Animals>
+    suspend fun actualizarAnimal(@Path("id") id: Int, @Body animal: Animals): Response<Animals>
 
     @DELETE("animales/{id}/")
     suspend fun eliminarAnimal(@Path("id") id: Int): Response<Unit>
 
-    // Incidencias
+    @Multipart
+    @POST("animales/{id}/subir_imagen/")
+    suspend fun subirImagenAnimal(
+        @Path("id") id: Int,
+        @Part image: MultipartBody.Part
+    ): Response<ImageUploadResponse>
+
+    @DELETE("animales/{id}/eliminar_imagen/")
+    suspend fun eliminarImagenAnimal(@Path("id") id: Int): Response<Unit>
+
+    // ========== INCIDENCIAS ==========
+
     @GET("incidencias/")
     suspend fun getIncidencias(): Response<List<Incidencia>>
+
+    @GET("incidencias/{id}/")
+    suspend fun getIncidencia(@Path("id") id: Int): Response<Incidencia>
 
     @POST("incidencias/")
     suspend fun crearIncidencia(@Body incidencia: Incidencia): Response<Incidencia>
@@ -95,9 +79,13 @@ interface ApiService {
     @DELETE("incidencias/{id}/")
     suspend fun eliminarIncidencia(@Path("id") id: Int): Response<Unit>
 
-    // Tratamientos
+    // ========== TRATAMIENTOS ==========
+
     @GET("tratamientos/")
     suspend fun getTratamientos(): Response<List<Tratamiento>>
+
+    @GET("tratamientos/{id}/")
+    suspend fun getTratamiento(@Path("id") id: Int): Response<Tratamiento>
 
     @POST("tratamientos/")
     suspend fun crearTratamiento(@Body tratamiento: Tratamiento): Response<Tratamiento>
@@ -108,9 +96,13 @@ interface ApiService {
     @DELETE("tratamientos/{id}/")
     suspend fun eliminarTratamiento(@Path("id") id: Int): Response<Unit>
 
-    // Eventos
+    // ========== EVENTOS ==========
+
     @GET("eventos/")
     suspend fun getEventos(): Response<List<Evento>>
+
+    @GET("eventos/{id}/")
+    suspend fun getEvento(@Path("id") id: Int): Response<Evento>
 
     @POST("eventos/")
     suspend fun crearEvento(@Body evento: Evento): Response<Evento>
@@ -121,68 +113,130 @@ interface ApiService {
     @DELETE("eventos/{id}/")
     suspend fun eliminarEvento(@Path("id") id: Int): Response<Unit>
 
-    //Usuarios
-    @GET("auth/me/")
-    suspend fun getCurrentUser(): Response<Usuario>
+    // ========== NOTIFICACIONES ==========
 
-    // Cambiar contraseña
-    @POST("auth/change-password/")
-    suspend fun changePassword(@Body request: ChangePasswordRequest): Response<Unit>
+    @GET("notificaciones/")
+    suspend fun getNotificaciones(): Response<List<Notificacion>>
 
-    // === GESTIÓN DE USUARIOS (Solo para administradores) ===
-    // ✅ BASADO EN TU urls.py: api/auth/ incluye usuarios.urls
+    @PUT("notificaciones/{id}/")
+    suspend fun actualizarNotificacion(@Path("id") id: Int, @Body notificacion: Notificacion): Response<Notificacion>
 
-    // Listar todos los usuarios - Sin endpoint específico (usar auth/ directo)
+    @DELETE("notificaciones/{id}/")
+    suspend fun eliminarNotificacion(@Path("id") id: Int): Response<Unit>
+
+    // ========== USUARIOS (Solo Admin) ==========
+
     @GET("auth/")
     suspend fun getUsers(): Response<List<Usuario>>
 
-    // Obtener usuario específico por ID
     @GET("auth/{id}/")
     suspend fun getUser(@Path("id") id: Int): Response<Usuario>
 
-    // Crear nuevo usuario (registro)
     @POST("auth/register/")
     suspend fun createUser(@Body request: CreateUserRequest): Response<Usuario>
 
-    // Actualizar usuario existente
     @PUT("auth/{id}/")
     suspend fun updateUser(@Path("id") id: Int, @Body request: UpdateUserRequest): Response<Usuario>
 
-    // Eliminar usuario
     @DELETE("auth/{id}/")
     suspend fun deleteUser(@Path("id") id: Int): Response<Unit>
 
-    // Activar/Desactivar usuario
     @PATCH("auth/{id}/toggle-active/")
     suspend fun toggleUserActive(@Path("id") id: Int): Response<Usuario>
 
-    // === GESTIÓN DE PERFILES ===
+    // ========== PERFIL DE USUARIO ==========
 
-    // Obtener perfil del usuario actual
     @GET("auth/profile/")
     suspend fun getCurrentUserProfile(): Response<UserProfile>
 
-    // Actualizar perfil del usuario actual
     @PUT("auth/profile/")
     suspend fun updateCurrentUserProfile(@Body request: UpdateProfileRequest): Response<UserProfile>
 
-    // Subir foto de perfil
     @Multipart
     @POST("auth/profile/upload-photo/")
     suspend fun uploadProfilePhoto(@Part photo: MultipartBody.Part): Response<UserProfile>
 
-    // === ADMINISTRACIÓN AVANZADA ===
+    @POST("auth/change-password/")
+    suspend fun changePassword(@Body request: ChangePasswordRequest): Response<Unit>
 
-    // Obtener usuarios por rol
-    @GET("users/by-role/")
-    suspend fun getUsersByRole(@Query("role") role: String): Response<List<Usuario>>
+    // ========== LOGS (Solo Admin) ==========
 
-    // Asignar rol a usuario
-    @POST("users/{id}/assign-role/")
-    suspend fun assignRole(@Path("id") id: Int, @Body role: Map<String, String>): Response<Usuario>
+    @GET("logs/")
+    suspend fun getLogs(): Response<List<Log>>
 
-    // Obtener logs de actividad del usuario
-    @GET("users/{id}/activity-logs/")
-    suspend fun <ActivityLog> getUserActivityLogs(@Path("id") id: Int): Response<List<ActivityLog>>
+    // ========== GRUPOS ==========
 
+    @GET("grupos/")
+    suspend fun getGrupos(): Response<List<Grupo>>
+
+    @POST("grupos/")
+    suspend fun crearGrupo(@Body grupo: Grupo): Response<Grupo>
+
+    @PUT("grupos/{id}/")
+    suspend fun actualizarGrupo(@Path("id") id: Int, @Body grupo: Grupo): Response<Grupo>
+
+    @DELETE("grupos/{id}/")
+    suspend fun eliminarGrupo(@Path("id") id: Int): Response<Unit>
+
+    // ========== ENDPOINTS DE SALUD ==========
+
+    @GET("health/")
+    suspend fun healthCheck(): Response<HealthResponse>
+
+    @GET("status/")
+    suspend fun getStatus(): Response<StatusResponse>
 }
+
+// ========== MODELOS DE RESPUESTA AUXILIARES ==========
+
+data class ImageUploadResponse(
+    val success: Boolean,
+    val url: String,
+    val message: String
+)
+
+data class HealthResponse(
+    val status: String,
+    val timestamp: String,
+    val version: String,
+    val database: String
+)
+
+data class StatusResponse(
+    val api_version: String,
+    val endpoints: Map<String, String>,
+    val server_time: String,
+    val status: String
+)
+
+data class Log(
+    val id: Int? = null,
+    val usuario: Int? = null,
+    val tipo_accion: String,
+    val entidad_afectada: String,
+    val entidad_id: String,
+    val fecha_hora: String? = null,
+    val cambios: Map<String, Any>? = null,
+    val observaciones: String? = null
+)
+
+data class Grupo(
+    val id: Int? = null,
+    val nombre: String,
+    val descripcion: String? = null,
+    val tipo: String,
+    val animal_ids: List<Int>? = null,
+    val fecha_creacion: String? = null,
+    val estado_actual: String? = null
+)
+
+data class Notificacion(
+    val id: Int? = null,
+    val usuario: Int,
+    val mensaje: String,
+    val tipo: String,
+    val fecha_creacion: String? = null,
+    val visto: Boolean = false,
+    val relacionado_con_animal: Int? = null,
+    val relacionado_con_evento: Int? = null
+)

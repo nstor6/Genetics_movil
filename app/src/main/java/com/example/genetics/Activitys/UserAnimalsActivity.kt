@@ -7,7 +7,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.genetics.api.Adapters.UserAnimalsAdapter
-import com.example.genetics.api.Animals
+import com.example.genetics.api.models.Animals
 import com.example.genetics.api.RetrofitClient
 import com.example.genetics.databinding.ActivityUserAnimalsBinding
 import kotlinx.coroutines.launch

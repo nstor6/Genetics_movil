@@ -3,6 +3,9 @@ package com.example.genetics.api
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
 import android.util.Log
 import com.example.genetics.LoginActivity
 import okhttp3.*
@@ -13,9 +16,20 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    // Configuración del servidor
-    private const val BASE_URL = "https://51b6-81-42-254-142.ngrok-free.app/api/"
-    private const val WS_BASE_URL = "wss://51b6-81-42-254-142.ngrok-free.app/ws/"
+    // 🔧 ACTUALIZA ESTA URL SEGÚN TU CONFIGURACIÓN
+    // Para emulador Android Studio:
+    private const val BASE_URL = "http://10.0.2.2:8000/api/"
+
+    // Para dispositivo físico (cambia XXX por tu IP):
+    // private const val BASE_URL = "http://192.168.1.XXX:8000/api/"
+
+    // Para ngrok (actualiza con tu URL actual):
+    // private const val BASE_URL = "https://51b6-81-42-254-142.ngrok-free.app/api/"
+
+    // Para servidor en la nube:
+    // private const val BASE_URL = "https://tu-dominio.com/api/"
+
+    private const val WS_BASE_URL = "ws://10.0.2.2:8000/ws/"
 
     // Variables globales
     private var retrofit: Retrofit? = null
@@ -29,22 +43,72 @@ object RetrofitClient {
     private var logsWebSocket: WebSocket? = null
 
     /**
-     * Inicializar RetrofitClient
-     * DEBE llamarse desde Application.onCreate() o MainActivity.onCreate()
+     * Inicializar RetrofitClient con validación completa
      */
-    fun initialize(context: Context) {
-        appContext = context.applicationContext
-        sharedPreferences = appContext!!.getSharedPreferences("genetics_prefs", Context.MODE_PRIVATE)
-        Log.d("RETROFIT_CLIENT", "Conectando a: $BASE_URL")
-        Log.d("RETROFIT_CLIENT", "WebSocket URL: $WS_BASE_URL")
-        Log.d("RETROFIT_CLIENT", "RetrofitClient inicializado correctamente")
+    fun initialize(context: Context): Boolean {
+        return try {
+            appContext = context.applicationContext
+            sharedPreferences = appContext!!.getSharedPreferences("genetics_prefs", Context.MODE_PRIVATE)
+
+            Log.d("RETROFIT_CLIENT", "🚀 Inicializando RetrofitClient...")
+            Log.d("RETROFIT_CLIENT", "📡 URL Base: $BASE_URL")
+            Log.d("RETROFIT_CLIENT", "📱 Dispositivo: ${Build.MODEL}")
+            Log.d("RETROFIT_CLIENT", "🌐 Android: ${Build.VERSION.RELEASE}")
+
+            // Verificar conectividad
+            if (!isNetworkAvailable()) {
+                Log.e("RETROFIT_CLIENT", "❌ Sin conexión a Internet")
+                return false
+            }
+
+            Log.d("RETROFIT_CLIENT", "✅ Conectividad verificada")
+            Log.d("RETROFIT_CLIENT", "✅ RetrofitClient inicializado correctamente")
+            true
+
+        } catch (e: Exception) {
+            Log.e("RETROFIT_CLIENT", "❌ Error crítico inicializando: ${e.message}")
+            e.printStackTrace()
+            false
+        }
     }
 
     /**
      * Verificar si está inicializado
      */
     private fun isInitialized(): Boolean {
-        return sharedPreferences != null && appContext != null
+        val initialized = sharedPreferences != null && appContext != null
+        if (!initialized) {
+            Log.w("RETROFIT_CLIENT", "⚠️ RetrofitClient NO está inicializado")
+        }
+        return initialized
+    }
+
+    /**
+     * Verificar conectividad de red
+     */
+    private fun isNetworkAvailable(): Boolean {
+        return try {
+            val connectivityManager = appContext!!.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                val network = connectivityManager.activeNetwork
+                val capabilities = connectivityManager.getNetworkCapabilities(network)
+                val hasInternet = capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
+
+                Log.d("RETROFIT_CLIENT", "🌐 Conectividad (API ≥23): $hasInternet")
+                hasInternet
+            } else {
+                @Suppress("DEPRECATION")
+                val networkInfo = connectivityManager.activeNetworkInfo
+                val connected = networkInfo?.isConnected == true
+
+                Log.d("RETROFIT_CLIENT", "🌐 Conectividad (API <23): $connected")
+                connected
+            }
+        } catch (e: Exception) {
+            Log.e("RETROFIT_CLIENT", "❌ Error verificando conectividad: ${e.message}")
+            false
+        }
     }
 
     /**
@@ -54,94 +118,110 @@ object RetrofitClient {
         if (!isInitialized()) {
             throw IllegalStateException(
                 "RetrofitClient no ha sido inicializado. " +
-                        "Llama a RetrofitClient.initialize(context) antes de usar el cliente."
+                        "Llama a RetrofitClient.initialize(context) en Application.onCreate() o MainActivity.onCreate()"
             )
         }
     }
 
     /**
-     * Crear cliente HTTP con interceptores
+     * Crear cliente HTTP con interceptores mejorados
      */
     private fun getOkHttpClient(): OkHttpClient {
         ensureInitialized()
 
         if (okHttpClient == null) {
+            Log.d("RETROFIT_CLIENT", "🔧 Creando OkHttpClient...")
+
             // Logging interceptor
             val logging = HttpLoggingInterceptor { message ->
-                Log.d("HTTP_LOG", message)
+                // Evitar logs demasiado largos
+                if (message.length > 1000) {
+                    Log.d("HTTP_LOG", "${message.take(500)}... [TRUNCADO] ...${message.takeLast(100)}")
+                } else {
+                    Log.d("HTTP_LOG", message)
+                }
             }.apply {
                 level = HttpLoggingInterceptor.Level.BODY
             }
 
-            // Interceptor de autenticación
+            // Interceptor de autenticación mejorado
             val authInterceptor = Interceptor { chain ->
-                val request = chain.request()
-                val url = request.url.toString()
+                val originalRequest = chain.request()
+                val url = originalRequest.url.toString()
 
-                Log.d("AUTH_INTERCEPTOR", "Petición a: $url")
+                Log.d("AUTH_INTERCEPTOR", "📡 Petición a: ${originalRequest.method} $url")
 
                 // Endpoints públicos (no requieren token)
                 val isPublicEndpoint = url.contains("/auth/login") ||
                         url.contains("/auth/register") ||
-                        url.contains("/auth/registro") ||
                         url.contains("/auth/refresh") ||
                         url.contains("/health") ||
-                        url.contains("/cors-test")
+                        url.contains("/cors-test") ||
+                        url.contains("/status")
 
-                val requestBuilder = request.newBuilder()
+                val requestBuilder = originalRequest.newBuilder()
                     .addHeader("Content-Type", "application/json")
                     .addHeader("Accept", "application/json")
-                    .addHeader("User-Agent", "GeneticsApp/1.0 Android")
+                    .addHeader("User-Agent", "GeneticsApp/1.0 Android/${Build.VERSION.RELEASE}")
 
                 // Añadir token si es necesario
                 if (!isPublicEndpoint) {
                     val token = getToken()
-                    Log.d("AUTH_INTERCEPTOR", "Token para $url: ${if (token != null) "Presente" else "Ausente"}")
 
                     if (token != null) {
                         requestBuilder.addHeader("Authorization", "Bearer $token")
-                        Log.d("AUTH_INTERCEPTOR", "Header Authorization añadido")
+                        Log.d("AUTH_INTERCEPTOR", "✅ Token añadido (${token.take(20)}...)")
                     } else {
-                        Log.w("AUTH_INTERCEPTOR", "No hay token para endpoint protegido: $url")
+                        Log.w("AUTH_INTERCEPTOR", "⚠️ No hay token para endpoint protegido")
                     }
                 } else {
-                    Log.d("AUTH_INTERCEPTOR", "Endpoint público, no se añade token")
+                    Log.d("AUTH_INTERCEPTOR", "🔓 Endpoint público - sin token")
                 }
 
-                val finalRequest = requestBuilder.build()
-                Log.d("HTTP_REQUEST", "${finalRequest.method} ${finalRequest.url}")
+                val request = requestBuilder.build()
+                val startTime = System.currentTimeMillis()
 
-                // Log de headers para debugging
-                finalRequest.headers.forEach { (name, value) ->
-                    if (name.equals("Authorization", ignoreCase = true)) {
-                        Log.d("HTTP_REQUEST", "Header: $name: Bearer ${value.removePrefix("Bearer ").take(20)}...")
-                    } else {
-                        Log.d("HTTP_REQUEST", "Header: $name: $value")
+                try {
+                    val response = chain.proceed(request)
+                    val endTime = System.currentTimeMillis()
+
+                    Log.d("HTTP_RESPONSE", "📊 ${response.code} ${response.message} (${endTime - startTime}ms)")
+
+                    // Manejo específico de errores
+                    when (response.code) {
+                        401 -> {
+                            if (!isPublicEndpoint) {
+                                Log.w("AUTH_INTERCEPTOR", "🚨 401 Unauthorized - Token inválido")
+                                val responseBody = response.peekBody(1024).string()
+                                Log.w("AUTH_INTERCEPTOR", "Respuesta: $responseBody")
+
+                                if (responseBody.contains("token", ignoreCase = true) ||
+                                    responseBody.contains("authentication", ignoreCase = true) ||
+                                    responseBody.contains("credentials", ignoreCase = true)) {
+
+                                    Log.w("AUTH_INTERCEPTOR", "🗑️ Limpiando token inválido")
+                                    clearToken()
+                                    redirectToLogin()
+                                }
+                            }
+                        }
+                        403 -> {
+                            Log.w("AUTH_INTERCEPTOR", "🚫 403 Forbidden - Sin permisos")
+                        }
+                        404 -> {
+                            Log.w("AUTH_INTERCEPTOR", "🔍 404 Not Found - Endpoint no existe: $url")
+                        }
+                        500 -> {
+                            Log.e("AUTH_INTERCEPTOR", "💥 500 Server Error")
+                        }
                     }
+
+                    response
+
+                } catch (e: Exception) {
+                    Log.e("AUTH_INTERCEPTOR", "💥 Error en petición: ${e.message}")
+                    throw e
                 }
-
-                val response = chain.proceed(finalRequest)
-                Log.d("HTTP_RESPONSE", "Código: ${response.code}")
-                Log.d("HTTP_RESPONSE", "Mensaje: ${response.message}")
-
-                // Manejo de 401 Unauthorized
-                if (response.code == 401 && !isPublicEndpoint) {
-                    Log.w("AUTH_INTERCEPTOR", "401 Unauthorized para: $url")
-                    val responseBody = response.peekBody(1024).string()
-                    Log.w("AUTH_INTERCEPTOR", "Respuesta 401: $responseBody")
-
-                    // Solo limpiar token si realmente es un problema de autenticación
-                    if (responseBody.contains("Authentication credentials") ||
-                        responseBody.contains("Invalid token") ||
-                        responseBody.contains("Token expired")) {
-                        Log.w("AUTH_INTERCEPTOR", "Token inválido, limpiando y redirigiendo...")
-                        clearToken()
-                        disconnectAllWebSockets()
-                        redirectToLogin()
-                    }
-                }
-
-                response
             }
 
             okHttpClient = OkHttpClient.Builder()
@@ -155,6 +235,8 @@ object RetrofitClient {
                 .followRedirects(true)
                 .followSslRedirects(true)
                 .build()
+
+            Log.d("RETROFIT_CLIENT", "✅ OkHttpClient creado")
         }
 
         return okHttpClient!!
@@ -168,14 +250,15 @@ object RetrofitClient {
             appContext?.let { context ->
                 val intent = Intent(context, LoginActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    putExtra("SESSION_EXPIRED", true)
                 }
                 context.startActivity(intent)
-                Log.i("AUTH_INTERCEPTOR", "Redirigiendo al login...")
+                Log.i("AUTH_INTERCEPTOR", "🔄 Redirigiendo al login por sesión expirada")
             } ?: run {
-                Log.e("AUTH_INTERCEPTOR", "AppContext es null, no se puede redirigir")
+                Log.e("AUTH_INTERCEPTOR", "❌ AppContext es null, no se puede redirigir")
             }
         } catch (e: Exception) {
-            Log.e("AUTH_INTERCEPTOR", "Error redirigiendo al login: ${e.message}")
+            Log.e("AUTH_INTERCEPTOR", "❌ Error redirigiendo al login: ${e.message}")
         }
     }
 
@@ -186,8 +269,7 @@ object RetrofitClient {
         ensureInitialized()
 
         if (retrofit == null) {
-            Log.d("RETROFIT_CLIENT", "Creando nueva instancia de Retrofit")
-            Log.d("RETROFIT_CLIENT", "URL Base: $BASE_URL")
+            Log.d("RETROFIT_CLIENT", "🔧 Creando instancia de Retrofit...")
 
             retrofit = Retrofit.Builder()
                 .baseUrl(BASE_URL)
@@ -195,10 +277,13 @@ object RetrofitClient {
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
 
-            Log.d("RETROFIT_CLIENT", "Retrofit creado exitosamente")
+            Log.d("RETROFIT_CLIENT", "✅ Retrofit creado exitosamente")
         }
+
         return retrofit!!.create(ApiService::class.java)
     }
+
+    // ========== WEBSOCKETS ==========
 
     /**
      * Conectar WebSocket de notificaciones
@@ -208,142 +293,48 @@ object RetrofitClient {
         val token = getToken()
 
         if (token == null) {
-            Log.w("WEBSOCKET", "No hay token disponible para WebSocket")
+            Log.w("WEBSOCKET", "⚠️ No hay token para WebSocket de notificaciones")
             return
         }
 
-        val url = "${WS_BASE_URL}notificaciones/?token=$token"
-        val request = Request.Builder().url(url).build()
+        try {
+            val url = "${WS_BASE_URL}notificaciones/?token=$token"
+            val request = Request.Builder().url(url).build()
 
-        notificationsWebSocket = getOkHttpClient().newWebSocket(request, listener)
-        Log.d("WEBSOCKET", "Conectando WebSocket de notificaciones: $url")
-    }
-
-    /**
-     * Conectar WebSocket de animales
-     */
-    fun connectAnimalsWebSocket(listener: WebSocketListener) {
-        ensureInitialized()
-        val token = getToken()
-
-        if (token == null) {
-            Log.w("WEBSOCKET", "No hay token disponible para WebSocket de animales")
-            return
+            notificationsWebSocket = getOkHttpClient().newWebSocket(request, listener)
+            Log.d("WEBSOCKET", "🔌 Conectando WebSocket notificaciones: $url")
+        } catch (e: Exception) {
+            Log.e("WEBSOCKET", "❌ Error conectando WebSocket notificaciones: ${e.message}")
         }
-
-        val url = "${WS_BASE_URL}animales/?token=$token"
-        val request = Request.Builder().url(url).build()
-
-        animalsWebSocket = getOkHttpClient().newWebSocket(request, listener)
-        Log.d("WEBSOCKET", "Conectando WebSocket de animales: $url")
     }
 
-    /**
-     * Conectar WebSocket de logs (solo para admins)
-     */
-    fun connectLogsWebSocket(listener: WebSocketListener) {
-        ensureInitialized()
-        val token = getToken()
-
-        if (token == null) {
-            Log.w("WEBSOCKET", "No hay token disponible para WebSocket de logs")
-            return
-        }
-
-        val url = "${WS_BASE_URL}logs/?token=$token"
-        val request = Request.Builder().url(url).build()
-
-        logsWebSocket = getOkHttpClient().newWebSocket(request, listener)
-        Log.d("WEBSOCKET", "Conectando WebSocket de logs: $url")
-    }
-
-    /**
-     * Desconectar WebSocket de notificaciones
-     */
     fun disconnectNotificationsWebSocket() {
         notificationsWebSocket?.close(1000, "Desconexión normal")
         notificationsWebSocket = null
-        Log.d("WEBSOCKET", "WebSocket de notificaciones desconectado")
+        Log.d("WEBSOCKET", "🔌 WebSocket notificaciones desconectado")
     }
 
-    /**
-     * Desconectar WebSocket de animales
-     */
-    fun disconnectAnimalsWebSocket() {
-        animalsWebSocket?.close(1000, "Desconexión normal")
-        animalsWebSocket = null
-        Log.d("WEBSOCKET", "WebSocket de animales desconectado")
-    }
-
-    /**
-     * Desconectar WebSocket de logs
-     */
-    fun disconnectLogsWebSocket() {
-        logsWebSocket?.close(1000, "Desconexión normal")
-        logsWebSocket = null
-        Log.d("WEBSOCKET", "WebSocket de logs desconectado")
-    }
-
-    /**
-     * Desconectar todos los WebSockets
-     */
-    fun disconnectAllWebSockets() {
-        disconnectNotificationsWebSocket()
-        disconnectAnimalsWebSocket()
-        disconnectLogsWebSocket()
-        Log.d("WEBSOCKET", "Todos los WebSockets desconectados")
-    }
-
-    /**
-     * Enviar mensaje por WebSocket de notificaciones
-     */
     fun sendNotificationMessage(message: String): Boolean {
-        return notificationsWebSocket?.send(message) ?: false
+        return try {
+            notificationsWebSocket?.send(message) ?: false
+        } catch (e: Exception) {
+            Log.e("WEBSOCKET", "❌ Error enviando mensaje: ${e.message}")
+            false
+        }
     }
 
-    /**
-     * Enviar mensaje por WebSocket de animales
-     */
-    fun sendAnimalsMessage(message: String): Boolean {
-        return animalsWebSocket?.send(message) ?: false
-    }
-
-    /**
-     * Enviar mensaje por WebSocket de logs
-     */
-    fun sendLogsMessage(message: String): Boolean {
-        return logsWebSocket?.send(message) ?: false
-    }
-
-    /**
-     * Verificar si WebSocket de notificaciones está conectado
-     */
-    fun isNotificationsWebSocketConnected(): Boolean {
-        return notificationsWebSocket != null
-    }
-
-    /**
-     * Verificar si WebSocket de animales está conectado
-     */
-    fun isAnimalsWebSocketConnected(): Boolean {
-        return animalsWebSocket != null
-    }
-
-    /**
-     * Verificar si WebSocket de logs está conectado
-     */
-    fun isLogsWebSocketConnected(): Boolean {
-        return logsWebSocket != null
-    }
+    // ========== TOKEN MANAGEMENT ==========
 
     /**
      * Guardar token JWT
      */
     fun saveToken(token: String) {
         ensureInitialized()
-        Log.d("RETROFIT_CLIENT", "Guardando token: ${token.take(20)}...")
+
+        Log.d("RETROFIT_CLIENT", "💾 Guardando token: ${token.take(20)}...")
         sharedPreferences!!.edit()
             .putString("jwt_token", token)
+            .putLong("token_timestamp", System.currentTimeMillis())
             .apply()
     }
 
@@ -352,30 +343,37 @@ object RetrofitClient {
      */
     fun getToken(): String? {
         if (!isInitialized()) {
-            Log.w("RETROFIT_CLIENT", "RetrofitClient no inicializado, retornando null para token")
+            Log.w("RETROFIT_CLIENT", "⚠️ RetrofitClient no inicializado para obtener token")
             return null
         }
+
         val token = sharedPreferences!!.getString("jwt_token", null)
+        val timestamp = sharedPreferences!!.getLong("token_timestamp", 0)
+
         if (token != null) {
-            Log.d("RETROFIT_CLIENT", "Token recuperado: ${token.take(20)}...")
+            val age = (System.currentTimeMillis() - timestamp) / 1000 / 60 // minutos
+            Log.d("RETROFIT_CLIENT", "🔑 Token encontrado (edad: ${age}min)")
+            return token
         } else {
-            Log.w("RETROFIT_CLIENT", "No se encontró token guardado")
+            Log.d("RETROFIT_CLIENT", "🔑 No hay token guardado")
+            return null
         }
-        return token
     }
 
     /**
-     * Limpiar token JWT y desconectar WebSockets
+     * Limpiar token JWT
      */
     fun clearToken() {
         if (!isInitialized()) {
-            Log.w("RETROFIT_CLIENT", "RetrofitClient no inicializado, no se puede limpiar token")
+            Log.w("RETROFIT_CLIENT", "⚠️ RetrofitClient no inicializado para limpiar token")
             return
         }
 
-        Log.d("RETROFIT_CLIENT", "Limpiando token...")
+        Log.d("RETROFIT_CLIENT", "🗑️ Limpiando token y datos de sesión...")
+
         sharedPreferences!!.edit()
             .remove("jwt_token")
+            .remove("token_timestamp")
             .apply()
 
         // Limpiar instancias
@@ -390,29 +388,147 @@ object RetrofitClient {
      * Verificar si el usuario está logueado
      */
     fun isLoggedIn(): Boolean {
-        if (!isInitialized()) {
-            Log.w("RETROFIT_CLIENT", "RetrofitClient no inicializado, retornando false para isLoggedIn")
-            return false
-        }
-
         val hasToken = getToken() != null
-        Log.d("RETROFIT_CLIENT", "Usuario logueado: $hasToken")
+        Log.d("RETROFIT_CLIENT", "🔐 Usuario logueado: $hasToken")
         return hasToken
     }
 
     /**
-     * Debug del token actual
+     * Desconectar todos los WebSockets
      */
-    fun debugToken() {
+    fun disconnectAllWebSockets() {
+        disconnectNotificationsWebSocket()
+        // Añadir otros WebSockets cuando los implementes
+        Log.d("WEBSOCKET", "🔌 Todos los WebSockets desconectados")
+    }
+
+    /**
+     * Debug completo del estado
+     */
+    fun debugStatus() {
+        Log.d("RETROFIT_CLIENT", "=== DEBUG RETROFIT CLIENT ===")
+        Log.d("RETROFIT_CLIENT", "Inicializado: ${isInitialized()}")
+        Log.d("RETROFIT_CLIENT", "URL Base: $BASE_URL")
+        Log.d("RETROFIT_CLIENT", "Tiene token: ${isLoggedIn()}")
+        Log.d("RETROFIT_CLIENT", "Conectividad: ${isNetworkAvailable()}")
+        Log.d("RETROFIT_CLIENT", "Retrofit creado: ${retrofit != null}")
+        Log.d("RETROFIT_CLIENT", "OkHttp creado: ${okHttpClient != null}")
+        Log.d("RETROFIT_CLIENT", "=============================")
+    }
+
+    // ========== WEBSOCKETS ADICIONALES (AGREGAR AL FINAL DEL ARCHIVO) ==========
+
+    /**
+     * Conectar WebSocket de animales
+     */
+    fun connectAnimalsWebSocket(listener: WebSocketListener) {
+        ensureInitialized()
         val token = getToken()
-        if (token != null) {
-            Log.d("RETROFIT_CLIENT", "DEBUG Token completo: $token")
-            Log.d("RETROFIT_CLIENT", "DEBUG Token length: ${token.length}")
-            // Verificar que el token tenga el formato correcto (JWT típicamente tiene 3 partes separadas por puntos)
-            val parts = token.split(".")
-            Log.d("RETROFIT_CLIENT", "DEBUG Token parts: ${parts.size} (debería ser 3 para JWT)")
-        } else {
-            Log.w("RETROFIT_CLIENT", "DEBUG: No hay token")
+
+        if (token == null) {
+            Log.w("WEBSOCKET", "⚠️ No hay token para WebSocket de animales")
+            return
+        }
+
+        try {
+            val url = "${WS_BASE_URL}animales/?token=$token"
+            val request = Request.Builder().url(url).build()
+
+            animalsWebSocket = getOkHttpClient().newWebSocket(request, listener)
+            Log.d("WEBSOCKET", "🔌 Conectando WebSocket animales: $url")
+        } catch (e: Exception) {
+            Log.e("WEBSOCKET", "❌ Error conectando WebSocket animales: ${e.message}")
         }
     }
+
+    /**
+     * Conectar WebSocket de logs (solo para admins)
+     */
+    fun connectLogsWebSocket(listener: WebSocketListener) {
+        ensureInitialized()
+        val token = getToken()
+
+        if (token == null) {
+            Log.w("WEBSOCKET", "⚠️ No hay token para WebSocket de logs")
+            return
+        }
+
+        try {
+            val url = "${WS_BASE_URL}logs/?token=$token"
+            val request = Request.Builder().url(url).build()
+
+            logsWebSocket = getOkHttpClient().newWebSocket(request, listener)
+            Log.d("WEBSOCKET", "🔌 Conectando WebSocket logs: $url")
+        } catch (e: Exception) {
+            Log.e("WEBSOCKET", "❌ Error conectando WebSocket logs: ${e.message}")
+        }
+    }
+
+    /**
+     * Desconectar WebSocket de animales
+     */
+    fun disconnectAnimalsWebSocket() {
+        animalsWebSocket?.close(1000, "Desconexión normal")
+        animalsWebSocket = null
+        Log.d("WEBSOCKET", "🔌 WebSocket animales desconectado")
+    }
+
+    /**
+     * Desconectar WebSocket de logs
+     */
+    fun disconnectLogsWebSocket() {
+        logsWebSocket?.close(1000, "Desconexión normal")
+        logsWebSocket = null
+        Log.d("WEBSOCKET", "🔌 WebSocket logs desconectado")
+    }
+
+    /**
+     * Enviar mensaje por WebSocket de animales
+     */
+    fun sendAnimalsMessage(message: String): Boolean {
+        return try {
+            animalsWebSocket?.send(message) ?: false
+        } catch (e: Exception) {
+            Log.e("WEBSOCKET", "❌ Error enviando mensaje animales: ${e.message}")
+            false
+        }
+    }
+
+    /**
+     * Enviar mensaje por WebSocket de logs
+     */
+    fun sendLogsMessage(message: String): Boolean {
+        return try {
+            logsWebSocket?.send(message) ?: false
+        } catch (e: Exception) {
+            Log.e("WEBSOCKET", "❌ Error enviando mensaje logs: ${e.message}")
+            false
+        }
+    }
+
+    /**
+     * Verificar estado de conexiones WebSocket
+     */
+    fun isNotificationsWebSocketConnected(): Boolean {
+        return notificationsWebSocket != null
+    }
+
+    fun isAnimalsWebSocketConnected(): Boolean {
+        return animalsWebSocket != null
+    }
+
+    fun isLogsWebSocketConnected(): Boolean {
+        return logsWebSocket != null
+    }
+
+    /**
+     * Actualizar método disconnectAllWebSockets() para incluir todos
+     */
+    private fun disconnectAllWebSocketsComplete() {
+        disconnectNotificationsWebSocket()
+        disconnectAnimalsWebSocket()
+        disconnectLogsWebSocket()
+        Log.d("WEBSOCKET", "🔌 Todos los WebSockets desconectados completamente")
+    }
+
 }

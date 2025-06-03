@@ -2,46 +2,64 @@ package com.example.genetics.websocket
 
 import android.util.Log
 import com.example.genetics.api.RetrofitClient
+import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
-import okhttp3.Response
 import org.json.JSONObject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
-/**
- * Manager para manejar conexiones WebSocket en la aplicación Android
- */
 object WebSocketManager {
 
-    private var notificationsListener: NotificationWebSocketListener? = null
-    private var animalsListener: AnimalWebSocketListener? = null
-    private var logsListener: LogWebSocketListener? = null
+    private var notificationsListener: ((JSONObject) -> Unit)? = null
+    private var animalsListener: ((JSONObject) -> Unit)? = null
+    private var logsListener: ((JSONObject) -> Unit)? = null
 
-    // Callbacks para diferentes tipos de eventos
-    private var onNotificationReceived: ((JSONObject) -> Unit)? = null
-    private var onAnimalUpdate: ((JSONObject) -> Unit)? = null
-    private var onLogReceived: ((JSONObject) -> Unit)? = null
-    private var onConnectionStatusChanged: ((String, Boolean) -> Unit)? = null
+    private var notificationsStatusListener: ((Boolean) -> Unit)? = null
+    private var animalsStatusListener: ((Boolean) -> Unit)? = null
+    private var logsStatusListener: ((Boolean) -> Unit)? = null
 
     /**
      * Conectar WebSocket de notificaciones
      */
     fun connectNotifications(
         onNotification: (JSONObject) -> Unit,
-        onStatusChange: (Boolean) -> Unit = {}
+        onStatusChange: (Boolean) -> Unit
     ) {
-        onNotificationReceived = onNotification
+        notificationsListener = onNotification
+        notificationsStatusListener = onStatusChange
 
-        notificationsListener = NotificationWebSocketListener(
-            onMessage = onNotification,
-            onStatusChange = onStatusChange
-        )
+        val listener = object : WebSocketListener() {
+            override fun onOpen(webSocket: WebSocket, response: Response) {
+                Log.d("WEBSOCKET_MANAGER", "✅ Notificaciones WebSocket conectado")
+                onStatusChange(true)
+            }
 
-        RetrofitClient.connectNotificationsWebSocket(notificationsListener!!)
-        Log.d("WEBSOCKET_MANAGER", "Conectando WebSocket de notificaciones")
+            override fun onMessage(webSocket: WebSocket, text: String) {
+                try {
+                    val jsonObject = JSONObject(text)
+                    Log.d("WEBSOCKET_MANAGER", "📢 Notificación recibida: $text")
+                    onNotification(jsonObject)
+                } catch (e: Exception) {
+                    Log.e("WEBSOCKET_MANAGER", "❌ Error parseando mensaje de notificación: ${e.message}")
+                }
+            }
+
+            override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+                Log.w("WEBSOCKET_MANAGER", "⚠️ Notificaciones WebSocket cerrando: $code - $reason")
+                onStatusChange(false)
+            }
+
+            override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                Log.w("WEBSOCKET_MANAGER", "❌ Notificaciones WebSocket cerrado: $code - $reason")
+                onStatusChange(false)
+            }
+
+            override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                Log.e("WEBSOCKET_MANAGER", "❌ Error en notificaciones WebSocket: ${t.message}")
+                onStatusChange(false)
+            }
+        }
+
+        RetrofitClient.connectNotificationsWebSocket(listener)
     }
 
     /**
@@ -49,17 +67,44 @@ object WebSocketManager {
      */
     fun connectAnimals(
         onUpdate: (JSONObject) -> Unit,
-        onStatusChange: (Boolean) -> Unit = {}
+        onStatusChange: (Boolean) -> Unit
     ) {
-        onAnimalUpdate = onUpdate
+        animalsListener = onUpdate
+        animalsStatusListener = onStatusChange
 
-        animalsListener = AnimalWebSocketListener(
-            onMessage = onUpdate,
-            onStatusChange = onStatusChange
-        )
+        val listener = object : WebSocketListener() {
+            override fun onOpen(webSocket: WebSocket, response: Response) {
+                Log.d("WEBSOCKET_MANAGER", "✅ Animales WebSocket conectado")
+                onStatusChange(true)
+            }
 
-        RetrofitClient.connectAnimalsWebSocket(animalsListener!!)
-        Log.d("WEBSOCKET_MANAGER", "Conectando WebSocket de animales")
+            override fun onMessage(webSocket: WebSocket, text: String) {
+                try {
+                    val jsonObject = JSONObject(text)
+                    Log.d("WEBSOCKET_MANAGER", "🐄 Actualización de animal recibida: $text")
+                    onUpdate(jsonObject)
+                } catch (e: Exception) {
+                    Log.e("WEBSOCKET_MANAGER", "❌ Error parseando mensaje de animal: ${e.message}")
+                }
+            }
+
+            override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+                Log.w("WEBSOCKET_MANAGER", "⚠️ Animales WebSocket cerrando: $code - $reason")
+                onStatusChange(false)
+            }
+
+            override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                Log.w("WEBSOCKET_MANAGER", "❌ Animales WebSocket cerrado: $code - $reason")
+                onStatusChange(false)
+            }
+
+            override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                Log.e("WEBSOCKET_MANAGER", "❌ Error en animales WebSocket: ${t.message}")
+                onStatusChange(false)
+            }
+        }
+
+        RetrofitClient.connectAnimalsWebSocket(listener)
     }
 
     /**
@@ -67,128 +112,130 @@ object WebSocketManager {
      */
     fun connectLogs(
         onLog: (JSONObject) -> Unit,
-        onStatusChange: (Boolean) -> Unit = {}
+        onStatusChange: (Boolean) -> Unit
     ) {
-        onLogReceived = onLog
+        logsListener = onLog
+        logsStatusListener = onStatusChange
 
-        logsListener = LogWebSocketListener(
-            onMessage = onLog,
-            onStatusChange = onStatusChange
-        )
+        val listener = object : WebSocketListener() {
+            override fun onOpen(webSocket: WebSocket, response: Response) {
+                Log.d("WEBSOCKET_MANAGER", "✅ Logs WebSocket conectado")
+                onStatusChange(true)
+            }
 
-        RetrofitClient.connectLogsWebSocket(logsListener!!)
-        Log.d("WEBSOCKET_MANAGER", "Conectando WebSocket de logs")
-    }
+            override fun onMessage(webSocket: WebSocket, text: String) {
+                try {
+                    val jsonObject = JSONObject(text)
+                    Log.d("WEBSOCKET_MANAGER", "📋 Log recibido: $text")
+                    onLog(jsonObject)
+                } catch (e: Exception) {
+                    Log.e("WEBSOCKET_MANAGER", "❌ Error parseando mensaje de log: ${e.message}")
+                }
+            }
 
-    /**
-     * Desconectar WebSocket de notificaciones
-     */
-    fun disconnectNotifications() {
-        RetrofitClient.disconnectNotificationsWebSocket()
-        notificationsListener = null
-        onNotificationReceived = null
-        Log.d("WEBSOCKET_MANAGER", "WebSocket de notificaciones desconectado")
-    }
+            override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+                Log.w("WEBSOCKET_MANAGER", "⚠️ Logs WebSocket cerrando: $code - $reason")
+                onStatusChange(false)
+            }
 
-    /**
-     * Desconectar WebSocket de animales
-     */
-    fun disconnectAnimals() {
-        RetrofitClient.disconnectAnimalsWebSocket()
-        animalsListener = null
-        onAnimalUpdate = null
-        Log.d("WEBSOCKET_MANAGER", "WebSocket de animales desconectado")
-    }
+            override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                Log.w("WEBSOCKET_MANAGER", "❌ Logs WebSocket cerrado: $code - $reason")
+                onStatusChange(false)
+            }
 
-    /**
-     * Desconectar WebSocket de logs
-     */
-    fun disconnectLogs() {
-        RetrofitClient.disconnectLogsWebSocket()
-        logsListener = null
-        onLogReceived = null
-        Log.d("WEBSOCKET_MANAGER", "WebSocket de logs desconectado")
+            override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                Log.e("WEBSOCKET_MANAGER", "❌ Error en logs WebSocket: ${t.message}")
+                onStatusChange(false)
+            }
+        }
+
+        RetrofitClient.connectLogsWebSocket(listener)
     }
 
     /**
      * Desconectar todos los WebSockets
      */
     fun disconnectAll() {
-        disconnectNotifications()
-        disconnectAnimals()
-        disconnectLogs()
-        Log.d("WEBSOCKET_MANAGER", "Todos los WebSockets desconectados")
+        Log.d("WEBSOCKET_MANAGER", "🔌 Desconectando todos los WebSockets")
+        RetrofitClient.disconnectAllWebSockets()
+
+        // Limpiar listeners
+        notificationsListener = null
+        animalsListener = null
+        logsListener = null
+        notificationsStatusListener = null
+        animalsStatusListener = null
+        logsStatusListener = null
     }
 
     /**
-     * Enviar mensaje al WebSocket de notificaciones
+     * Desconectar WebSocket específico
      */
-    fun sendNotificationMessage(type: String, data: Map<String, Any> = emptyMap()): Boolean {
-        val message = JSONObject().apply {
-            put("type", type)
-            data.forEach { (key, value) ->
-                put(key, value)
+    fun disconnectNotifications() {
+        RetrofitClient.disconnectNotificationsWebSocket()
+        notificationsListener = null
+        notificationsStatusListener = null
+    }
+
+    fun disconnectAnimals() {
+        RetrofitClient.disconnectAnimalsWebSocket()
+        animalsListener = null
+        animalsStatusListener = null
+    }
+
+    fun disconnectLogs() {
+        RetrofitClient.disconnectLogsWebSocket()
+        logsListener = null
+        logsStatusListener = null
+    }
+
+    /**
+     * Enviar mensajes por WebSocket
+     */
+    fun sendNotificationMessage(message: String): Boolean {
+        return try {
+            val jsonMessage = if (message.startsWith("{")) {
+                message
+            } else {
+                """{"type": "$message"}"""
             }
+            RetrofitClient.sendNotificationMessage(jsonMessage)
+        } catch (e: Exception) {
+            Log.e("WEBSOCKET_MANAGER", "❌ Error enviando mensaje de notificación: ${e.message}")
+            false
         }
-        return RetrofitClient.sendNotificationMessage(message.toString())
     }
 
-    /**
-     * Enviar mensaje al WebSocket de animales
-     */
-    fun sendAnimalsMessage(type: String, data: Map<String, Any> = emptyMap()): Boolean {
-        val message = JSONObject().apply {
-            put("type", type)
-            data.forEach { (key, value) ->
-                put(key, value)
+    fun sendAnimalsMessage(message: String): Boolean {
+        return try {
+            val jsonMessage = if (message.startsWith("{")) {
+                message
+            } else {
+                """{"type": "$message"}"""
             }
+            RetrofitClient.sendAnimalsMessage(jsonMessage)
+        } catch (e: Exception) {
+            Log.e("WEBSOCKET_MANAGER", "❌ Error enviando mensaje de animales: ${e.message}")
+            false
         }
-        return RetrofitClient.sendAnimalsMessage(message.toString())
     }
 
-    /**
-     * Enviar mensaje al WebSocket de logs
-     */
-    fun sendLogsMessage(type: String, data: Map<String, Any> = emptyMap()): Boolean {
-        val message = JSONObject().apply {
-            put("type", type)
-            data.forEach { (key, value) ->
-                put(key, value)
+    fun sendLogsMessage(message: String): Boolean {
+        return try {
+            val jsonMessage = if (message.startsWith("{")) {
+                message
+            } else {
+                """{"type": "$message"}"""
             }
+            RetrofitClient.sendLogsMessage(jsonMessage)
+        } catch (e: Exception) {
+            Log.e("WEBSOCKET_MANAGER", "❌ Error enviando mensaje de logs: ${e.message}")
+            false
         }
-        return RetrofitClient.sendLogsMessage(message.toString())
     }
 
     /**
-     * Marcar notificación como leída
-     */
-    fun markNotificationAsRead(notificationId: Int): Boolean {
-        return sendNotificationMessage("mark_as_read", mapOf("notification_id" to notificationId))
-    }
-
-    /**
-     * Suscribirse a actualizaciones de un animal específico
-     */
-    fun subscribeToAnimal(animalId: Int): Boolean {
-        return sendAnimalsMessage("subscribe_animal", mapOf("animal_id" to animalId))
-    }
-
-    /**
-     * Desuscribirse de actualizaciones de un animal específico
-     */
-    fun unsubscribeFromAnimal(animalId: Int): Boolean {
-        return sendAnimalsMessage("unsubscribe_animal", mapOf("animal_id" to animalId))
-    }
-
-    /**
-     * Solicitar logs recientes
-     */
-    fun requestRecentLogs(limit: Int = 50): Boolean {
-        return sendLogsMessage("get_recent_logs", mapOf("limit" to limit))
-    }
-
-    /**
-     * Verificar estado de conexiones
+     * Obtener estado de conexiones
      */
     fun getConnectionStatus(): Map<String, Boolean> {
         return mapOf(
@@ -197,131 +244,20 @@ object WebSocketManager {
             "logs" to RetrofitClient.isLogsWebSocketConnected()
         )
     }
-}
 
-/**
- * WebSocketListener para notificaciones
- */
-class NotificationWebSocketListener(
-    private val onMessage: (JSONObject) -> Unit,
-    private val onStatusChange: (Boolean) -> Unit
-) : WebSocketListener() {
-
-    override fun onOpen(webSocket: WebSocket, response: Response) {
-        Log.d("NOTIFICATIONS_WS", "Conexión establecida")
-        onStatusChange(true)
-
-        // Solicitar contador de notificaciones no leídas
-        webSocket.send("""{"type": "get_unread_count"}""")
+    /**
+     * Verificar si al menos una conexión está activa
+     */
+    fun isAnyConnected(): Boolean {
+        val status = getConnectionStatus()
+        return status.values.any { it }
     }
 
-    override fun onMessage(webSocket: WebSocket, text: String) {
-        Log.d("NOTIFICATIONS_WS", "Mensaje recibido: $text")
-        try {
-            val json = JSONObject(text)
-            onMessage(json)
-        } catch (e: Exception) {
-            Log.e("NOTIFICATIONS_WS", "Error parseando mensaje: ${e.message}")
-        }
-    }
-
-    override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-        Log.e("NOTIFICATIONS_WS", "Error de conexión: ${t.message}")
-        onStatusChange(false)
-
-        // Intentar reconectar después de 5 segundos
-        CoroutineScope(Dispatchers.Main).launch {
-            delay(5000)
-            Log.d("NOTIFICATIONS_WS", "Intentando reconectar...")
-            // Aquí podrías implementar lógica de reconexión automática
-        }
-    }
-
-    override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-        Log.d("NOTIFICATIONS_WS", "Conexión cerrada: $code - $reason")
-        onStatusChange(false)
-    }
-}
-
-/**
- * WebSocketListener para animales
- */
-class AnimalWebSocketListener(
-    private val onMessage: (JSONObject) -> Unit,
-    private val onStatusChange: (Boolean) -> Unit
-) : WebSocketListener() {
-
-    override fun onOpen(webSocket: WebSocket, response: Response) {
-        Log.d("ANIMALS_WS", "Conexión establecida")
-        onStatusChange(true)
-    }
-
-    override fun onMessage(webSocket: WebSocket, text: String) {
-        Log.d("ANIMALS_WS", "Mensaje recibido: $text")
-        try {
-            val json = JSONObject(text)
-            onMessage(json)
-        } catch (e: Exception) {
-            Log.e("ANIMALS_WS", "Error parseando mensaje: ${e.message}")
-        }
-    }
-
-    override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-        Log.e("ANIMALS_WS", "Error de conexión: ${t.message}")
-        onStatusChange(false)
-
-        // Intentar reconectar después de 5 segundos
-        CoroutineScope(Dispatchers.Main).launch {
-            delay(5000)
-            Log.d("ANIMALS_WS", "Intentando reconectar...")
-        }
-    }
-
-    override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-        Log.d("ANIMALS_WS", "Conexión cerrada: $code - $reason")
-        onStatusChange(false)
-    }
-}
-
-/**
- * WebSocketListener para logs
- */
-class LogWebSocketListener(
-    private val onMessage: (JSONObject) -> Unit,
-    private val onStatusChange: (Boolean) -> Unit
-) : WebSocketListener() {
-
-    override fun onOpen(webSocket: WebSocket, response: Response) {
-        Log.d("LOGS_WS", "Conexión establecida")
-        onStatusChange(true)
-
-        // Solicitar logs recientes al conectar
-        webSocket.send("""{"type": "get_recent_logs", "limit": 50}""")
-    }
-
-    override fun onMessage(webSocket: WebSocket, text: String) {
-        Log.d("LOGS_WS", "Mensaje recibido: $text")
-        try {
-            val json = JSONObject(text)
-            onMessage(json)
-        } catch (e: Exception) {
-            Log.e("LOGS_WS", "Error parseando mensaje: ${e.message}")
-        }
-    }
-
-    override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-        Log.e("LOGS_WS", "Error de conexión: ${t.message}")
-        onStatusChange(false)
-
-        // Intentar reconectar después de 5 segundos
-        CoroutineScope(Dispatchers.Main).launch {
-            delay(5000)
-            Log.d("LOGS_WS", "Intentando reconectar...")
-        }
-    }
-
-    override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-        Log.d("LOGS_WS", "Conexión cerrada: $code - $reason")
-        onStatusChange(false)
+    /**
+     * Verificar si todas las conexiones están activas
+     */
+    fun areAllConnected(): Boolean {
+        val status = getConnectionStatus()
+        return status.values.all { it }
     }
 }

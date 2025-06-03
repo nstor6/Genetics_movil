@@ -1,240 +1,204 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
+    android:layout_height="match_parent"
     android:padding="16dp">
 
-    <!-- Información básica -->
-    <androidx.cardview.widget.CardView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="4dp"
-        xmlns:app="http://schemas.android.com/apk/res-auto">
+        android:orientation="vertical">
 
-        <LinearLayout
+        <!-- Información básica -->
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:layout_marginBottom="16dp"
+            android:elevation="4dp"
+            android:radius="8dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="📋 Información Básica"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/colorPrimary"
-                android:layout_marginBottom="12dp" />
-
-            <!-- Sexo -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="8dp">
+                android:orientation="vertical"
+                android:padding="16dp">
 
                 <TextView
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Sexo:"
+                    android:text="Información General"
+                    android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@color/colorGray" />
+                    android:textColor="@color/colorPrimary"
+                    android:layout_marginBottom="16dp" />
 
-                <TextView
-                    android:id="@+id/textSexo"
-                    android:layout_width="wrap_content"
+                <!-- Sexo -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="♀️ Hembra"
-                    android:textColor="@android:color/black" />
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Sexo:"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/textSexo"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="♂️ Macho" />
+                </LinearLayout>
+
+                <!-- Fecha de nacimiento -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Fecha de nacimiento:"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/textFechaNacimiento"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="01/01/2020" />
+                </LinearLayout>
+
+                <!-- Estado reproductivo -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Estado reproductivo:"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/textEstadoReproductivo"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Activo" />
+                </LinearLayout>
+
+                <!-- Estado productivo -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Estado productivo:"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/textEstadoProductivo"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Activo" />
+                </LinearLayout>
+
+                <!-- Peso -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Peso actual:"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/textPeso"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="450 kg" />
+                </LinearLayout>
+
+                <!-- Ubicación -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Ubicación:"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/textUbicacion"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Corral 1" />
+                </LinearLayout>
 
             </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
-            <!-- Fecha de nacimiento -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="8dp">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Fecha de Nacimiento:"
-                    android:textStyle="bold"
-                    android:textColor="@color/colorGray" />
-
-                <TextView
-                    android:id="@+id/textFechaNacimiento"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="01/01/2020"
-                    android:textColor="@android:color/black" />
-
-            </LinearLayout>
-
-            <!-- Peso -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Peso Actual:"
-                    android:textStyle="bold"
-                    android:textColor="@color/colorGray" />
-
-                <TextView
-                    android:id="@+id/textPeso"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="450 kg"
-                    android:textColor="@android:color/black" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </androidx.cardview.widget.CardView>
-
-    <!-- Estados -->
-    <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="4dp">
-
-        <LinearLayout
+        <!-- Observaciones -->
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:elevation="4dp"
+            android:radius="8dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="📊 Estados"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/colorPrimary"
-                android:layout_marginBottom="12dp" />
-
-            <!-- Estado reproductivo -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="8dp">
+                android:orientation="vertical"
+                android:padding="16dp">
 
                 <TextView
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Estado Reproductivo:"
+                    android:text="Observaciones"
+                    android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@color/colorGray" />
+                    android:textColor="@color/colorPrimary"
+                    android:layout_marginBottom="8dp" />
 
                 <TextView
-                    android:id="@+id/textEstadoReproductivo"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/textNotas"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Gestante"
-                    android:textColor="@android:color/black" />
+                    android:text="Sin observaciones"
+                    android:textSize="14sp" />
 
             </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
-            <!-- Estado productivo -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="8dp">
+    </LinearLayout>
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Estado Productivo:"
-                    android:textStyle="bold"
-                    android:textColor="@color/colorGray" />
-
-                <TextView
-                    android:id="@+id/textEstadoProductivo"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Activo"
-                    android:textColor="@android:color/black" />
-
-            </LinearLayout>
-
-            <!-- Ubicación -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Ubicación:"
-                    android:textStyle="bold"
-                    android:textColor="@color/colorGray" />
-
-                <TextView
-                    android:id="@+id/textUbicacion"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Corral A-5"
-                    android:textColor="@android:color/black" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </androidx.cardview.widget.CardView>
-
-    <!-- Notas -->
-    <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="4dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="📝 Observaciones"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/colorPrimary"
-                android:layout_marginBottom="12dp" />
-
-            <TextView
-                android:id="@+id/textNotas"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Sin observaciones adicionales"
-                android:textColor="@android:color/black"
-                android:lineSpacingExtra="4dp" />
-
-        </LinearLayout>
-
-    </androidx.cardview.widget.CardView>
-
-</LinearLayout>
+</ScrollView>

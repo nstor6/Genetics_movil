@@ -2,6 +2,8 @@ package com.example.genetics.api
 
 import com.google.gson.annotations.SerializedName
 
+// ========== MODELO PRINCIPAL DE USUARIO ==========
+
 data class Usuario(
     @SerializedName("id")
     val id: Int? = null,
@@ -69,7 +71,8 @@ data class UserProfile(
     val certificaciones: String? = null
 )
 
-// DTOs para requests específicos según tu backend
+// ========== DTOs PARA REQUESTS ESPECÍFICOS ==========
+
 data class CreateUserRequest(
     val nombre: String,
     val apellidos: String,

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Directorio interno de la aplicación -->
+    <files-path name="internal_files" path="." />
+
+    <!-- Directorio de caché interno -->
+    <cache-path name="internal_cache" path="." />
+
+    <!-- Directorio externo público -->
+    <external-path name="external_files" path="." />
+
+    <!-- Directorio específico para fotos de animales -->
+    <external-files-path name="animal_photos" path="Pictures/" />
+
+    <!-- Directorio de descargas -->
+    <external-files-path name="downloads" path="Download/" />
+</paths>
