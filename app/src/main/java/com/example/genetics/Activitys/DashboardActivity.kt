@@ -558,7 +558,10 @@ class DashboardActivity : AppCompatActivity() {
                     1 -> refreshAllData()
                     2 -> Toast.makeText(this, "📊 Logs - Próximamente", Toast.LENGTH_SHORT).show()
                     3 -> showWebSocketStatus()
-                    4 -> Toast.makeText(this, "👤 Mi perfil - Próximamente", Toast.LENGTH_SHORT).show()
+                    4 -> {
+                        Log.d("DASHBOARD", "👤 Abriendo perfil de usuario")
+                        startActivity(Intent(this, ProfileActivity::class.java))
+                    }
                     5 -> mostrarInfoApp()
                     6 -> logout()
                 }

@@ -495,7 +495,10 @@ class UserDashboardActivity : AppCompatActivity() {
             )) { _, which ->
                 when (which) {
                     0 -> cargarDatosIniciales()
-                    1 -> UiUtils.showToastSafe(this, "Ver perfil - Próximamente")
+                    1 -> {
+                        Log.d("USER_DASHBOARD", "👤 Abriendo perfil de usuario")
+                        startActivity(Intent(this, ProfileActivity::class.java))
+                    }
                     2 -> UiUtils.showToastSafe(this, "Configuración de notificaciones - Próximamente")
                     3 -> mostrarInfoApp()
                     4 -> logout()
