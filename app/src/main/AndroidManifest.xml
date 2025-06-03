@@ -2,31 +2,26 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.genetics">
-
     <!-- ========== PERMISOS ========== -->
-
     <!-- Permisos de red - OBLIGATORIOS -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-
-    <!-- Permisos para desarrollo/debug -->
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-
-    <!-- Permisos para notificaciones (Android 13+) -->
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-
-    <!-- Permisos para almacenamiento (si usas cámara/fotos) -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" /> <!-- Permisos para desarrollo/debug -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- Permisos para notificaciones (Android 13+) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" /> <!-- Permisos para almacenamiento (si usas cámara/fotos) -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="28" />
-
-    <!-- Cámara para fotos de animales -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" /> <!-- Cámara para fotos de animales -->
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-feature android:name="android.hardware.camera" android:required="false" />
-    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
 
-    <!-- ========== APLICACIÓN ========== -->
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera.autofocus"
+        android:required="false" />
 
     <application
         android:name=".GeneticsApplication"
@@ -35,15 +30,16 @@
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Genetics"
         android:usesCleartextTraffic="true"
-        android:networkSecurityConfig="@xml/network_security_config"
         tools:targetApi="31">
-
+        <activity
+            android:name=".Activitys.ProfileActivity"
+            android:exported="false" />
         <!-- ========== ACTIVIDADES ========== -->
-
         <!-- MainActivity - Actividad principal de entrada -->
         <activity
             android:name=".MainActivity"
@@ -51,189 +47,144 @@
             android:screenOrientation="portrait">
             <intent-filter android:priority="1000">
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
             <!-- Deep links para la app -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https"
-                    android:host="genetics.app" />
-            </intent-filter>
-        </activity>
 
-        <!-- LoginActivity - Pantalla de login -->
+                <data
+                    android:host="genetics.app"
+                    android:scheme="https" />
+            </intent-filter>
+        </activity> <!-- LoginActivity - Pantalla de login -->
         <activity
             android:name=".LoginActivity"
             android:exported="false"
-            android:theme="@style/Theme.Genetics"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize" />
-
-        <!-- ========== DASHBOARDS ========== -->
-
+            android:theme="@style/Theme.Genetics"
+            android:windowSoftInputMode="adjustResize" /> <!-- ========== DASHBOARDS ========== -->
         <!-- DashboardActivity - Dashboard para administradores -->
         <activity
             android:name=".Activitys.DashboardActivity"
             android:exported="false"
-            android:theme="@style/Theme.Genetics"
+            android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:launchMode="singleTop" />
-
-        <!-- UserDashboardActivity - Dashboard para usuarios normales -->
+            android:theme="@style/Theme.Genetics" /> <!-- UserDashboardActivity - Dashboard para usuarios normales -->
         <activity
             android:name=".Activitys.UserDashboardActivity"
             android:exported="false"
-            android:theme="@style/Theme.Genetics"
+            android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:launchMode="singleTop" />
-
-        <!-- ========== GESTIÓN DE DATOS ========== -->
-
+            android:theme="@style/Theme.Genetics" /> <!-- ========== GESTIÓN DE DATOS ========== -->
         <!-- AnimalsActivity - Lista de animales (Admin) -->
         <activity
             android:name=".Activitys.AnimalsActivity"
             android:exported="false"
-            android:theme="@style/Theme.Genetics"
-            android:parentActivityName=".Activitys.DashboardActivity" />
-
-        <!-- UserAnimalsActivity - Lista de animales (Solo lectura) -->
+            android:parentActivityName=".Activitys.DashboardActivity"
+            android:theme="@style/Theme.Genetics" /> <!-- UserAnimalsActivity - Lista de animales (Solo lectura) -->
         <activity
             android:name=".Activitys.UserAnimalsActivity"
             android:exported="false"
-            android:theme="@style/Theme.Genetics"
-            android:parentActivityName=".Activitys.UserDashboardActivity" />
-
-        <!-- AnimalDetailActivity - Detalles de animal (Admin) -->
+            android:parentActivityName=".Activitys.UserDashboardActivity"
+            android:theme="@style/Theme.Genetics" /> <!-- AnimalDetailActivity - Detalles de animal (Admin) -->
         <activity
             android:name=".Activitys.AnimalDetailActivity"
             android:exported="false"
-            android:theme="@style/Theme.Genetics"
-            android:parentActivityName=".Activitys.AnimalsActivity" />
-
-        <!-- UserAnimalDetailActivity - Detalles de animal (Solo lectura) -->
+            android:parentActivityName=".Activitys.AnimalsActivity"
+            android:theme="@style/Theme.Genetics" /> <!-- UserAnimalDetailActivity - Detalles de animal (Solo lectura) -->
         <activity
             android:name=".Activitys.UserAnimalDetailActivity"
             android:exported="false"
-            android:theme="@style/Theme.Genetics"
-            android:parentActivityName=".Activitys.UserAnimalsActivity" />
-
-        <!-- IncidentsActivity - Gestión de incidencias -->
+            android:parentActivityName=".Activitys.UserAnimalsActivity"
+            android:theme="@style/Theme.Genetics" /> <!-- IncidentsActivity - Gestión de incidencias -->
         <activity
             android:name=".Activitys.IncidentsActivity"
             android:exported="false"
-            android:theme="@style/Theme.Genetics"
-            android:parentActivityName=".Activitys.DashboardActivity" />
-
-        <!-- TreatmentsActivity - Gestión de tratamientos -->
+            android:parentActivityName=".Activitys.DashboardActivity"
+            android:theme="@style/Theme.Genetics" /> <!-- TreatmentsActivity - Gestión de tratamientos -->
         <activity
             android:name=".Activitys.TreatmentsActivity"
             android:exported="false"
-            android:theme="@style/Theme.Genetics"
-            android:parentActivityName=".Activitys.DashboardActivity" />
-
-        <!-- CalendarActivity - Calendario de eventos -->
+            android:parentActivityName=".Activitys.DashboardActivity"
+            android:theme="@style/Theme.Genetics" /> <!-- CalendarActivity - Calendario de eventos -->
         <activity
             android:name=".Activitys.CalendarActivity"
             android:exported="false"
-            android:theme="@style/Theme.Genetics"
-            android:parentActivityName=".Activitys.DashboardActivity" />
-
-        <!-- UsersActivity - Gestión de usuarios (Solo Admin) -->
+            android:parentActivityName=".Activitys.DashboardActivity"
+            android:theme="@style/Theme.Genetics" /> <!-- UsersActivity - Gestión de usuarios (Solo Admin) -->
         <activity
             android:name=".Activitys.UsersActivity"
             android:exported="false"
-            android:theme="@style/Theme.Genetics"
-            android:parentActivityName=".Activitys.DashboardActivity" />
-
-        <!-- ========== CREACIÓN DE CONTENIDO ========== -->
-
+            android:parentActivityName=".Activitys.DashboardActivity"
+            android:theme="@style/Theme.Genetics" /> <!-- ========== CREACIÓN DE CONTENIDO ========== -->
         <!-- AddAnimalActivity - Crear animal -->
         <activity
             android:name=".Create.AddAnimalActivity"
             android:exported="false"
-            android:theme="@style/Theme.Genetics"
             android:parentActivityName=".Activitys.AnimalsActivity"
-            android:windowSoftInputMode="adjustResize" />
-
-        <!-- AddIncidentActivity - Crear incidencia -->
+            android:theme="@style/Theme.Genetics"
+            android:windowSoftInputMode="adjustResize" /> <!-- AddIncidentActivity - Crear incidencia -->
         <activity
             android:name=".Create.AddIncidentActivity"
             android:exported="false"
-            android:theme="@style/Theme.Genetics"
             android:parentActivityName=".Activitys.IncidentsActivity"
-            android:windowSoftInputMode="adjustResize" />
-
-        <!-- AddTreatmentActivity - Crear tratamiento -->
+            android:theme="@style/Theme.Genetics"
+            android:windowSoftInputMode="adjustResize" /> <!-- AddTreatmentActivity - Crear tratamiento -->
         <activity
             android:name=".Create.AddTreatmentActivity"
             android:exported="false"
-            android:theme="@style/Theme.Genetics"
             android:parentActivityName=".Activitys.TreatmentsActivity"
-            android:windowSoftInputMode="adjustResize" />
-
-        <!-- AddEventActivity - Crear evento -->
+            android:theme="@style/Theme.Genetics"
+            android:windowSoftInputMode="adjustResize" /> <!-- AddEventActivity - Crear evento -->
         <activity
             android:name=".Create.AddEventActivity"
             android:exported="false"
-            android:theme="@style/Theme.Genetics"
             android:parentActivityName=".Activitys.CalendarActivity"
-            android:windowSoftInputMode="adjustResize" />
-
-        <!-- AddUserActivity - Crear usuario (Solo Admin) -->
+            android:theme="@style/Theme.Genetics"
+            android:windowSoftInputMode="adjustResize" /> <!-- AddUserActivity - Crear usuario (Solo Admin) -->
         <activity
             android:name=".Create.AddUserActivity"
             android:exported="false"
-            android:theme="@style/Theme.Genetics"
             android:parentActivityName=".Activitys.UsersActivity"
-            android:windowSoftInputMode="adjustResize" />
-
-        <!-- ========== EDICIÓN DE CONTENIDO ========== -->
-
+            android:theme="@style/Theme.Genetics"
+            android:windowSoftInputMode="adjustResize" /> <!-- ========== EDICIÓN DE CONTENIDO ========== -->
         <!-- EditAnimalActivity - Editar animal -->
         <activity
             android:name=".Activitys.EditAnimalActivity"
             android:exported="false"
-            android:theme="@style/Theme.Genetics"
             android:parentActivityName=".Activitys.AnimalDetailActivity"
-            android:windowSoftInputMode="adjustResize" />
-
-        <!-- EditIncidentActivity - Editar incidencia -->
+            android:theme="@style/Theme.Genetics"
+            android:windowSoftInputMode="adjustResize" /> <!-- EditIncidentActivity - Editar incidencia -->
         <activity
             android:name=".Edit.EditIncidentActivity"
             android:exported="false"
-            android:theme="@style/Theme.Genetics"
             android:parentActivityName=".Activitys.IncidentsActivity"
-            android:windowSoftInputMode="adjustResize" />
-
-        <!-- EditTreatmentActivity - Editar tratamiento -->
+            android:theme="@style/Theme.Genetics"
+            android:windowSoftInputMode="adjustResize" /> <!-- EditTreatmentActivity - Editar tratamiento -->
         <activity
             android:name=".Edit.EditTreatmentActivity"
             android:exported="false"
-            android:theme="@style/Theme.Genetics"
             android:parentActivityName=".Activitys.TreatmentsActivity"
-            android:windowSoftInputMode="adjustResize" />
-
-        <!-- EditEventActivity - Editar evento -->
+            android:theme="@style/Theme.Genetics"
+            android:windowSoftInputMode="adjustResize" /> <!-- EditEventActivity - Editar evento -->
         <activity
             android:name=".Edit.EditEventActivity"
             android:exported="false"
-            android:theme="@style/Theme.Genetics"
             android:parentActivityName=".Activitys.CalendarActivity"
-            android:windowSoftInputMode="adjustResize" />
-
-        <!-- EditUserActivity - Editar usuario -->
+            android:theme="@style/Theme.Genetics"
+            android:windowSoftInputMode="adjustResize" /> <!-- EditUserActivity - Editar usuario -->
         <activity
             android:name=".Edit.EditUserActivity"
             android:exported="false"
-            android:theme="@style/Theme.Genetics"
             android:parentActivityName=".Activitys.UsersActivity"
-            android:windowSoftInputMode="adjustResize" />
-
-        <!-- ========== PROVEEDORES ========== -->
-
+            android:theme="@style/Theme.Genetics"
+            android:windowSoftInputMode="adjustResize" /> <!-- ========== PROVEEDORES ========== -->
         <!-- FileProvider para compartir archivos (fotos, etc.) -->
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -244,32 +195,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-
-        <!-- ========== SERVICIOS ========== -->
-
-        <!-- Servicio de notificaciones en background (opcional) -->
-        <!--
-        <service
-            android:name=".services.NotificationService"
-            android:exported="false" />
-        -->
-
-        <!-- ========== RECEIVERS ========== -->
-
-        <!-- Receiver para eventos del sistema (opcional) -->
-        <!--
-        <receiver
-            android:name=".receivers.BootReceiver"
-            android:exported="true">
-            <intent-filter android:priority="1000">
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
-                <action android:name="android.intent.action.PACKAGE_REPLACED" />
-                <data android:scheme="package" />
-            </intent-filter>
-        </receiver>
-        -->
-
     </application>
 
 </manifest>
